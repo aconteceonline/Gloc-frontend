@@ -1,0 +1,56 @@
+
+<header class="bg-gradient-to-r from-blue-500 to-blue-700 text-white p-6 shadow-lg">
+               <h1> <a class="text-8x1 font-bold"  routerLink="/principal">
+                        GLOC - GESTÃO DE LOCAÇÃO
+                  </a>
+               </h1>
+
+    <div class="text-center">
+
+        <h1 class="text-lg mt-2 font-bold">{{ props.titulo }}</h1>
+        <p class="text-lg mt-2">{{ props.subTitulo }}</p>
+    </div>
+
+    <div class="mt-4">
+        <hr class="border-t border-blue-300 opacity-50" />
+    </div>
+
+
+    <nav class="mt-4'">
+        <ul class="flex justify-center space-x-6 text-white font-semibold">
+            <li>
+                <a class="hover:text-yellow-300">Dashboard</a>
+            </li>
+            <li>
+                <a  routerLink="menuconsultar" class="hover:text-yellow-300">Consultar</a>
+            </li>
+            <li>
+                <a routerLink="menucadastrar" class="hover:text-yellow-300">Cadastrar</a>
+            </li>
+            <li>
+                <a class="hover:text-yellow-300">Cobranças</a>
+            </li>
+              <li>
+                <a class="hover:text-yellow-300">Relatórios</a>
+            </li>
+            <li>
+                <a class="hover:text-yellow-300"><button (click)="logout()">Sair</button></a>
+            </li>
+
+        </ul>
+    </nav>
+</header>
+
+      <div class="mx-auto max-w-xl">
+         <router-outlet></router-outlet>
+      </div>
+
+
+
+ <footer class="bg-gray-200 text-center  mt-6">
+    <p class="text-gray-600 text-sn">2025 - GLOC - Gestão de Locação. Tosdos os direitos reservados.</p>
+ </footer>
+
+
+
+

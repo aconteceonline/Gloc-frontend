@@ -1,0 +1,64 @@
+
+
+<div class="flex items-center justify-center min-h-screen bg-gray-100">
+
+  <div class="px-8 py-6 mt-4 text-left bg-white shadow-lg rounded-lg w-full max-w-md">
+<div class="text-center">
+          <h1 class="text-3xl font-bold text-gray-800">GLOC - Gestão de Locação</h1>
+          <br/>
+          <h1 class="text-3xl font-bold text-gray-800">Seja Bem-vindo</h1>
+
+          <p class="mt-2 text-sm text-gray-500">Faça login para continuar</p>
+        </div>
+
+    <form (ngSubmit)="onLogin()">
+      <div class="mt-4">
+        <div>
+          <label class="block" for="username">Usuário</label>
+          <input type="text" placeholder="Usuário" [(ngModel)]="credentials.usuario" name="username" required
+                 class="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-600">
+        </div>
+        <div class="mt-4">
+          <label class="block" for="password">Senha</label>
+          <input type="password" placeholder="Senha" [(ngModel)]="credentials.senha" name="password"
+                 class="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-600">
+        </div>
+
+       <div class="mt-6 text-center">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center">
+              <input id="remember-me" name="remember-me" type="checkbox" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+              <label for="remember-me" class="ml-2 block text-sm text-gray-900">
+                Lembrar-me
+              </label>
+            </div>
+
+            <div class="text-sm">
+              <a href="#" class="font-medium text-indigo-600 hover:text-indigo-500">
+                Esqueceu a senha?
+              </a>
+            </div>
+          </div>
+        </div>
+
+       <div class="mt-6 text-center">
+
+        <div class="flex items-baseline justify-between">
+          <button type="submit"
+                  class="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200">
+                  Conectar
+        </button>
+        </div>
+      </div>
+      </div>
+    </form>
+        <div class="mt-6 text-center">
+          <p class="text-sm text-gray-500">
+            Não tem uma conta?
+            <a href="#" class="font-medium text-indigo-600 hover:text-indigo-500">
+              Cadastre-se
+            </a>
+          </p>
+        </div>
+  </div>
+</div>
