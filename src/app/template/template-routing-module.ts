@@ -26,12 +26,12 @@ const routes: Routes = [
       },
       {
         path: 'menucadastrar/pessoa',
-        loadChildren: () => import ('../cadastro/cad-inquilino/cad-inquilino-module').then(m => m.CadInquilinoModule),
+        loadChildren: () => import ('../cadastro/cad-pessoa/cad-pessoa-module').then(m => m.CadPessoaModule),
          pathMatch: 'full',
         data: { titulo: 'CADASTRO PESSOAS', subTitulo: 'Cadastre aqui os novas pessoas'}
       },
       {
-        path: 'cadimovel',
+        path: 'menucadastrar/cadimovel',
         loadChildren: () => import ('../cadastro/cad-imovel/cad-imovel-module').then(m => m.CadImovelModule),
         pathMatch: 'full',
         data: { titulo: 'CADASTRO IMÓVEIS', subTitulo: 'Cadastre aqui os novos imóveis'}
