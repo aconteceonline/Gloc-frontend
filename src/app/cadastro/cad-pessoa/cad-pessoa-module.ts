@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 
 import { CadPessoaRoutingModule } from './cad-pessoa-routing-module';
 import { Cadpessoa } from './cad-pessoa/cad-pessoa';
-
+import { ReactiveFormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
@@ -11,7 +11,9 @@ import { Cadpessoa } from './cad-pessoa/cad-pessoa';
   ],
   imports: [
     CommonModule,
+      ReactiveFormsModule,
     CadPessoaRoutingModule
+
   ]
 })
 export class CadPessoaModule { }
