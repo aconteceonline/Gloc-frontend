@@ -3,7 +3,9 @@
     <h2 class="text-2xl font-bold text-gray-800 mb-2">Cadastro de Novas Pessoas</h2>
     <p class="text-gray-600 mb-8">Preencha os campos abaixo para registrar um nova pessoa.</p>
     <form [formGroup]="pessoaForm" (ngSubmit)="onSubmit()" >
+
       <fieldset class="mb-8">
+
         <legend class="text-lg font-semibold text-indigo-700 border-b border-indigo-200 w-full pb-2 mb-6">Dados de contato</legend>
         <div class="flex flex-col sm:flex-row sm:space-x-4">
             <div class="flex-1">
@@ -55,12 +57,35 @@
             </div>
             <div>
               <label for="nome" class="block text-sm font-medium text-gray-700">Nome Completo <span class="text-red-500">*</span></label>
-              <input id="nome" type="text" formControlName="nome" placeholder="Seu nome completo"
+              <input id="nome" type="text" formControlName="nome" placeholder="Nome completo"
                 class="mt-1 block w-full border rounded-md shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
                 [ngClass]="{'border-red-500': isInvalid('nome'), 'border-gray-300': !isInvalid('nome')}"
               >
-              <p *ngIf="pessoaForm.get('nome')?.errors?.['required'] && isInvalid('nome')" class="mt-1 text-xs text-red-600">O nome é obrigatório.</p>
+               <p *ngIf="pessoaForm.get('nome')?.errors?.['required'] && isInvalid('nome')" class="mt-1 text-xs text-red-600">O nome é obrigatório.</p>
             </div>
+            <div>
+
+               <label for="cpf" class="block text-sm font-medium text-gray-700">RG<span class="text-red-500">*</span></label>
+              <input id="cpf" type="text" formControlName="cpf" placeholder="000.000.000-00"
+                class="mt-1 block w-full border rounded-md shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+                [ngClass]="{'border-red-500': isInvalid('cpf'), 'border-gray-300': !isInvalid('cpf')}"
+              >
+            </div>
+             <div>
+              <label for="nome" class="block text-sm font-medium text-gray-700">Orgão Emissor <span class="text-red-500">*</span></label>
+              <input id="nome" type="text" formControlName="nome" placeholder="Ex.: SSP - SP"
+                class="mt-1 block w-full border rounded-md shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+                [ngClass]="{'border-red-500': isInvalid('nome'), 'border-gray-300': !isInvalid('nome')}"
+              >
+              </div>
+              <div>
+              <label for="nome" class="block text-sm font-medium text-gray-700">Data expedição <span class="text-red-500">*</span></label>
+              <input id="nome" type="text" formControlName="nome" placeholder="99/99/9999"
+                class="mt-1 block w-full border rounded-md shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+                [ngClass]="{'border-red-500': isInvalid('nome'), 'border-gray-300': !isInvalid('nome')}"
+              >
+              </div>
+
           </div>
           <div *ngIf="!isPessoaFisica" class="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 border rounded-lg bg-green-50">
             <div class="md:col-span-2">
@@ -78,8 +103,8 @@
               </ng-container>
             </div>
             <div>
-              <label for="razaoSocial" class="block text-sm font-medium text-gray-700">Razão Social <span class="text-red-500">*</span></label>
-              <input id="razaoSocial" type="text" formControlName="razaoSocial" placeholder="Nome completo da empresa"
+              <label for="contato" class="block text-sm font-medium text-gray-700">Contato empresarial <span class="text-red-500">*</span></label>
+              <input id="contato" type="text" formControlName="contato" placeholder="Contato empresarial"
                 class="mt-1 block w-full border rounded-md shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
                 [ngClass]="{'border-red-500': isInvalid('razaoSocial'), 'border-gray-300': !isInvalid('razaoSocial')}"
               >
@@ -95,158 +120,156 @@
               <p *ngIf="pessoaForm.get('nomeFantasia')?.errors?.['required'] && isInvalid('nomeFantasia')" class="mt-1 text-xs text-red-600">O Nome Fantasia é obrigatório.</p>
             </div>
           </div>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-      <div class="md:col-span-2">
-      </div>
-      <div>
-        <label for="email" class="block text-sm font-medium text-gray-700">E-mail <span class="text-red-500">*</span></label>
-        <input id="email" type="email" formControlName="email" placeholder="contato@exemplo.com"
-          class="mt-1 block w-full border rounded-md shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
-          [ngClass]="{'border-red-500': isInvalid('email'), 'border-gray-300': !isInvalid('email')}"
-        >
-        <ng-container *ngIf="isInvalid('email')">
-          <p *ngIf="pessoaForm.get('email')?.errors?.['required']" class="mt-1 text-xs text-red-600">O e-mail é obrigatório.</p>
-          <p *ngIf="pessoaForm.get('email')?.errors?.['email']" class="mt-1 text-xs text-red-600">Formato de e-mail inválido.</p>
-        </ng-container>
-      </div>
-
-      <div>
-        <label for="telefone" class="block text-sm font-medium text-gray-700">Telefone <span class="text-red-500">*</span></label>
-        <input id="telefone" type="tel" formControlName="telefone" placeholder="(99) 99999-9999"
-          class="mt-1 block w-full border rounded-md shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
-          [ngClass]="{'border-red-500': isInvalid('telefone'), 'border-gray-300': !isInvalid('telefone')}"
-        >
-        <p *ngIf="pessoaForm.get('telefone')?.errors?.['required'] && isInvalid('telefone')" class="mt-1 text-xs text-red-600">O telefone é obrigatório.</p>
-      </div>
-    </div>
-    <br>
-    <div formGroupName="endereco" class="grid grid-cols-1 md:grid-cols-4 gap-1">
-      <div class="md:col-span-4">
-       <legend class="text-lg font-semibold text-indigo-700 border-b border-indigo-200 w-full pb-2 mb-6">Endereço completo</legend>
-      </div>
-     <div class="md:col-span-2  ">
-        <label for="cep" class="block text-sm font-medium text-gray-700">CEP</label>
-        <input
-              id="cep"
-              type="text"
-              formControlName="cep"
-              (blur)="buscarCep()"
-              placeholder="CEP (Ex: 01001-000)"
-              maxlength="9"
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-            />
-      <div *ngIf="loading" class="mt-1 text-blue-500 text-sm">Buscando endereço...</div>
-      <div *ngIf="erroBusca" class="mt-1 text-red-500 text-sm">
-        CEP inválido ou não encontrado. Verifique o número.
-      </div>
-      <div *ngIf="enderecoForm.get('cep')?.errors && enderecoForm.get('cep')?.touched" class="mt-1 text-red-500 text-sm">
-        <span *ngIf="enderecoForm.get('cep')?.errors?.['required']">Obrigatório.</span>
-        <span *ngIf="enderecoForm.get('cep')?.errors?.['pattern']">Formato inválido. Use 8 dígitos.</span>
-      </div>
-    </div>
-
-    <div class="md:col-span-4">
-      <div>
-        <label for="logradouro" class="block text-sm font-medium text-gray-700">Rua/Logradouro</label>
-        <input
-          id="logradouro"
-          type="text"
-          formControlName="logradouro"
-          class="mt-1 block w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md shadow-sm cursor-not-allowed"
-          readonly
-        />
-       </div>
-
-    </div>
-    <div class="md:col-span-1">
-        <label for="numero" class="block text-sm font-medium text-gray-700">Número</label>
-        <input
-          id="numero"
-          type="text"
-          formControlName="numero"
-          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-        />
-        <div *ngIf="enderecoForm.get('numero')?.errors && enderecoForm.get('numero')?.touched" class="mt-1 text-red-500 text-sm">
-          O número é obrigatório.
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+        <div class="md:col-span-2">
         </div>
-     </div>
+        <br>
 
-     <div class="md:col-span-3">
-        <label for="bairro" class="block text-sm font-medium text-gray-700">Bairro</label>
-        <input
-          id="bairro"
-          type="text"
-          formControlName="bairro"
-          class="mt-1 block w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md shadow-sm cursor-not-allowed"
-          readonly
-        />
-      </div>
-
-
-
-    <div class="md:col-span-3">
-
-      <div>
-        <label for="cidade" class="block text-sm font-medium text-gray-700">Cidade</label>
-        <input
-          id="cidade"
-          type="text"
-          formControlName="cidade"
-          class="mt-1 block w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md shadow-sm cursor-not-allowed"
-          readonly
-        />
-      </div>
-    </div>
-    <div >
-        <label for="uf" class="block text-sm font-medium text-gray-700">UF</label>
-        <input
-          id="uf"
-          type="text"
-          formControlName="uf"
-          class="mt-1 block w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md shadow-sm cursor-not-allowed"
-          readonly
-        />
-    </div>
+        <div class="md:col-span-2">
+        <legend class="text-lg font-semibold text-indigo-700 border-b border-indigo-200 w-full pb-2 mb-6">Contato (Telefone, whatsapp, email) </legend>
+        </div>
+        <div class="md:col-span-2">
+                <button
+                  type="button"
+                  name="tipo"
+                 class="w-full flex justify-center py-2  border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-indigo-500 hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-gray-400 "
+                >
+                  +Contatos
+                </button>
 
 
-    <div class="md:col-span-4">
+        </div>
+
+</div>
 
 
-      <div>
-        <label for="complemento" class="block text-sm font-medium text-gray-700">Complemento (opcional)</label>
-        <input
-          id="complemento"
-          type="text"
-          formControlName="complemento"
-          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-        />
-      </div>
-     </div>
-    </div>
-    <div class="pt-4">
-      <button type="submit"
-        [disabled]="pessoaForm.invalid"
-        class="w-full flex justify-center py-3 px-6 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-gray-400 disabled:cursor-not-allowed"
-        [ngClass]="{
-          'bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500': pessoaForm.valid,
-          'bg-gray-400 cursor-not-allowed': pessoaForm.invalid
-        }"
-      >
-        Finalizar Cadastro
-      </button>
-    </div>
-
-
-
-      </fieldset>
+     </fieldset>
 
       <fieldset>
 
-      </fieldset>
+          <br>
+        <div formGroupName="endereco" class="grid grid-cols-1 md:grid-cols-4 gap-1">
+          <div class="md:col-span-4">
+          <legend class="text-lg font-semibold text-indigo-700 border-b border-indigo-200 w-full pb-2 mb-6">Endereço completo</legend>
+          </div>
+        <div class="md:col-span-2  ">
+            <label for="cep" class="block text-sm font-medium text-gray-700">CEP</label>
+            <input
+                  id="cep"
+                  type="text"
+                  formControlName="cep"
+                  (blur)="buscarCep()"
+                  placeholder="CEP (Ex: 01001-000)"
+                  maxlength="9"
+                  class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                />
+          <div *ngIf="loading" class="mt-1 text-blue-500 text-sm">Buscando endereço...</div>
+          <div *ngIf="erroBusca" class="mt-1 text-red-500 text-sm">
+            CEP inválido ou não encontrado. Verifique o número.
+          </div>
+          <div *ngIf="enderecoForm.get('cep')?.errors && enderecoForm.get('cep')?.touched" class="mt-1 text-red-500 text-sm">
+            <span *ngIf="enderecoForm.get('cep')?.errors?.['required']">Obrigatório.</span>
+            <span *ngIf="enderecoForm.get('cep')?.errors?.['pattern']">Formato inválido. Use 8 dígitos.</span>
+          </div>
+          </div>
 
-      <div class="mt-10 flex justify-end">
+        <div class="md:col-span-4">
+          <div>
+            <label for="logradouro" class="block text-sm font-medium text-gray-700">Rua/Logradouro</label>
+            <input
+              id="logradouro"
+              type="text"
+              formControlName="logradouro"
+              class="mt-1 block w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md shadow-sm cursor-not-allowed"
+              readonly
+            />
+          </div>
 
-      </div>
+          </div>
+          <div class="md:col-span-1">
+              <label for="numero" class="block text-sm font-medium text-gray-700">Número</label>
+              <input
+                id="numero"
+                type="text"
+                formControlName="numero"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              />
+              <div *ngIf="enderecoForm.get('numero')?.errors && enderecoForm.get('numero')?.touched" class="mt-1 text-red-500 text-sm">
+                O número é obrigatório.
+              </div>
+          </div>
+
+        <div class="md:col-span-3">
+            <label for="bairro" class="block text-sm font-medium text-gray-700">Bairro</label>
+            <input
+              id="bairro"
+              type="text"
+              formControlName="bairro"
+              class="mt-1 block w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md shadow-sm cursor-not-allowed"
+              readonly
+            />
+          </div>
+
+
+
+          <div class="md:col-span-3">
+
+            <div>
+              <label for="cidade" class="block text-sm font-medium text-gray-700">Cidade</label>
+              <input
+                id="cidade"
+                type="text"
+                formControlName="cidade"
+                class="mt-1 block w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md shadow-sm cursor-not-allowed"
+                readonly
+              />
+            </div>
+          </div>
+          <div >
+            <label for="uf" class="block text-sm font-medium text-gray-700">UF</label>
+            <input
+              id="uf"
+              type="text"
+              formControlName="uf"
+              class="mt-1 block w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md shadow-sm cursor-not-allowed"
+              readonly
+            />
+          </div>
+          </div>
+
+
+
+          <div class="md:col-span-4">
+
+
+            <div>
+              <label for="complemento" class="block text-sm font-medium text-gray-700">Complemento (opcional)</label>
+              <input
+                id="complemento"
+                type="text"
+                formControlName="complemento"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+          </div>
+</fieldset>
+          <div class="pt-4">
+            <button type="submit"
+              [disabled]="pessoaForm.invalid"
+              class="w-full flex justify-center py-3 px-6 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-gray-400 disabled:cursor-not-allowed"
+              [ngClass]="{
+                'bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500': pessoaForm.valid,
+                'bg-gray-400 cursor-not-allowed': pessoaForm.invalid
+              }"
+            >
+              Finalizar Cadastro
+            </button>
+          </div>
+
+
+
+            <div class="mt-10 flex justify-end"> </div>
+
 
     </form>
   </div>

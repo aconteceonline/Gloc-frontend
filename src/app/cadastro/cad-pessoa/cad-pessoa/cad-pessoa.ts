@@ -1,24 +1,10 @@
-//import { CommonModule, } from '@angular/common';
+import { CommonModule, } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, AbstractControl, ValidatorFn  } from '@angular/forms';
 import { LayoutProps } from '../../../template/layout/layoutprops';
 import { CepBuscaService } from '../../../services/CepBuscaService'
 import { take } from 'rxjs';
 import { Endereco } from '../../../models/Endereco.model';
-//import { ActivatedRoute, Router } from '@angular/router';
-
-
-
-interface Person {
-  fullName: string;
-  personType: 'fisica' | 'juridica';
-  endereco: string;
-  contact: string;
-  email: string;
-  cpf: string;
-  rg: string;
-  status: 'ativo' | 'inativo' | 'pendente';
-}
 
 
 
@@ -80,7 +66,7 @@ export class Cadpessoa  implements OnInit {
 
       // Campos PJ
       cnpj: [''],
-      razaoSocial: [''],
+      contato: [''],
       nomeFantasia: [''],
 
       email: ['', [Validators.required, Validators.email]],
@@ -176,7 +162,7 @@ export class Cadpessoa  implements OnInit {
     const cpfControl = this.pessoaForm.get('cpf');
     const nomeControl = this.pessoaForm.get('nome');
     const cnpjControl = this.pessoaForm.get('cnpj');
-    const razaoSocialControl = this.pessoaForm.get('razaoSocial');
+    const razaoSocialControl = this.pessoaForm.get('contato');
     const nomeFantasiaControl = this.pessoaForm.get('nomeFantasia');
 
     if (tipo === 'PF') {

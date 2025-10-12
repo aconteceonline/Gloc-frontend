@@ -5,15 +5,16 @@ import { CadPessoaRoutingModule } from './cad-pessoa-routing-module';
 import { Cadpessoa } from './cad-pessoa/cad-pessoa';
 import { ReactiveFormsModule } from '@angular/forms';
 
+
 @NgModule({
   declarations: [
     Cadpessoa
   ],
   imports: [
     CommonModule,
-      ReactiveFormsModule,
-    CadPessoaRoutingModule
+    ReactiveFormsModule,
+    CadPessoaRoutingModule,
 
-  ]
+]
 })
 export class CadPessoaModule { }

@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { CadCategorias } from './cad-categorias';
+import { Dialog } from './dialog';
 
-describe('CadCategorias', () => {
-  let component: CadCategorias;
-  let fixture: ComponentFixture<CadCategorias>;
+describe('Dialog', () => {
+  let component: Dialog;
+  let fixture: ComponentFixture<Dialog>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [CadCategorias]
+      imports: [Dialog]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(CadCategorias);
+    fixture = TestBed.createComponent(Dialog);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
