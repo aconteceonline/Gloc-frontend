@@ -1,10 +1,13 @@
-import { CommonModule, } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, AbstractControl, ValidatorFn  } from '@angular/forms';
 import { LayoutProps } from '../../../template/layout/layoutprops';
 import { CepBuscaService } from '../../../services/CepBuscaService'
 import { take } from 'rxjs';
 import { Endereco } from '../../../models/Endereco.model';
+import { MatDialog } from '@angular/material/dialog';
+import { ModalContato } from '../../modal-contato/modal-contato';
+
 
 
 
@@ -44,6 +47,7 @@ export class Cadpessoa  implements OnInit {
     return this.pessoaForm.get('endereco') as FormGroup;
   }
 
+  dialog: MatDialog = new MatDialog;
 
   loading: boolean = false;
   erroBusca: boolean = false;
@@ -97,8 +101,19 @@ export class Cadpessoa  implements OnInit {
     this.toggleValidation('PF');
   }
 
+  openModal() {
+    this.dialog.open(ModalContato, {
+        width: '700px',
+        height: '330px',
+      //  data:  contato
+
+      })
 
 
+  }
+   closeModal() {
+
+  }
 
  // Função disparada ao perder o foco (onBlur)
   buscarCep() {

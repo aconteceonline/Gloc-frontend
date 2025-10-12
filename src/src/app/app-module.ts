@@ -8,19 +8,14 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
 import { Login } from './login/login';
 import { authInterceptor } from './auth-interceptor';
-
-
-
-
-
+import { ModalContato } from './cadastro/modal-contato/modal-contato';
+import { MatDialogModule } from '@angular/material/dialog';
 
 
 @NgModule({
   declarations: [
     App,
     Login,
-
-
 
 
   ],
@@ -30,6 +25,8 @@ import { authInterceptor } from './auth-interceptor';
     ReactiveFormsModule,
     AppRoutingModule,
     BrowserAnimationsModule,
+    MatDialogModule
+
 
 
   ],
