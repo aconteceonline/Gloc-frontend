@@ -7,6 +7,8 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { ModalContato } from '../modal-contato/modal-contato';
 import { MatDialogModule } from '@angular/material/dialog'
 
+import { NgxMaskDirective, provideNgxMask } from 'ngx-mask';
+
 
 
 @NgModule({
@@ -18,10 +20,15 @@ import { MatDialogModule } from '@angular/material/dialog'
     CommonModule,
     ReactiveFormsModule,
     CadPessoaRoutingModule,
-    MatDialogModule
+    MatDialogModule,
+
+    NgxMaskDirective,
 
 
 
 ]
+,
+ providers: [provideNgxMask({ /* opções de cfg */ })],
+ bootstrap: [CadPessoaModule],
 })
 export class CadPessoaModule { }

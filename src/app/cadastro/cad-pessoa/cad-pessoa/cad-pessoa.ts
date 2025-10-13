@@ -65,7 +65,10 @@ export class Cadpessoa  implements OnInit {
          tipo: ['PF', Validators.required], // Valor inicial: Pessoa Física
 
       // Campos PF
-      cpf: ['', [Validators.required, cpfValidator()]],
+      cpf: [''],
+      rg: [''],
+      orgEmis: [''],
+      dtEmis: [''],
       nome: ['', Validators.required],
 
       // Campos PJ
@@ -73,8 +76,8 @@ export class Cadpessoa  implements OnInit {
       contato: [''],
       nomeFantasia: [''],
 
-      email: ['', [Validators.required, Validators.email]],
-      telefone: ['', Validators.required],
+      email: [''],
+      telefone: [''],
 
      // NOVO: FormGroup para Endereço
       endereco: this.fb.group({

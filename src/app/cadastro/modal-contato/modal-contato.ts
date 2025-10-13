@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Inject, Input, OnInit, Output } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MatDialogRef } from '@angular/material/dialog';
+
 
 export interface Contact {
   id: number;
@@ -13,6 +14,7 @@ export interface Contact {
 @Component({
   selector: 'app-modal-contato',
   standalone: false,
+
   templateUrl: './modal-contato.html',
   styleUrl: './modal-contato.scss'
 })
@@ -62,6 +64,7 @@ export class ModalContato implements OnInit {
   ngOnInit(): void {
     this.calculateTotalPages();
     this.paginate();
+
   }
 
   private calculateTotalPages(): void {

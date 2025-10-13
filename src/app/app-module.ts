@@ -8,16 +8,15 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
 import { Login } from './login/login';
 import { authInterceptor } from './auth-interceptor';
-import { ModalContato } from './cadastro/modal-contato/modal-contato';
 import { MatDialogModule } from '@angular/material/dialog';
+
+
 
 
 @NgModule({
   declarations: [
     App,
     Login,
-
-
   ],
   imports: [
     BrowserModule,
@@ -25,12 +24,14 @@ import { MatDialogModule } from '@angular/material/dialog';
     ReactiveFormsModule,
     AppRoutingModule,
     BrowserAnimationsModule,
-    MatDialogModule
+    MatDialogModule,
+
 
 
 
   ],
   providers: [
+
       {
       provide: LOCALE_ID,
       useValue: 'pt-BR',
@@ -39,7 +40,8 @@ import { MatDialogModule } from '@angular/material/dialog';
     provideBrowserGlobalErrorListeners(),
     provideZonelessChangeDetection(),
     provideHttpClient(withFetch()),
-    provideHttpClient(withInterceptors([authInterceptor]))
+    provideHttpClient(withInterceptors([authInterceptor])),
+
   ],
   bootstrap: [App]
 })
