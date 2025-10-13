@@ -1,0 +1,88 @@
+<div >
+  <div class="w-full max-w-4xl mx-auto bg-white p-8 rounded-2xl shadow-lg">
+    <h2 class="text-center text-2xl font-bold text-gray-800 mb-2">Lista de contatos</h2>
+    <p class="text-center text-gray-600 mb-8">Selecione contato na lista para exporta.</p>
+    <form  >
+
+      <fieldset >
+
+        <legend class="text-lg font-semibold text-indigo-700 border-b border-indigo-200 w-full pb-2 mb-6">Contatos</legend>
+
+<div
+     class=" bg-gray-500 bg-opacity-75 z-10 flex items-center justify-center">
+
+    <div class="bg-white rounded-lg  shadow-2xl w-full max-w-4xl max-h-[40vh] flex flex-col">
+
+        <div class="flex-grow overflow-y-auto ">
+
+            <div>
+                <table  class=" text-sm text-gray-500">
+                    <thead class="text-xs text-gray-700 uppercase bg-gray-100">
+                        <tr>
+                            <th scope="col" class="p-4">
+                                <input type="checkbox"
+                                       [checked]="isAllSelectedOnCurrentPage"
+                                       (change)="toggleSelectAll()"
+                                       class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+                            </th>
+                            <th scope="col" class="px-6 py-3">Telefone</th>
+                            <th scope="col" class="px-6 py-3">WhatsApp</th>
+                            <th scope="col" class="px-6 py-3">Email</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                       <tr *ngFor="let contact of paginatedContacts"
+                            class="bg-white border-b hover:bg-blue-50/50 transition"
+                           [class.bg-blue-50]="isSelected(contact.id)"> <td class="w-4 p-4">
+                                <input type="checkbox"
+                                       [checked]="isSelected(contact.id)"
+                                       (change)="toggleSelection(contact.id)"
+                                       class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+                            </td>
+
+
+                            <td class="px-6 py-4">{{ contact.phone }}</td>
+                            <td class="px-6 py-4">
+                                <span [ngClass]="{'text-green-600 font-semibold': contact.whatsapp, 'text-red-500': !contact.whatsapp}">
+                                    {{ contact.whatsapp ? 'Sim' : 'Não' }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4">{{ contact.email }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+<div class="p-5 border-t border-gray-200 flex justify-between items-center bg-gray-50">
+
+            <button (click)="confirmSelection()"
+                    [disabled]="selectedContactIds.length === 0"
+                    class="px-4 py-2 text-sm font-semibold rounded-lg transition"
+                    [ngClass]="{
+                        'bg-blue-600 text-white hover:bg-blue-700': selectedContactIds.length > 0,
+                        'bg-gray-400 text-gray-200 cursor-not-allowed': selectedContactIds.length === 0
+                    }">
+                Confirmar Seleção ({{ selectedContactIds.length }})
+            </button>
+
+            <nav class="flex items-center space-x-2">
+                </nav>
+        </div>
+
+            </div>
+
+        </div>
+
+
+
+
+
+
+         </div>
+        </div>
+      </fieldset>
+
+      <div class="mt-10 flex justify-end"> </div>
+    </form>
+  </div>
+</div>
+

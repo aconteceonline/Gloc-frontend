@@ -103,8 +103,8 @@ export class Cadpessoa  implements OnInit {
 
   openModal() {
     this.dialog.open(ModalContato, {
-        width: '700px',
-        height: '330px',
+        width: '990px',
+        height: '500px',
       //  data:  contato
 
       })
