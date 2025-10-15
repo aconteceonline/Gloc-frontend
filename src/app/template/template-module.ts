@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { TemplateRoutingModule } from './template-routing-module';
 import { Layout } from './layout/layout';
 import { MenucadastrarModule } from '../menucadastrar/menucadastrar-module';
+import { ModalContato } from '../cadastro/modal-contato/modal-contato';
 
 
 
@@ -13,10 +14,12 @@ import { MenucadastrarModule } from '../menucadastrar/menucadastrar-module';
   declarations: [
     Layout,
 
+
   ],
   imports: [
     CommonModule,
     TemplateRoutingModule,
+
 
 
   ]

@@ -5,7 +5,6 @@
     <form [formGroup]="pessoaForm" (ngSubmit)="onSubmit()" >
 
       <fieldset class="mb-8">
-
         <legend class="text-lg font-semibold text-indigo-700 border-b border-indigo-200 w-full pb-2 mb-6">Dados de contato</legend>
         <div class="flex flex-col sm:flex-row sm:space-x-4">
             <div class="flex-1">
@@ -64,18 +63,15 @@
                <p *ngIf="pessoaForm.get('nome')?.errors?.['required'] && isInvalid('nome')" class="mt-1 text-xs text-red-600">O nome é obrigatório.</p>
             </div>
             <div>
-
                <label for="cpf" class="block text-sm font-medium text-gray-700">RG<span class="text-red-500"></span></label>
               <input id="cpf" type="text" formControlName="rg"  inputmode="numeric"  mask="00.000.000-00"  placeholder="00.000.000-00" type="text"
                 class="mt-1 block w-full border rounded-md shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
-
               >
             </div>
              <div>
               <label for="nome" class="block text-sm font-medium text-gray-700">Orgão Emissor <span class="text-red-500"></span></label>
               <input id="nome" type="text" formControlName="orgEmis" placeholder="Ex.: SSP - SP"    type="text"
                 class="mt-1 block w-full border rounded-md shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
-
               >
               </div>
               <div>
@@ -83,10 +79,8 @@
               <input id="nome" type="text" formControlName="dtEmis" placeholder="99/99/9999" inputmode="date"
                   mask="99/99/9999"
                 class="mt-1 block w-full border rounded-md shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
-
               >
               </div>
-
           </div>
           <div *ngIf="!isPessoaFisica" class="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 border rounded-lg bg-green-50">
             <div class="md:col-span-2">
@@ -143,9 +137,48 @@
               </div>
 
             </div>
-
-
      </fieldset>
+
+
+
+<ng-container >
+
+    <table class="data-table">
+
+        <thead>
+            <tr class="text-gray-500 mb-10">
+                <th >Telefone</th>
+                <th >Celular</th>
+                <th >Whatsapp</th>
+                <th >Email</th>
+            </tr>
+        </thead>
+
+        <tbody  *ngIf="receivedData$ | async as receivedData">
+            <tr>
+                <td >{{ receivedData?.telefone  ? (receivedData.telefone | mask : '(00) 0000-0000') : 'Não Informado'   }}</td>
+                <td>{{ receivedData?.celular ? (receivedData.celular | mask : '(00) 0000-0000') : 'não informado' }}</td>
+                <td >{{ receivedData?.whatsapp ? (receivedData.whatsapp | mask : '(00) 0000-0000') : 'não informado' }}</td>
+                <td>{{ receivedData?.email || 'não informado' }}</td>
+            </tr>
+        </tbody>
+
+    </table>
+
+</ng-container>
+
+<div *ngIf="!(receivedData$ | async)" class="text-gray-500 mb-">
+    <p>Nenhuma informação de contato cadastrada. Abra o formulário adicionar contatos para cadastrar.</p>
+</div>
+
+
+
+
+
+      <hr class="my-4 border-green-200">
+
+
+
      <fieldset>
 
        <br>

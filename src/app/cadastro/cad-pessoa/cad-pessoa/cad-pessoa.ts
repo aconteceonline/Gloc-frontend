@@ -1,12 +1,13 @@
 
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, AbstractControl, ValidatorFn  } from '@angular/forms';
 import { LayoutProps } from '../../../template/layout/layoutprops';
 import { CepBuscaService } from '../../../services/CepBuscaService'
-import { take } from 'rxjs';
+import { filter, Observable, Subject, Subscription, take, takeUntil } from 'rxjs';
 import { Endereco } from '../../../models/Endereco.model';
 import { MatDialog } from '@angular/material/dialog';
-import { ModalContato } from '../../modal-contato/modal-contato';
+import {  ModalContato } from '../../modal-contato/modal-contato';
+import { DataService } from '../../../services/data.service';
 
 
 
@@ -41,7 +42,14 @@ function cnpjValidator(): ValidatorFn {
   templateUrl: './cad-pessoa.html',
   styleUrl: './cad-pessoa.scss'
 })
-export class Cadpessoa  implements OnInit {
+export class Cadpessoa  implements  OnInit {
+telefone: string = "";
+celular: string = "";
+receivedData: any = null; // Para armazenar os dados recebidos
+private destroy$ = new Subject<void>(); // Usado para gerenciar a desinscrição
+
+ // Atribua o Observable diretamente à propriedade
+    receivedData$!: Observable<any>;
 
   get enderecoForm(): FormGroup {
     return this.pessoaForm.get('endereco') as FormGroup;
@@ -57,8 +65,10 @@ export class Cadpessoa  implements OnInit {
 
 
   constructor(
-   private fb: FormBuilder,
-   private cepService: CepBuscaService
+         private fb: FormBuilder,
+         private cepService: CepBuscaService,
+         private data: DataService,
+         private cdRef: ChangeDetectorRef
   ) {
     this.pessoaForm = this.fb.group(
       {
@@ -102,21 +112,48 @@ export class Cadpessoa  implements OnInit {
 
     // Configura a validação inicial para PF
     this.toggleValidation('PF');
+
+
+    this.receivedData$ = this.data.modalResult$;
+
+    this.ngAfterViewInit()
+
   }
+
+
+ngAfterViewInit(): void {
+
+   this.data.modalResult$
+    .pipe(
+      filter(data => data !== null),
+
+
+      takeUntil(this.destroy$)
+    )
+    .subscribe(data => {
+      this.receivedData = data;
+
+     this.cdRef.markForCheck(); // força nova verificação
+
+    });
+
+}
 
   openModal() {
     this.dialog.open(ModalContato, {
         width: '990px',
         height: '500px',
-      //  data:  contato
 
       })
-
-
   }
-   closeModal() {
 
-  }
+
+  /**
+   * Método de tratamento de evento que é chamado quando o componente filho
+   * emite o formulário. Ele recebe o objeto ContactModel completo ($event).
+   * * @param data O objeto ContactModel com os dados de contato.
+   */
+
 
  // Função disparada ao perder o foco (onBlur)
   buscarCep() {
@@ -220,6 +257,7 @@ export class Cadpessoa  implements OnInit {
       // TODO: Chamar o serviço de backend para salvar
 
 
+  //    this.receivedData = "";
       this.pessoaForm.reset();
     } else {
       // Marca todos os campos como 'touched' para exibir as mensagens de erro
