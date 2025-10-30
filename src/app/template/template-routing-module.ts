@@ -36,10 +36,7 @@ const routes: Routes = [
         pathMatch: 'full',
         data: { titulo: 'CADASTRO IMÓVEIS', subTitulo: 'Cadastre aqui os novos imóveis'}
       },
-      {
-        path: 'cadproprietario',
-        loadChildren: () => import ('../cadastro/cad-proprietario/cad-proprietario-module').then(m => m.CadProprietarioModule), pathMatch: 'full',
-      },
+
       {
         path: 'cadresumo',
         loadChildren: () => import ('../cadastro/cad-resumo/cad-resumo-module').then(m => m.CadResumoModule), pathMatch: 'full',

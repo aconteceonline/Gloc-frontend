@@ -50,7 +50,7 @@ constructor(private data: DataService, public dialogRef: MatDialogRef<ModalConta
 
     // 3. Fecha o modal
      this.dialogRef.close();
-     console.log('Modal Fechado.');
+     console.log('Modal enviou o dado e está fechando....');
   }
 
 }

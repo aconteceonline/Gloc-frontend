@@ -1,16 +1,15 @@
 
-import { ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import {  Component, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, AbstractControl, ValidatorFn  } from '@angular/forms';
 import { LayoutProps } from '../../../template/layout/layoutprops';
 import { CepBuscaService } from '../../../services/CepBuscaService'
-import { filter, Observable, Subject, Subscription, take, takeUntil } from 'rxjs';
+import {  take, } from 'rxjs';
 import { Endereco } from '../../../models/Endereco.model';
-import { MatDialog } from '@angular/material/dialog';
-import {  ModalContato } from '../../modal-contato/modal-contato';
-import { DataService } from '../../../services/data.service';
-
-
-
+import { PessoaModel } from '../../../glocModel/pessoa.model';
+import { PessoaService } from '../../../glocService/pessoa.service';
+import { EnderecoModel } from '../../../glocModel/endereco.model';
+import { ContatoModel } from '../../../glocModel/contato.model';
+import { EmpresaModel } from '../../../glocModel/empresa.model';
 
 // --- VALIDADORES CUSTOMIZADOS ---
 
@@ -36,27 +35,58 @@ function cnpjValidator(): ValidatorFn {
   };
 }
 
+
+
 @Component({
   selector: 'app-cad-pessoa',
   standalone: false,
   templateUrl: './cad-pessoa.html',
   styleUrl: './cad-pessoa.scss'
 })
-export class Cadpessoa  implements  OnInit {
-telefone: string = "";
-celular: string = "";
-receivedData: any = null; // Para armazenar os dados recebidos
-private destroy$ = new Subject<void>(); // Usado para gerenciar a desinscrição
+export class Cadpessoa {
 
- // Atribua o Observable diretamente à propriedade
-    receivedData$!: Observable<any>;
+  id: any;
+
+Pessoa: PessoaModel = {
+    id_tipo_pessoa_fk: undefined,
+    id_cargo_func_fk: 0,
+    id_situacao_fk: 0,
+    id_cpf_cnpj: 0,
+    nome: '',
+    orgao: '',
+    dt_expedicao: '',
+   }
+hoje: Date = new Date();
+  Endereco: EnderecoModel = {
+     id_pessoa_fk: 0,
+     cep: '',
+     numero: 0,
+     complemento: '',
+  }
+
+
+  Empresa: EmpresaModel = {
+      id_pessoa_fk: 0,
+      rz_social: '',
+      nm_fantasia: ''
+  }
+
+  Contato: ContatoModel = {
+      id_pessoa_fk: 0,
+      nr_contato: '',
+      whatsapp: 0,
+      email: '',
+  }
+
+  // Injetando o service
+  private pessoaService = inject(PessoaService);
 
   get enderecoForm(): FormGroup {
     return this.pessoaForm.get('endereco') as FormGroup;
   }
 
-  dialog: MatDialog = new MatDialog;
 
+  isChecked = false;
   loading: boolean = false;
   erroBusca: boolean = false;
   pessoaForm: FormGroup;
@@ -67,37 +97,33 @@ private destroy$ = new Subject<void>(); // Usado para gerenciar a desinscrição
   constructor(
          private fb: FormBuilder,
          private cepService: CepBuscaService,
-         private data: DataService,
-         private cdRef: ChangeDetectorRef
   ) {
     this.pessoaForm = this.fb.group(
       {
          tipo: ['PF', Validators.required], // Valor inicial: Pessoa Física
 
       // Campos PF
-      cpf: [''],
+      cpf: [],
       rg: [''],
       orgEmis: [''],
       dtEmis: [''],
       nome: ['', Validators.required],
-
-      // Campos PJ
-      cnpj: [''],
-      contato: [''],
-      nomeFantasia: [''],
-
+      cnpj: [],
+      nmFantasia: ['', Validators.required],
+      rzSocial: [''],
       email: [''],
-      telefone: [''],
+      celular: ['', Validators.required],
+      zap: [''],
 
      // NOVO: FormGroup para Endereço
       endereco: this.fb.group({
         cep: ['', Validators.required],
-        logradouro: ['', Validators.required],
+        logradouro: [''],
         numero: ['', Validators.required],
         complemento: [''], // Opcional
-        bairro: ['', Validators.required],
-        cidade: ['', Validators.required],
-        uf: ['', Validators.required],
+        bairro: [''],
+        cidade: [''],
+        uf: [''],
       }),
     }); // Inicializa vazio
 
@@ -113,48 +139,7 @@ private destroy$ = new Subject<void>(); // Usado para gerenciar a desinscrição
     // Configura a validação inicial para PF
     this.toggleValidation('PF');
 
-
-    this.receivedData$ = this.data.modalResult$;
-
-    this.ngAfterViewInit()
-
   }
-
-
-ngAfterViewInit(): void {
-
-   this.data.modalResult$
-    .pipe(
-      filter(data => data !== null),
-
-
-      takeUntil(this.destroy$)
-    )
-    .subscribe(data => {
-      this.receivedData = data;
-
-     this.cdRef.markForCheck(); // força nova verificação
-
-    });
-
-}
-
-  openModal() {
-    this.dialog.open(ModalContato, {
-        width: '990px',
-        height: '500px',
-
-      })
-  }
-
-
-  /**
-   * Método de tratamento de evento que é chamado quando o componente filho
-   * emite o formulário. Ele recebe o objeto ContactModel completo ($event).
-   * * @param data O objeto ContactModel com os dados de contato.
-   */
-
-
  // Função disparada ao perder o foco (onBlur)
   buscarCep() {
     this.erroBusca = false;
@@ -217,8 +202,8 @@ ngAfterViewInit(): void {
     const cpfControl = this.pessoaForm.get('cpf');
     const nomeControl = this.pessoaForm.get('nome');
     const cnpjControl = this.pessoaForm.get('cnpj');
-    const razaoSocialControl = this.pessoaForm.get('contato');
-    const nomeFantasiaControl = this.pessoaForm.get('nomeFantasia');
+    const razaoSocialControl = this.pessoaForm.get('rzSocial');
+    const nomeFantasiaControl = this.pessoaForm.get('nmFantasia');
 
     if (tipo === 'PF') {
       // Habilita validação PF
@@ -248,24 +233,6 @@ ngAfterViewInit(): void {
     nomeFantasiaControl?.updateValueAndValidity();
   }
 
-   onSubmit(): void {
-    if (this.pessoaForm.valid) {
-      console.log('Formulário Válido, Dados Enviados:', this.pessoaForm.value);
-
-
-      alert('Cadastro de Vendedor realizado com sucesso!');
-      // TODO: Chamar o serviço de backend para salvar
-
-
-  //    this.receivedData = "";
-      this.pessoaForm.reset();
-    } else {
-      // Marca todos os campos como 'touched' para exibir as mensagens de erro
-      this.pessoaForm.markAllAsTouched();
-      alert('Por favor, preencha todos os campos obrigatórios e corrija os erros.');
-    }
-  }
-
   // Helper para verificar se o campo está inválido e foi tocado/modificado
   isInvalid(controlName: string, groupName: string = ''): boolean {
      let control;
@@ -282,5 +249,172 @@ ngAfterViewInit(): void {
     return this.pessoaForm.get('tipo')?.value === 'PF';
   }
 
+ onSubmit() {
+    if (this.pessoaForm.valid) {
+/*
+*  pessoaModel
+*/
+      this.Pessoa.id_tipo_pessoa_fk = 1;
+      this.Pessoa.id_cargo_func_fk = 1;
+      this.Pessoa.id_situacao_fk = 1
+      this.Pessoa.nome = this.pessoaForm.value.nome;
+        if ( this.pessoaForm.value.tipo == 'PF') {
+           this.Pessoa.id_cpf_cnpj = this.pessoaForm.value.cpf;
+        } else{
+            this.Pessoa.id_cpf_cnpj = this.pessoaForm.value.cnpj;
+        }
+            console.log("this.pessoaForm.value.tipo = " + this.pessoaForm.value.cpf )
+            console.log("this.Pessoa.id_cpf_cnpj= " + this.Pessoa.id_cpf_cnpj)
+    //  this.Pessoa.id_cpf_cnpj = this.pessoaForm.value.id_cpf_cnpj;
+      this.Pessoa.orgao = this.pessoaForm.value.orgEmis;
+      const dataComBarras = this.pessoaForm.value.dtEmis.replace(/(\d{2})(\d{2})(\d{4})/, '$1/$2/$3');
+      this.Pessoa.dt_expedicao = dataComBarras
 
+
+  console.log("this.Pessoa = " + this.Pessoa.id_cpf_cnpj )
+
+
+      this.pessoaService.cadastrarPessoa(this.Pessoa).subscribe({
+          next: (response) => {
+            // 2. Tratar o sucesso da requisição
+            console.log('Pessoa cadastrada com sucesso!', response);
+            alert(`Pessoa ${response.nome} cadastrada com ID: ${response.id}`);
+            this.id = response.id;
+             console.log('Pessoa id!', response.id);
+
+       // Opcional: Limpar o formulário
+       // this.Pessoa = { nome: '', email: '', idade: 0 };
+          },
+          error: (error) => {
+            // 3. Tratar erros da requisição
+            console.error('Erro ao cadastrar pessoa:', error);
+            alert('Ocorreu um erro no cadastro. Verifique o console.');
+          },
+      complete: () => {
+        // Opcional: Ação ao completar (se o Observable terminar)
+        console.log('Requisição de cadastro concluída.');
+     }
+    });
+  }
+/*
+*  EmpresaModel
+*/
+/*      this.Empresa.id_pessoa_fk = this.id
+      this.Empresa.nm_fantasia = this.pessoaForm.value.nmFantasia;
+      this.Empresa.rz_social = this.pessoaForm.value.rzSocial;
+      this.pessoaService.cadastrarPessoa(this.Pessoa).subscribe({
+          next: (response) => {
+            // 2. Tratar o sucesso da requisição
+            console.log('Pessoa cadastrada com sucesso!', response);
+            alert(`Pessoa ${response.nome} cadastrada com ID: ${response.id}`);
+
+       // Opcional: Limpar o formulário
+       // this.Pessoa = { nome: '', email: '', idade: 0 };
+          },
+          error: (error) => {
+            // 3. Tratar erros da requisição
+            console.error('Erro ao cadastrar pessoa:', error);
+            alert('Ocorreu um erro no cadastro. Verifique o console.');
+          },
+      complete: () => {
+        // Opcional: Ação ao completar (se o Observable terminar)
+        console.log('Requisição de cadastro concluída.');
+     }
+    });
+*/
+/*
+*  contatoModel
+*/
+ /*     this.Contato.id_pessoa_fk = this.id
+      this.Contato.nr_contato = this.pessoaForm.value.celular;
+      this.Contato.whatsapp = this.pessoaForm.value.zap;
+      this.pessoaService.cadastrarPessoa(this.Pessoa).subscribe({
+          next: (response) => {
+            // 2. Tratar o sucesso da requisição
+            console.log('Pessoa cadastrada com sucesso!', response);
+            alert(`Pessoa ${response.nome} cadastrada com ID: ${response.id}`);
+
+       // Opcional: Limpar o formulário
+       // this.Pessoa = { nome: '', email: '', idade: 0 };
+          },
+          error: (error) => {
+            // 3. Tratar erros da requisição
+            console.error('Erro ao cadastrar pessoa:', error);
+            alert('Ocorreu um erro no cadastro. Verifique o console.');
+          },
+      complete: () => {
+        // Opcional: Ação ao completar (se o Observable terminar)
+        console.log('Requisição de cadastro concluída.');
+     }
+    });
+*/
+//endereco
+/*      this.Endereco.id_pessoa_fk = this.id
+      this.Endereco.cep = this.pessoaForm.value.endereco.cep;
+      this.Endereco.numero =  this.pessoaForm.value.endereco.numero;
+      this.Endereco.complemento = this.pessoaForm.value.endereco.complemento;
+
+      this.pessoaService.cadastrarPessoa(this.Pessoa).subscribe({
+          next: (response) => {
+            // 2. Tratar o sucesso da requisição
+            console.log('Pessoa cadastrada com sucesso!', response);
+            alert(`Pessoa ${response.nome} cadastrada com ID: ${response.id}`);
+
+       // Opcional: Limpar o formulário
+       // this.Pessoa = { nome: '', email: '', idade: 0 };
+          },
+          error: (error) => {
+            // 3. Tratar erros da requisição
+            console.error('Erro ao cadastrar pessoa:', error);
+            alert('Ocorreu um erro no cadastro. Verifique o console.');
+          },
+      complete: () => {
+        // Opcional: Ação ao completar (se o Observable terminar)
+        console.log('Requisição de cadastro concluída.');
+     }
+    });
+
+// 1. Chamar o método do service para enviar o POST
+
+
+    // this.Pessoa = this.pessoaForm.value
+     console.log('Pessoa cadastrada com sucesso!'   , this.Pessoa);
+
+     console.log('Pessoa cadastrada com sucesso!'   , this.pessoaForm);
+
+
+
+
+
+
+
+
+  }
+  else {
+      // Marca todos os campos como 'touched' para exibir as mensagens de erro
+      this.pessoaForm.markAllAsTouched();
+      alert('Por favor, preencha todos os campos obrigatórios e corrija os erros.');
+    }
+}
+
+
+*/
+
+
+
+
+/*
+      alert('Cadastro de Vendedor realizado com sucesso!');
+      // TODO: Chamar o serviço de backend para salvar
+
+
+  //    this.receivedData = "";
+      this.pessoaForm.reset();
+    } else {
+      // Marca todos os campos como 'touched' para exibir as mensagens de erro
+      this.pessoaForm.markAllAsTouched();
+      alert('Por favor, preencha todos os campos obrigatórios e corrija os erros.');
+    }
+  }*/
+ }
 }

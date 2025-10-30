@@ -1,6 +1,6 @@
 
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 
 
 type ModalData = any
@@ -12,7 +12,10 @@ type ModalData = any
 export class DataService {
  // 1. BehaviorSubject privado para armazenar e emitir o valor
   // Inicializamos com 'null' ou um valor padrão.
-  private modalResultSource = new BehaviorSubject<ModalData>(null);
+
+  //private modalResultSource = new BehaviorSubject<ModalData>(null);
+
+  private modalResultSource = new Subject<ModalData>();
 
   // 2. Observable público para os componentes se inscreverem
   // Usamos 'asObservable()' para que os componentes não possam chamar .next() diretamente
@@ -26,7 +29,8 @@ export class DataService {
    * @param data Os dados a serem compartilhados (ex: objeto do formulário).
    */
   sendData(data: ModalData): void {
-    // Emite o novo valor para todos os inscritos
+   // Emite o novo valor.
+    // O Componente Pai deve se inscrever antes de abrir o modal.
     this.modalResultSource.next(data);
 
   }

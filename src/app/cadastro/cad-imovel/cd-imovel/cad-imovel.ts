@@ -48,9 +48,6 @@ export class CadImovel  implements OnInit {
 
   ngOnInit(): void {
 
-
-
-
     this.inquilinoForm = this.fb.group({
      // Dados Pessoais
       nomeCompleto: ['', [Validators.required, Validators.minLength(3)]],
