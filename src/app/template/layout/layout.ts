@@ -1,8 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import {  ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
-import { LayoutProps } from './layoutprops';
+
 import { filter, map } from 'rxjs';
+import { LayoutProps } from './layoutprops';
+
 
 
 @Component({
@@ -13,10 +15,10 @@ import { filter, map } from 'rxjs';
 })
 export class Layout  implements  OnInit {
 
-    props: LayoutProps ={ titulo: 'Gerencie os seus contratos de locação em uma plataforma imobiliária completa',
+   @Input() props: LayoutProps = { titulo: 'Gerencie contratos de locação em uma plataforma imobiliária completa',
       subTitulo: 'Uma solução de longo prazo para negócios de alta prioridade' }
 
-   constructor(private router: Router, private activatedRoute: ActivatedRoute, private authService: AuthService, ){}
+   constructor(private router: Router, private activatedRoute: ActivatedRoute, private authService: AuthService, private cdr: ChangeDetectorRef ){}
 
 
   ngOnInit(): void {
@@ -28,6 +30,8 @@ export class Layout  implements  OnInit {
     ).subscribe( (props: LayoutProps) => this.props = props )
 
   }
+
+
 
    obterPropiedadeLayout() : LayoutProps{
      let  rotaFilha = this.activatedRoute.firstChild;

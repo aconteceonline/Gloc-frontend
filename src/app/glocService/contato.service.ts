@@ -11,15 +11,15 @@ import { ContatoModel } from '../glocModel/contato.model';
   providedIn: 'root'
 })
 export class ContatoService {
-  private http = inject(HttpClient);
-  apiUrl = "http://localhost:3001/endereco";
+ // private http = inject(HttpClient);
+  apiUrl = "http://localhost:3001/contatos";
 
   private myApiUrl!: string;
 
 
  ContatoModel: ContatoModel[] = []
 
-  constructor() {
+  constructor(private http: HttpClient) {
   }
 
   getListContatos(): Observable<ContatoModel[]>{
@@ -27,7 +27,6 @@ export class ContatoService {
   }
 
   cadastrarContato(glocModel: ContatoModel): Observable<ContatoModel> {
-  //  console.log(" glocModel  =  ",  glocModel)
      return this.http.post<ContatoModel>(this.apiUrl, glocModel);
   }
 
@@ -45,8 +44,18 @@ export class ContatoService {
   }
 
   readByIdContato(id: any): Observable<ContatoModel>{
-    const url = `${this.myApiUrl}${this.myApiUrl}/${id}`
+    const url = `${this.apiUrl}/${id}`
     return this.http.get<ContatoModel>(url)
   }
+
+  listarCelularPorPessoa(pessoaId: number): Observable<string | null> {
+  return this.http.get<ContatoModel[]>(`${this.apiUrl}?pessoaId=${pessoaId}`)
+    .pipe(
+      map(contatos => {
+        const celular = contatos.find(c => c.nr_contato === 'celular');
+        return celular?.nr_contato ?? null;
+      })
+    );
+}
 
 }

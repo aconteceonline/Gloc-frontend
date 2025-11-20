@@ -12,7 +12,7 @@ import { EmpresaModel } from '../glocModel/empresa.model';
 })
 export class EmpresaService {
   private http = inject(HttpClient);
-  apiUrl = "http://localhost:3001/endereco";
+  apiUrl = "http://localhost:3001/empresas";
 
   private myApiUrl!: string;
 

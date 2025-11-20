@@ -1,7 +1,7 @@
 export interface ContatoModel{
     id?: number;
-    id_pessoa_fk: number,
-    nr_contato: string,
-    whatsapp: number,
-    email: string
+    id_pessoa_fk?: number,
+    nr_contato?: string,
+    whatsapp?: boolean,
+    email?: string
 }

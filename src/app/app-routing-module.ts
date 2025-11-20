@@ -13,7 +13,7 @@ const routes: Routes = [
 
 
     { path: 'principal',
-        loadChildren: () => import('./template/template-module').then(m => m.TemplateModule), canActivate: [authGuard]
+      loadChildren: () => import('./template/template-module').then(m => m.TemplateModule), canActivate: [authGuard]
 
     },
 

@@ -3,7 +3,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, catchError, of, map } from 'rxjs';
-import { Endereco } from '../models/Endereco.model';
+import { BucaEnderecoModel as Endereco } from '../glocModel/busca-endereco.model';
 
 @Injectable({
   providedIn: 'root'

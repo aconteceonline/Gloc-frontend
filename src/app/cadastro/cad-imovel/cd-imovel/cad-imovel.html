@@ -1,97 +1,332 @@
-<div class="bg-gray-100 flex  justify-center  p-4 sm:p-6 lg:p-8">
-  <div class="w-full max-w-4xl mx-auto bg-white p-8 rounded-2xl shadow-lg">
-    <h2 class="text-2xl font-bold text-gray-800 mb-2">Cadastro de Novo Imóvel</h2>
-    <p class="text-gray-600 mb-8">Preencha os campos abaixo para registrar um novo imóvel.</p>
-    <form  (ngSubmit)="onSubmit()" novalidate >
-      <fieldset class="mb-8">
-        <legend class="text-lg font-semibold text-indigo-700 border-b border-indigo-200 w-full pb-2 mb-6">Dados Imóvel</legend>
-        <div class="grid grid-cols-1 md:grid-cols-8 gap-8">
-            <button  title="Pesquisar nome do contato"
-              class="p-1 text-red-600 hover:text-red-600 hover:border-gray-500 rounded-full
-                    transition duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 30 35"
-                fill="currentColor"
-                class="w-6 h-6">
-                <path fill-rule="evenodd"
-                  d="M10.5 3.75a6.75 6.75 0 1 0 0 13.5 6.75 6.75 0 0 0 0-13.5ZM2.25 10.5a8.25 8.25 0 1 1 14.59 5.28l4.69 4.69a.75.75 0 1 1-1.06 1.06l-4.69-4.69A8.25 8.25 0 0 1 2.25 10.5Z"
-                  clip-rule="evenodd"/>
-              </svg>
-            </button>
-            <div class="md:col-span-3">
-              <label  id="nomeCompleto" formControlName="nomeCompleto" class="text-gray-400  font-medium    ">Nome do contato</label>
-              <div *ngIf="f['nomeCompleto'].invalid && (f['nomeCompleto'].dirty || f['nomeCompleto'].touched)" class="text-red-600 text-sm mt-1">
-                <span *ngIf="f['nomeCompleto'].errors?.['required']">Nome é obrigatório.</span>
-                <span *ngIf="f['nomeCompleto'].errors?.['minlength']">O nome deve ter no mínimo 3 caracteres.</span>
+<div  class="bg-gray-100 flex items-center justify-center min-h-screen p-6 sm:p-6 lg:p-6">
+  <div class="w-full max-w-4x2 mx-auto bg-white p-5 rounded-2xl shadow-lg">
+    <h2 class="text-2xl font-bold text-gray-800 mb-2">Cadastro de Novos imóveis</h2>
+    <p class="text-gray-600 mb-8">Preencha os campos abaixo para registrar novo imóvel.</p>
+
+<form [formGroup]="imovelForm"  >
+ <legend class="text-lg font-semibold text-indigo-700 border-b border-indigo-200 w-full pb-2 mb-4">Contato</legend>
+
+<section class="bg-white shadow-sm rounded-lg p-0 space-y-6" >
+
+        <!-- Se houver pessoa selecionada -->
+   <div *ngIf="pessoaSelecionada(); else campoContato" class="border  border-indigo-200 rounded-md p-2 bg-gray-80 flex justify-between items-center">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 space-x-10 ">
+          <div class="flex flex-col ">
+                  <label class="text-sm font-semibold text-gray-800">
+                      Nome do Contato
+                  </label>
+                  <p class="mt-1  w-100 rounded-md border-gray-300 sm:text-sm p-2 bg-gray-50 border">
+                      {{ pessoaSelecionada()?.nome }}
+                  </p>
+          </div>
+          <div class="flex flex-col  ">
+                  <label class="text-sm font-semibold text-gray-800">
+                       {{ pessoaSelecionada()?.id_tipo_pessoa_fk == 1 ? 'CPF' : 'CNPJ' }}
+                  </label>
+                  <p  class="mt-1 w-35  rounded-md border-gray-300 sm:text-sm p-2 bg-gray-50 border">
+                      {{ pessoaSelecionada()?.id_cpf_cnpj | cpfCnpjMask:(pessoaSelecionada()?.id_tipo_pessoa_fk) }}
+                  </p>
+          </div>
+          <div  class="flex flex-col ">
+                  <label class="text-sm font-semibold text-gray-800">
+                      Número de Contato
+                  </label>
+                  <p  *ngIf="contato$ | async as contato"  class="mt-2  w-35 rounded-md border-gray-300 sm:text-sm p-2 bg-gray-50 border">
+                      {{ contato.nr_contato  | telefoneMask }}
+                  </p>
+          </div>
+
+          <div  class="flex flex-col gap-3">
+                  <label class="text-sm font-semibold text-gray-800">
+                      WhatsApp
+                  </label>
+                  <p *ngIf="contato$ | async as contato"  class="mt-1  w-10 rounded-md border-gray-300 sm:text-sm p-2 bg-gray-50 border">
+                       {{ contato.whatsapp ? 'Sim' : 'Não'}}
+                  </p>
+           </div>
+        </div>
+
+          <!-- Ícone de lupa para nova busca -->
+          <button type="button"
+                  class="w-9 h-9 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center hover:bg-blue-200"
+                  title="Buscar outro contato"
+                  (click)="abrirModal()">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                stroke-width="2" stroke="currentColor" class="w-5 h-5">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 104.5 4.5a7.5 7.5 0 0012.15 12.15z" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Se não houver pessoa selecionada -->
+        <ng-template #campoContato>
+          <div class="border rounded-md px-3 py-2 flex justify-between items-center cursor-pointer hover:bg-gray-100"
+              (click)="abrirModal()">
+            <span class="text-gray-500">Nome, cpf/cnpj e contato</span>
+            <span class="text-blue-600 text-sm hover:underline">Selecionar</span>
+          </div>
+        </ng-template>
+
+</section>
+
+<!-- Modal -->
+<app-pessoa-modal
+  [pessoas]="pessoaService.pessoas()"
+  [aberto]="modalAberto()"
+  (fechar)="fecharModal()"
+  (selecionar)="selecionarPessoa($event)"
+  (cadastrarNovaPessoa)="cadastrarPessoa()">
+</app-pessoa-modal>
+
+<br>
+
+  <fieldset class="mb-8 ">
+    <legend class="text-lg font-semibold text-indigo-700 border-b border-indigo-200 w-full pb-2 mb-6">Dados Imóvel</legend>
+    <div class="flex flex-col sm:flex-row sm:space-x-4">
+
+
+      <section class="bg-white shadow-sm rounded-lg  space-y-1">
+        <!-- Título -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Título <span class="text-red-500">*</span></label>
+          <input type="text" class="mt-1 block w-full placeholder:text-slate-400 border  border-slate-200  rounded-md shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500 text-gray-900 focus:outline-none "
+                 [class.border-red-500]="imovelForm.get('titulo')?.invalid && imovelForm.get('titulo')?.touched"
+                 formControlName="titulo" placeholder="Ex: Casa com quintal amplo" />
+        </div>
+
+        <!-- Descrição -->
+        <div>
+          <label class="block text-sm font-medium mb-1 text-gray-700 ">Descrição</label>
+          <textarea rows="4" class="mt-1 block w-full placeholder:text-slate-400 border  border-slate-200  rounded-md shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500 text-gray-900 focus:outline-none "
+                    [class.border-red-500]="imovelForm.get('descricao')?.invalid && imovelForm.get('descricao')?.touched"
+                    formControlName="descricao"
+                    placeholder="Detalhes do imóvel, acabamentos, vizinhança, etc."></textarea>
+        </div>
+
+        <!-- Tipo e preço -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium mb-1 text-gray-700 ">Tipo<span class="text-red-500">*</span></label>
+            <select class="mt-1 block w-full placeholder:text-slate-400 border  border-slate-200  rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 focus:outline-none " formControlName="tipo">
+              <option value="casa"></option>
+               <option value="casa">Casa</option>
+              <option value="apartamento">Apartamento</option>
+              <option value="terreno">Terreno</option>
+              <option value="comercial">Comercial</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Preço (R$)</label>
+            <input type="number" class="mt-1 block w-full placeholder:text-slate-400 border  border-slate-200  rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 focus:outline-none " formControlName="preco" min="0" step="0.01" />
+          </div>
+        </div>
+
+        <!-- Dormitórios, banheiros, área -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label class="block text-sm font-medium mb-1">Dormitórios<span class="text-red-500">*</span></label>
+            <input type="number" class="mt-1  w-full placeholder:text-slate-400 border  border-slate-200  rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 focus:outline-none" formControlName="dormitorios" min="0" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Banheiros<span class="text-red-500">*</span></label>
+            <input type="number" class="mt-1  w-full placeholder:text-slate-400 border  border-slate-200  rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 focus:outline-none" formControlName="banheiros" min="0" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Área (m²)<span class="text-red-500">*</span></label>
+            <input type="number" class="  w-full placeholder:text-slate-400 border  border-slate-200  rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 focus:outline-none" formControlName="area" min="0" />
+          </div>
+        </div>
+      </section>
+
+</div>
+</fieldset>
+    <!-- Endereço -->
+
+          <br>
+          <div formGroupName="endereco" class="grid grid-cols-1 md:grid-cols-4 gap-1">
+              <div class="md:col-span-4">
+                <legend class="text-lg font-semibold text-indigo-700 border-b border-indigo-200 w-full pb-2 mb-6">Endereço completo</legend>
+              </div>
+              <div class="md:col-span-2 w-[120px] ">
+                <label for="cep" class="block  text-sm font-medium text-gray-700">CEP <span class="text-red-500">*</span></label>
+                <input id="cep" type="text" formControlName="cep"  placeholder="Pesquisar" inputmode="numeric" mask="00.000-000"
+                      maxlength="16"
+                    class="mt-1 block w-40 border placeholder:text-slate-400  rounded-md shadow-sm p-2  focus:outline-none focus:border-blue-500  text-gray-900"
+                [ngClass]="{
+                    'border-red-500': enderecoForm.get('cep')?.invalid && enderecoForm.get('cep')?.touched,
+                    'border-gray-300': enderecoForm.get('cep')?.valid || !enderecoForm.get('cep')?.touched
+                    }"
+                    (blur)="buscarCep()"
+                    >
+
+                  <div *ngIf="loading" class="mt-4 w-40 text-blue-500 text-sm">Buscando endereço...</div>
+                  <div *ngIf="erroBusca" class="mt-3 text-red-500 text-sm">
+                    CEP inválido ou não encontrado. Verifique o número.
+                  </div>
+                  <div *ngIf="enderecoForm.get('cep')?.errors && enderecoForm.get('cep')?.touched" class="mt-1 text-red-500 ">
+                    <span *ngIf="enderecoForm.get('cep')?.errors?.['required'] "  class="mt-1 text-red-600">Obrigatório.</span>
+                    <span *ngIf="enderecoForm.get('cep')?.errors?.['pattern']"  class="mt-1 text-xs text-red-600">Formato inválido. Use 8 dígitos.</span>
+                  </div>
+              </div>
+
+              <div class="md:col-span-4">
+              <div>
+                <label for="logradouro" class="block text-sm font-medium text-gray-700">Rua/Logradouro</label>
+                <input
+                  id="logradouro"
+                  type="text"
+                  formControlName="logradouro"
+                  class="mt-1 block w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md shadow-sm cursor-not-allowed"
+                  readonly
+                />
+              </div>
+
+              </div>
+              <div class="md:col-span-1">
+                  <label for="numero" class="block text-sm font-medium text-gray-700">Número <span class="text-red-500">*</span></label>
+                  <input
+                    id="numero"
+                    type="text"
+                    formControlName="numero"
+                    placeholder="Número"
+                    class="mt-1 block w-full placeholder:text-slate-400  border rounded-md shadow-sm  p-2  focus:outline-none focus:border-blue-500 text-gray-900"
+                        [ngClass]="{
+                    'border-red-500': enderecoForm.get('numero')?.invalid && enderecoForm.get('numero')?.touched,
+                    'border-gray-300': enderecoForm.get('numero')?.valid || !enderecoForm.get('numero')?.touched
+                    }"
+                  >
+                  <div *ngIf="enderecoForm.get('numero')?.errors && enderecoForm.get('numero')?.touched" class="mt-1 text-red-500 text-sm">
+                    Obrigatório.
+                  </div>
+              </div>
+
+              <div class="md:col-span-3">
+                <label for="complemento" class="block text-sm font-medium text-gray-700">Complemento (opcional)</label>
+                <input
+                    id="complemento"
+                    type="text"
+                    formControlName="complemento"
+                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+
+                  >
+              </div>
+
+
+
+              <div class="md:col-span-2">
+                <div>
+                  <label for="bairro" class="block text-sm font-medium text-gray-700">Bairro</label>
+                    <input
+                      id="bairro"
+                      type="text"
+                      formControlName="bairro"
+                      class="mt-1 block w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md shadow-sm cursor-not-allowed"
+                      readonly
+                    />
+                </div>
+              </div>
+              <div class="md:col-span-2">
+                  <label for="cidade" class="block text-sm font-medium text-gray-700">Cidade</label>
+                  <input
+                    id="cidade"
+                    type="text"
+                    formControlName="cidade"
+                    class="mt-1 block w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md shadow-sm cursor-not-allowed"
+                    readonly
+                  />
+              </div>
+              <div class=" w-16">
+                  <label for="uf" class="block text-sm font-medium text-gray-700">UF</label>
+                  <input
+                    id="uf"
+                    type="text"
+                    formControlName="uf"
+                    class="mt-1 block w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md shadow-sm cursor-not-allowed"
+                    readonly
+                  />
+              </div>
+          </div>
+
+
+
+          <!-- Upload de fotos -->
+          <div class="md:col-span-4">
+             <legend class="text-lg font-semibold text-indigo-700 border-b border-indigo-200 w-full pb-2 mb-6">Upload de fotos</legend>
+          </div>
+          <section class="bg-white shadow-sm rounded-lg p-6 space-y-4">
+            <h2 class="text-lg font-medium">Fotos ({{ fotosCount() }}/10)</h2>
+
+            <div class="dropzone">
+              <p class="text-sm text-gray-600">Arraste e solte ou clique para selecionar</p>
+              <input type="file" multiple accept="image/jpeg,image/png,image/webp"
+                    class="mt-3 mx-auto block"
+                    />
+            </div>
+
+            <div *ngIf="erroUpload()" class="text-red-600 text-sm">{{ erroUpload() }}</div>
+
+            <!-- Grid de previews -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+              <div *ngFor="let foto of fotos()" class="relative group">
+                <img [src]="foto.url" [alt]="foto.nome" class="w-full h-32 object-cover rounded-md border" />
+                <button type="button"
+                        class="absolute top-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100"
+                  >
+                  Remover
+                </button>
               </div>
             </div>
-            <br>
-            <div class="md:col-span-3">
 
-                  <label  for="tel" id="contact" name="contact" formControlName="contato"
-                        class="block text-sm font-medium text-gray-400 "
-                        placeholder="(00) 90000-0000">(99) 99999-9999</label>
+            <div class="flex gap-2">
+              <button type="button" class="px-3 py-2 bg-gray-100 rounded hover:bg-gray-200" (click)="limparFotos()">
+                Limpar fotos
+              </button>
             </div>
+          </section>
 
-          <div class="md:col-span-3">
+          <!-- Ações -->
+          <div class="flex items-center gap-3 pb-4">
+            <button type="button"
+                    class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-blue-300"
+                    [disabled]="uploading()"
+                    (click)="salvar()">
+              {{ uploading() ? 'Salvando...' : 'Salvar imóvel' }}
+            </button>
+            <div *ngIf="sucesso()" class="text-green-700 text-sm">{{ sucesso() }}</div>
+          </div>
 
-                <select class="  bg-gray-100  border-gray-100 text-gray-700 py-1 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500" id="grid-state">
-                  <option> Tipo do imóvel</option>
-                  <option>Apartamento</option>
-                  <option>Casa</option>
-                  <option>Sobrado</option>
-                </select>
-                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                    <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
-                </div>
-           </div>
-         </div>
-        </fieldset>
-        <fieldset>
-          <legend class="text-lg font-semibold text-indigo-700 border-b border-indigo-200 w-full pb-2 mb-6">Endereço</legend>
-          <div class="grid grid-cols-1 md:grid-cols-6 gap-6">
-            <div class="md:col-span-2">
-                <label for="cep" class="block text-sm font-medium text-gray-700">CEP</label>
-                <input type="text" id="cep" formControlName="cep" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="00000-000">
-            </div>
+          <div  class="flex items-center gap-3 ">
+                  <legend class="text-lg font-semibold text-indigo-700 border-b border-indigo-200 w-full pb-2 mb-6">Lista (preview dos salvos)</legend>
+          </div>
 
-            <div class="md:col-span-4">
-              <label for="logradouro" class="block text-sm font-medium text-gray-700">Logradouro (Rua, Av.)</label>
-              <input type="text" id="logradouro" formControlName="logradouro" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-            </div>
 
-            <div class="md:col-span-2">
-              <label for="numero" class="block text-sm font-medium text-gray-700">Número</label>
-              <input type="text" id="numero" formControlName="numero" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-            </div>
-            <div class="md:col-span-4">
-              <label for="complemento" class="block text-sm font-medium text-gray-700">Complemento (opcional)</label>
-              <input type="text" id="complemento" formControlName="complemento" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-            </div>
+        <!-- Lista (preview dos salvos) -->
 
-            <div class="md:col-span-4">
-              <label for="cidade" class="block text-sm font-medium text-gray-700">Cidade</label>
-              <input type="text" id="cidade" formControlName="cidade" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+
+        <section >
+
+          <h2 class="text-lg font-medium mb-1">Imóveis salvos</h2>
+          <div *ngFor="let item of imoveis.imoveis()" class="border rounded-md p-1 mb-3">
+            <div class="flex justify-between items-start">
+              <div>
+                <p class="font-semibold">{{ item.titulo }}</p>
+                <p class="text-sm text-gray-600"> {{ item.area }} m² • R$ {{ item.preco }}</p>
+              </div>
+              <button class="text-red-600 text-sm" >Excluir</button>
             </div>
-            <div class="md:col-span-2">
-              <label for="estado" class="block text-sm font-medium text-gray-700">Estado</label>
-              <input type="text" id="estado" formControlName="estado" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="SP">
+            <div class="grid grid-cols-10 gap-20 mt-20">
+              <img *ngFor="let f of item.fotos | slice:0:3" [src]="f.url" class="w-full h-20 object-cover rounded" />
             </div>
           </div>
-        </fieldset>
+
+        </section>
 
 
 
-      <div class="mt-10 flex justify-end">
-        <button type="submit"
-                [disabled]="inquilinoForm.invalid"
-                class="inline-flex justify-center py-3 px-6 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-gray-400 disabled:cursor-not-allowed">
-          Cadastrar Imovel
-        </button>
-      </div>
 
-    </form>
-    </div>
+
+   </form>
+  </div>
 </div>
 

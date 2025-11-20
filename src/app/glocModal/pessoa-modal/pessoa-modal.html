@@ -1,0 +1,90 @@
+<div *ngIf="aberto" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+  <div class="bg-white rounded-lg shadow-lg w-full max-w-xl p-6">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-lg font-semibold">Selecionar pessoa de contato</h2>
+      <button (click)="onFechar()" class="text-gray-500 hover:text-gray-700">✕</button>
+    </div>
+    <div class="flex flex-col sm:flex-row items-center gap-2 mb-4">
+          <!-- Campo de busca -->
+        <input type="text"  class="flex-1 border rounded-md px-3 py-2"
+        [formControl]="buscaControl"
+
+         placeholder="Buscar por nome ou CPF..."
+
+         (input)="pagina.set(1)"
+        />
+
+        <!-- Botão "+" com controle total de estado -->
+        <button
+
+          class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-xl leading-none transition-colors bg-blue-200 text-blue-700 hover:bg-blue-300 cursor-pointer"
+          title="Cadastrar nova pessoa"
+          (click)="pessoasFiltradas().length === 0 && abrirCadastroPessoa()"
+
+          >
+
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                    stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+          </svg>
+
+      </button>
+    </div>
+    <div *ngIf="pessoasFiltradas().length === 0 && busca()" class="text-sm text-gray-500 mb-2">
+      Nenhuma pessoa encontrada com "{{ busca() }}".
+    </div>
+
+    <div *ngIf="carregando()" class="text-center py-8 text-blue-600">
+      Carregando contato(s) ...
+
+    </div>
+
+    <!-- Lista de pessoas -->
+
+
+<ul *ngIf="!carregando() && pessoasPagina().length > 0"
+        class="divide-y divide-gray-200 max-h-80 overflow-y-auto">
+
+        <li *ngFor="let pessoa of pessoasPagina()" class="py-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center font-bold">
+                    {{ avatar(pessoa.nome) }}
+                </div>
+                <div>
+                    <p class="font-medium">
+                        {{ pessoa.nome }}
+                    </p>
+                    <p class="text-sm text-gray-500">CPF/CNPJ: {{ pessoa.id_cpf_cnpj }}</p>
+
+
+                </div>
+            </div>
+
+            <button class="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
+                    (click)="onSelecionar(pessoa)">
+                Selecionar
+            </button>
+        </li>
+    </ul>
+
+    <!-- Nenhum resultado -->
+    <div *ngIf="!carregando() && pessoasFiltradas().length === 0 && buscaControl.value.length >= 2"
+        class="text-sm text-gray-500 text-center py-4">
+        Nenhuma pessoa encontrada para o termo "{{ buscaControl.value }}".
+    </div>
+
+    <!-- Paginação -->
+    <div class="flex justify-between items-center mt-4 text-sm text-gray-600">
+      <button (click)="anterior()" [disabled]="pagina() === 1"
+              class="px-2 py-1 bg-gray-100 rounded hover:bg-gray-200 disabled:opacity-50">
+        ← Anterior
+      </button>
+      <span>Página {{ pagina() }} de {{ totalPaginas() }}</span>
+      <button (click)="proximo()" [disabled]="pagina() === totalPaginas()"
+              class="px-2 py-1 bg-gray-100 rounded hover:bg-gray-200 disabled:opacity-50">
+        Próxima →
+      </button>
+    </div>
+
+  </div>
+</div>

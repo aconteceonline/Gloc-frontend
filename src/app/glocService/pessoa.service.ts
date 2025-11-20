@@ -1,19 +1,31 @@
-import { inject, Injectable } from '@angular/core';
-
-import { HttpClient } from '@angular/common/http';
-
-import {  Observable, map } from 'rxjs';
-
+import { inject, Injectable, signal } from '@angular/core';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import {  Observable, catchError, map, of, throwError } from 'rxjs';
 import { PessoaModel } from '../glocModel/pessoa.model';
+
+const STORAGE_KEY = 'pessoas';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PessoaService {
+
+  private _pessoas = signal<PessoaModel[]>(this.load());
+  pessoas = this._pessoas.asReadonly();
+
+    private load(): PessoaModel[] {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        return raw ? JSON.parse(raw) : [];
+      } catch {
+        return [];
+      }
+    }
+
   private http = inject(HttpClient);
   apiUrl = "http://localhost:3001/pessoas";
 
-  private myApiUrl!: string;
+  private myApiUrl = "http://localhost:3001/";
 
 
  pessoaModel: PessoaModel[] = []
@@ -31,18 +43,13 @@ export class PessoaService {
   }
 
   getListNomePessoa(): Observable<PessoaModel[]>{
-    return this.http.get<PessoaModel[]>(`${this.myApiUrl}${this.myApiUrl}`);
+    return this.http.get<PessoaModel[]>(`${this.myApiUrl}${this.apiUrl}`);
 
   }
 
   cadastrarPessoa(glocModel: PessoaModel): Observable<PessoaModel> {
-    console.log(" glocModel  =  ",  glocModel)
      return this.http.post<PessoaModel>(this.apiUrl, glocModel);
   }
-
-  // getLead(id: string): Observable<LeadModel> {
-  //   return this.http.get<LeadModel>(`${this.baseUrl}/${id}`)
-  // }
 
   updatePessoa(glocModel: any): Observable<PessoaModel> {
 
@@ -53,7 +60,6 @@ export class PessoaService {
 
   deletePessoa(id: any): Observable<PessoaModel> {
     const  url = `${this.myApiUrl}${this.myApiUrl}/${id}`;
-    console.log("url = ", url)
     return this.http.delete<PessoaModel>(url)
   }
 
@@ -61,5 +67,32 @@ export class PessoaService {
     const url = `${this.myApiUrl}${this.myApiUrl}/${id}`
     return this.http.get<PessoaModel>(url)
   }
+
+ readByCPF(cpf: any): Observable<PessoaModel | null> {
+  const url = `${this.apiUrl}/${cpf}`;
+  return this.http.get<PessoaModel>(url).pipe(
+    catchError((error: HttpErrorResponse) => {
+      if (error.status === 404) {
+        // CPF não cadastrado — retorna null silenciosamente
+        return of(null);
+      }
+      // Outros erros — propaga o erro
+      return throwError(() => error);
+    })
+  );
+}
+
+    readByCNPJ(cnpj: any): Observable<PessoaModel>{
+    const url = `${this.apiUrl}/${cnpj}`
+    return this.http.get<PessoaModel>(url)
+  }
+
+  buscarPorTermo(busca: string): Observable<PessoaModel[]> {
+    console.log(' buscar por termo  ', (`${this.myApiUrl}termo/${busca}`))
+  return this.http.get<PessoaModel[]>(`${this.myApiUrl}termo/${busca}`)
+
+
+}
+
 
 }

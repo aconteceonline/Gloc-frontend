@@ -12,7 +12,7 @@ import { EnderecoModel } from '../glocModel/endereco.model';
 })
 export class EnderecoService {
   private http = inject(HttpClient);
-  apiUrl = "http://localhost:3001/endereco";
+  apiUrl = "http://localhost:3001/enderecos";
 
   private myApiUrl!: string;
 

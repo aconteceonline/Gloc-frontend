@@ -1,40 +1,20 @@
-
-import {  Component, inject } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, AbstractControl, ValidatorFn  } from '@angular/forms';
+import {  Component, EventEmitter, inject, OnInit, Output } from '@angular/core';
+import { FormBuilder, FormGroup, Validators, AbstractControl, ValidatorFn, FormControl  } from '@angular/forms';
 import { LayoutProps } from '../../../template/layout/layoutprops';
 import { CepBuscaService } from '../../../services/CepBuscaService'
-import {  take, } from 'rxjs';
-import { Endereco } from '../../../models/Endereco.model';
+import {  catchError, debounceTime, of, take, throwError, } from 'rxjs';
+import { BucaEnderecoModel as Endereco } from '../../../glocModel/busca-endereco.model';
 import { PessoaModel } from '../../../glocModel/pessoa.model';
 import { PessoaService } from '../../../glocService/pessoa.service';
 import { EnderecoModel } from '../../../glocModel/endereco.model';
 import { ContatoModel } from '../../../glocModel/contato.model';
 import { EmpresaModel } from '../../../glocModel/empresa.model';
-
-// --- VALIDADORES CUSTOMIZADOS ---
-
-// Validador de CPF (implementação simplificada para demonstração)
-function cpfValidator(): ValidatorFn {
-  return (control: AbstractControl): { [key: string]: any } | null => {
-    const cpf = control.value?.replace(/\D/g, '');
-    if (!cpf) return null; // Campo vazio é tratado pelo 'required'
-    if (cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) return { 'invalidCpf': true };
-    // Aqui viria a lógica completa de verificação de dígitos
-    return null;
-  };
-}
-
-// Validador de CNPJ (implementação simplificada para demonstração)
-function cnpjValidator(): ValidatorFn {
-  return (control: AbstractControl): { [key: string]: any } | null => {
-    const cnpj = control.value?.replace(/\D/g, '');
-    if (!cnpj) return null; // Campo vazio é tratado pelo 'required'
-    if (cnpj.length !== 14 || /^(\d)\1{13}$/.test(cnpj)) return { 'invalidCnpj': true };
-    // Aqui viria a lógica completa de verificação de dígitos
-    return null;
-  };
-}
-
+import { validarCPF } from '../../../validators/cpf-validator';
+import { validarCNPJ } from '../../../validators/cnpj-validator';
+import { ContatoService } from '../../../glocService/contato.service';
+import { EnderecoService } from '../../../glocService/endereco.service';
+import { EmpresaService } from '../../../glocService/empresa.service';
+import { HttpErrorResponse } from '@angular/common/http';
 
 
 @Component({
@@ -43,9 +23,18 @@ function cnpjValidator(): ValidatorFn {
   templateUrl: './cad-pessoa.html',
   styleUrl: './cad-pessoa.scss'
 })
-export class Cadpessoa {
+export class Cadpessoa implements OnInit {
 
   id: any;
+  public tipoAlerta: 'error' | 'success' | null = null;
+  public mensagemDeErro: string | null = null;
+  private readonly cpfControlName = 'nr_cpf';
+  cpfValido: boolean | null = null;
+  res: any | null = null
+  private readonly cnpjControlName = 'nr_cnpj';
+  cnpjValido: boolean | null = null;
+
+  @Output() cadastrada = new EventEmitter<PessoaModel>()
 
 Pessoa: PessoaModel = {
     id_tipo_pessoa_fk: undefined,
@@ -74,25 +63,28 @@ hoje: Date = new Date();
   Contato: ContatoModel = {
       id_pessoa_fk: 0,
       nr_contato: '',
-      whatsapp: 0,
+      whatsapp: false,
       email: '',
   }
 
   // Injetando o service
   private pessoaService = inject(PessoaService);
-
+  private contatoService = inject(ContatoService);
+  private enderecoService = inject(EnderecoService);
+  private empresaService = inject(EmpresaService);
   get enderecoForm(): FormGroup {
     return this.pessoaForm.get('endereco') as FormGroup;
   }
-
 
   isChecked = false;
   loading: boolean = false;
   erroBusca: boolean = false;
   pessoaForm: FormGroup;
 
-  props: LayoutProps ={ titulo: 'GLOC - Gestão de Locação', subTitulo: 'Uma solução de longo prazo para negócios de alta prioridade' }
-
+  props: LayoutProps = {
+    titulo: 'Gerencie os seus contratos de locação em uma plataforma imobiliária completa',
+    subTitulo: 'Uma solução de longo prazo para negócios de alta prioridade'
+  };
 
   constructor(
          private fb: FormBuilder,
@@ -100,24 +92,26 @@ hoje: Date = new Date();
   ) {
     this.pessoaForm = this.fb.group(
       {
-         tipo: ['PF', Validators.required], // Valor inicial: Pessoa Física
-
-      // Campos PF
-      cpf: [],
+      tipo: ['PF', Validators.required],
+      [this.cpfControlName]: [''], // A validação 'required' será adicionada no toggleValidation
+      [this.cnpjControlName]: [''], // A validação 'required' será adicionada no toggleValidation
       rg: [''],
-      orgEmis: [''],
-      dtEmis: [''],
       nome: ['', Validators.required],
-      cnpj: [],
       nmFantasia: ['', Validators.required],
-      rzSocial: [''],
+      rzSocial: ['', Validators.required],
       email: [''],
       celular: ['', Validators.required],
-      zap: [''],
+      zap: new FormControl(false) ,
 
      // NOVO: FormGroup para Endereço
       endereco: this.fb.group({
-        cep: ['', Validators.required],
+         cep: [
+          '',
+          [
+            Validators.required,
+            Validators.pattern(/^\d{5}-?\d{3}$/) // aceita 8 dígitos com ou sem hífen
+          ]
+        ],
         logradouro: [''],
         numero: ['', Validators.required],
         complemento: [''], // Opcional
@@ -125,11 +119,16 @@ hoje: Date = new Date();
         cidade: [''],
         uf: [''],
       }),
-    }); // Inicializa vazio
+    });
+    // Inicializa vazio
+  this.pessoaForm.get('nr_cpf');
+  this.pessoaForm.get('nr_cpf')?.updateValueAndValidity({ onlySelf: true, emitEvent: false });
 
   }
 
   ngOnInit(): void {
+    // Inicialização da escuta reativa (opcional, mas bom para reatividade em tempo real)
+    this.setupCpfCnpjListener();
 
   // Escuta mudanças no campo 'type' para alternar validação
     this.pessoaForm.get('tipo')?.valueChanges.subscribe(tipo => {
@@ -140,6 +139,140 @@ hoje: Date = new Date();
     this.toggleValidation('PF');
 
   }
+
+// Opcional: Configura a escuta reativa com debounce para não sobrecarregar o backend
+  setupCpfCnpjListener() {
+    this.pessoaForm.get(this.cpfControlName)?.valueChanges
+      .pipe(
+        debounceTime(500), // Espera 500ms antes de reagir
+        // Usaria switchMap se quisesse buscar a cada tecla, mas vamos usar o blur
+      )
+  }
+
+  // 3. NOVO MÉTODO: Chamado ao SAIR do campo (evento blur)
+  onCpfBlur() {
+    const value = this.pessoaForm.get('nr_cpf')?.value;
+    this.cpfValido = validarCPF(value);
+    if(!this.cpfValido){
+         this.tipoAlerta = 'error'
+         this.pessoaForm.get(this.cpfControlName)?.setErrors({ 'invalido': true });
+    }
+    this.mensagemDeErro = null; // Limpa o erro anterior
+    this.tipoAlerta = null;
+    const control = this.pessoaForm.get(this.cpfControlName);
+
+// --- NOVO: Limpeza do Valor ---
+    const rawValue = control?.value || '';
+    // Remove pontos, traços, espaços e outros caracteres não numéricos
+    const cleanedValue = rawValue.replace(/\D/g, '');
+
+    // Se você usa uma máscara de CPF/CNPJ, é crucial atualizar o valor
+    // do controle para o valor limpo, para que o validador funcione corretamente.
+    if (rawValue !== cleanedValue) {
+         control?.setValue(cleanedValue, { emitEvent: false }); // Atualiza o controle sem disparar o valueChanges
+    }
+
+   const cpf = control?.value;
+
+   if (cpf) {
+      this.verificarCpfExistente(cpf);
+   }
+  }
+
+
+  // 4. Lógica de Busca no Backend
+verificarCpfExistente(cpf: string) {
+  this.pessoaService.readByCPF(cpf).pipe(
+    catchError((error: HttpErrorResponse) => {
+      if (error.status === 404) {
+        // CPF não cadastrado — não exibe erro, apenas continua
+        return of(null); // continua o fluxo com valor nulo
+      }
+      // Outros erros — trata como erro real
+      this.tipoAlerta = 'error';
+      this.mensagemDeErro = 'Erro de servidor ao verificar CPF.';
+      return throwError(() => error);
+    })
+  ).subscribe((response: PessoaModel | null) => {
+    if (response) {
+      // CPF já cadastrado — exibe alerta e marca erro no campo
+      this.tipoAlerta = 'error';
+      this.mensagemDeErro = `Já existe cadastro com esse CPF ${cpf}`;
+      this.pessoaForm.get(this.cpfControlName)?.setErrors({ 'jaExiste': true });
+    } else {
+      // CPF não cadastrado — segue o fluxo normalmente, sem alertas
+      this.pessoaForm.get(this.cpfControlName)?.setErrors(null);
+    }
+  });
+}
+
+
+
+  onCnpjBlur() {
+    const value = this.pessoaForm.get('nr_cnpj')?.value;
+    this.cnpjValido = validarCNPJ(value);
+    if(!this.cnpjValido){
+         this.tipoAlerta = 'error'
+         this.pessoaForm.get(this.cnpjControlName)?.setErrors({ 'invalido': true });
+    }
+    this.mensagemDeErro = null; // Limpa o erro anterior
+    this.tipoAlerta = null;
+    const control = this.pessoaForm.get(this.cnpjControlName);
+
+// --- NOVO: Limpeza do Valor ---
+    const rawValue = control?.value || '';
+    // Remove pontos, traços, espaços e outros caracteres não numéricos
+    const cleanedValue = rawValue.replace(/\D/g, '');
+
+    // Se você usa uma máscara de CPF/CNPJ, é crucial atualizar o valor
+    // do controle para o valor limpo, para que o validador funcione corretamente.
+    if (rawValue !== cleanedValue) {
+         control?.setValue(cleanedValue, { emitEvent: false }); // Atualiza o controle sem disparar o valueChanges
+    }
+
+
+   /* if (control?.invalid) {
+      // Trata erros de validação local (ex: campo vazio)
+      this.tipoAlerta = 'error';
+      this.mensagemDeErro = 'CPF inválido ou incompleto.';
+      return;
+    }*/
+
+    const cnpj = control?.value;
+
+    if (cnpj) {
+      this.verificarCnpjExistente(cnpj);
+    }
+  }
+
+
+  // 4. Lógica de Busca no Backend
+  verificarCnpjExistente(cnpj: string) {
+    this.pessoaService.readByCNPJ(cnpj).subscribe({
+      next: (response: any) => {
+        // Assumindo que um retorno de sucesso significa que o cadastro EXISTE
+        this.tipoAlerta = 'error';
+        this.mensagemDeErro = `Já existe cadastro com esse CPF ${cnpj}`;
+
+        // (Opcional) Força uma marcação de erro no FormControl
+        this.pessoaForm.get(this.cpfControlName)?.setErrors({ 'jaExiste': true });
+      },
+   /*   error: (error) => {
+        // Se o erro for um 404 (Not Found), significa que está DISPONÍVEL
+        if (error.status === 404) {
+          this.tipoAlerta = 'success';
+    //      this.mensagemDeErro = `CPF ${cpf} está disponível para cadastro.`;
+      //    this.continuaCadastro();
+        } else {
+          // Trata outros erros de servidor (500)
+          this.tipoAlerta = 'error';
+          this.mensagemDeErro = 'Erro de servidor ao verificar CPF.';
+        }
+      },*/
+    });
+  }
+
+
  // Função disparada ao perder o foco (onBlur)
   buscarCep() {
     this.erroBusca = false;
@@ -199,24 +332,23 @@ hoje: Date = new Date();
 
 
  toggleValidation(tipo: string): void {
-    const cpfControl = this.pessoaForm.get('cpf');
+    const cpfControl = this.pessoaForm.get('nr_cpf');
     const nomeControl = this.pessoaForm.get('nome');
-    const cnpjControl = this.pessoaForm.get('cnpj');
+    const cnpjControl = this.pessoaForm.get('nr_cnpj');
     const razaoSocialControl = this.pessoaForm.get('rzSocial');
     const nomeFantasiaControl = this.pessoaForm.get('nmFantasia');
 
     if (tipo === 'PF') {
       // Habilita validação PF
-      cpfControl?.setValidators([Validators.required, cpfValidator()]);
       nomeControl?.setValidators([Validators.required]);
 
       // Desabilita validação PJ
       cnpjControl?.setValidators(null);
       razaoSocialControl?.setValidators(null);
       nomeFantasiaControl?.setValidators(null);
+
     } else { // PJ
       // Habilita validação PJ
-      cnpjControl?.setValidators([Validators.required, cnpjValidator()]);
       razaoSocialControl?.setValidators([Validators.required]);
       nomeFantasiaControl?.setValidators([Validators.required]);
 
@@ -234,7 +366,7 @@ hoje: Date = new Date();
   }
 
   // Helper para verificar se o campo está inválido e foi tocado/modificado
-  isInvalid(controlName: string, groupName: string = ''): boolean {
+  isInvalid(controlName: string, groupName: string = '', ): boolean {
      let control;
     if (groupName) {
       control = this.pessoaForm.get(groupName)?.get(controlName);
@@ -258,163 +390,82 @@ hoje: Date = new Date();
       this.Pessoa.id_cargo_func_fk = 1;
       this.Pessoa.id_situacao_fk = 1
       this.Pessoa.nome = this.pessoaForm.value.nome;
-        if ( this.pessoaForm.value.tipo == 'PF') {
-           this.Pessoa.id_cpf_cnpj = this.pessoaForm.value.cpf;
+      if ( this.pessoaForm.value.tipo == 'PF') {
+           this.Pessoa.id_cpf_cnpj = this.pessoaForm.value.nr_cpf;
         } else{
-            this.Pessoa.id_cpf_cnpj = this.pessoaForm.value.cnpj;
-        }
-            console.log("this.pessoaForm.value.tipo = " + this.pessoaForm.value.cpf )
-            console.log("this.Pessoa.id_cpf_cnpj= " + this.Pessoa.id_cpf_cnpj)
-    //  this.Pessoa.id_cpf_cnpj = this.pessoaForm.value.id_cpf_cnpj;
+            this.Pessoa.id_cpf_cnpj = this.pessoaForm.value.nr_cpf;
+      }
       this.Pessoa.orgao = this.pessoaForm.value.orgEmis;
-      const dataComBarras = this.pessoaForm.value.dtEmis.replace(/(\d{2})(\d{2})(\d{4})/, '$1/$2/$3');
-      this.Pessoa.dt_expedicao = dataComBarras
-
-
-  console.log("this.Pessoa = " + this.Pessoa.id_cpf_cnpj )
-
-
-      this.pessoaService.cadastrarPessoa(this.Pessoa).subscribe({
-          next: (response) => {
-            // 2. Tratar o sucesso da requisição
-            console.log('Pessoa cadastrada com sucesso!', response);
-            alert(`Pessoa ${response.nome} cadastrada com ID: ${response.id}`);
-            this.id = response.id;
-             console.log('Pessoa id!', response.id);
-
-       // Opcional: Limpar o formulário
-       // this.Pessoa = { nome: '', email: '', idade: 0 };
-          },
-          error: (error) => {
-            // 3. Tratar erros da requisição
-            console.error('Erro ao cadastrar pessoa:', error);
-            alert('Ocorreu um erro no cadastro. Verifique o console.');
-          },
-      complete: () => {
-        // Opcional: Ação ao completar (se o Observable terminar)
-        console.log('Requisição de cadastro concluída.');
-     }
-    });
+      this.Pessoa.dt_expedicao = null
+      this.continuaCadastro()
   }
-/*
-*  EmpresaModel
-*/
-/*      this.Empresa.id_pessoa_fk = this.id
-      this.Empresa.nm_fantasia = this.pessoaForm.value.nmFantasia;
-      this.Empresa.rz_social = this.pessoaForm.value.rzSocial;
-      this.pessoaService.cadastrarPessoa(this.Pessoa).subscribe({
-          next: (response) => {
-            // 2. Tratar o sucesso da requisição
-            console.log('Pessoa cadastrada com sucesso!', response);
-            alert(`Pessoa ${response.nome} cadastrada com ID: ${response.id}`);
+ }
 
-       // Opcional: Limpar o formulário
-       // this.Pessoa = { nome: '', email: '', idade: 0 };
+  continuaCadastro() {
+       this.cadastraPessoa();
+ }
+
+/*----------------------------------------------
+*  Cadastro Pessoa
+*-----------------------------------------------
+*/
+ cadastraPessoa(){
+   this.pessoaService.cadastrarPessoa(this.Pessoa).subscribe({
+          next: (response) => {
+               this.id = response.id;
           },
-          error: (error) => {
-            // 3. Tratar erros da requisição
-            console.error('Erro ao cadastrar pessoa:', error);
-            alert('Ocorreu um erro no cadastro. Verifique o console.');
-          },
+
       complete: () => {
-        // Opcional: Ação ao completar (se o Observable terminar)
-        console.log('Requisição de cadastro concluída.');
+        this.cadastaContato()
+        this.cadastraEndereco();
      }
     });
+ };
+/*----------------------------------------------
+*  Cadastro Contato
+*-----------------------------------------------
 */
-/*
-*  contatoModel
-*/
- /*     this.Contato.id_pessoa_fk = this.id
+ cadastaContato(){
+
+      this.Contato.id_pessoa_fk = this.id
       this.Contato.nr_contato = this.pessoaForm.value.celular;
       this.Contato.whatsapp = this.pessoaForm.value.zap;
-      this.pessoaService.cadastrarPessoa(this.Pessoa).subscribe({
-          next: (response) => {
-            // 2. Tratar o sucesso da requisição
-            console.log('Pessoa cadastrada com sucesso!', response);
-            alert(`Pessoa ${response.nome} cadastrada com ID: ${response.id}`);
+      this.contatoService.cadastrarContato(this.Contato).subscribe();
 
-       // Opcional: Limpar o formulário
-       // this.Pessoa = { nome: '', email: '', idade: 0 };
-          },
-          error: (error) => {
-            // 3. Tratar erros da requisição
-            console.error('Erro ao cadastrar pessoa:', error);
-            alert('Ocorreu um erro no cadastro. Verifique o console.');
-          },
-      complete: () => {
-        // Opcional: Ação ao completar (se o Observable terminar)
-        console.log('Requisição de cadastro concluída.');
-     }
-    });
+ };
+/*----------------------------------------------
+*  Cadastro Endereco
+*-----------------------------------------------
 */
-//endereco
-/*      this.Endereco.id_pessoa_fk = this.id
+cadastraEndereco(){
+      this.Endereco.id_pessoa_fk = this.id
       this.Endereco.cep = this.pessoaForm.value.endereco.cep;
       this.Endereco.numero =  this.pessoaForm.value.endereco.numero;
       this.Endereco.complemento = this.pessoaForm.value.endereco.complemento;
-
-      this.pessoaService.cadastrarPessoa(this.Pessoa).subscribe({
-          next: (response) => {
-            // 2. Tratar o sucesso da requisição
-            console.log('Pessoa cadastrada com sucesso!', response);
-            alert(`Pessoa ${response.nome} cadastrada com ID: ${response.id}`);
-
-       // Opcional: Limpar o formulário
-       // this.Pessoa = { nome: '', email: '', idade: 0 };
-          },
-          error: (error) => {
-            // 3. Tratar erros da requisição
-            console.error('Erro ao cadastrar pessoa:', error);
-            alert('Ocorreu um erro no cadastro. Verifique o console.');
-          },
+      this.enderecoService.cadastrarEndereco(this.Endereco).subscribe({
       complete: () => {
-        // Opcional: Ação ao completar (se o Observable terminar)
-        console.log('Requisição de cadastro concluída.');
+           this.pessoaForm.reset();
+           alert('Cadastro de realizado com sucesso!');
      }
     });
-
-// 1. Chamar o método do service para enviar o POST
-
-
-    // this.Pessoa = this.pessoaForm.value
-     console.log('Pessoa cadastrada com sucesso!'   , this.Pessoa);
-
-     console.log('Pessoa cadastrada com sucesso!'   , this.pessoaForm);
-
-
-
-
-
-
-
-
-  }
-  else {
-      // Marca todos os campos como 'touched' para exibir as mensagens de erro
-      this.pessoaForm.markAllAsTouched();
-      alert('Por favor, preencha todos os campos obrigatórios e corrija os erros.');
-    }
-}
-
-
+};
+/*----------------------------------------------
+*  Cadastro Empresa
+*-----------------------------------------------
 */
+ cadastraEmpresa(){
+      this.Empresa.id_pessoa_fk = this.id
+      this.Empresa.nm_fantasia = this.pessoaForm.value.nmFantasia;
+      this.Empresa.rz_social = this.pessoaForm.value.rzSocial;
+      this.empresaService.cadastrarEmpresa(this.Empresa).subscribe({
+      complete: () => {
+          this.pessoaForm.reset();
+           alert('Cadastro de realizado com sucesso!');
+
+     }
+    });
+};
 
 
+};
 
-
-/*
-      alert('Cadastro de Vendedor realizado com sucesso!');
-      // TODO: Chamar o serviço de backend para salvar
-
-
-  //    this.receivedData = "";
-      this.pessoaForm.reset();
-    } else {
-      // Marca todos os campos como 'touched' para exibir as mensagens de erro
-      this.pessoaForm.markAllAsTouched();
-      alert('Por favor, preencha todos os campos obrigatórios e corrija os erros.');
-    }
-  }*/
- }
-}

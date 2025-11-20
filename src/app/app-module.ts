@@ -5,10 +5,13 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AppRoutingModule } from './app-routing-module';
 import { App } from './app';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
+import {  provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
 import { Login } from './login/login';
 import { authInterceptor } from './auth-interceptor';
 import { MatDialogModule } from '@angular/material/dialog';
+
+
+//import { PessoaModal } from './glocModal/pessoa-modal/pessoa-modal';
 
 
 
@@ -17,6 +20,7 @@ import { MatDialogModule } from '@angular/material/dialog';
   declarations: [
     App,
     Login,
+
   ],
   imports: [
     BrowserModule,
@@ -25,9 +29,7 @@ import { MatDialogModule } from '@angular/material/dialog';
     AppRoutingModule,
     BrowserAnimationsModule,
     MatDialogModule,
-
-
-
+    ReactiveFormsModule,
 
   ],
   providers: [
@@ -37,6 +39,11 @@ import { MatDialogModule } from '@angular/material/dialog';
       useValue: 'pt-BR',
 
     },
+   /* {
+      provide: HTTP_INTERCEPTORS,
+      useClass: CpfInterceptor,
+      multi: true
+    },*/
     provideBrowserGlobalErrorListeners(),
     provideZonelessChangeDetection(),
     provideHttpClient(withFetch()),

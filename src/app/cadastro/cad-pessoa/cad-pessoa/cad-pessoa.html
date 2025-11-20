@@ -2,6 +2,7 @@
   <div class="w-full max-w-4x2 mx-auto bg-white p-5 rounded-2xl shadow-lg">
     <h2 class="text-2xl font-bold text-gray-800 mb-2">Cadastro de Novas Pessoas</h2>
     <p class="text-gray-600 mb-8">Preencha os campos abaixo para registrar uma nova pessoa.</p>
+
     <form [formGroup]="pessoaForm" (ngSubmit)="onSubmit()" >
 
       <fieldset class="mb-8">
@@ -9,7 +10,7 @@
         <div class="flex flex-col sm:flex-row sm:space-x-4">
             <div class="flex-1">
               <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de Pessoa <span class="text-red-500">*</span></label>
-              <div class="flex rounded-lg overflow-hidden border border-gray-300">
+              <div class="flex rounded-lg overflow-hidden border border-gray-300 ">
                 <button
                   type="button"
                   name="tipo"
@@ -38,82 +39,95 @@
                 </button>
               </div>
             </div>
-          </div>
-          <div *ngIf="isPessoaFisica" class="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 border rounded-lg bg-blue-50">
+       </div>
+       <div *ngIf="isPessoaFisica" class="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 border-4  border-blue-200  rounded-lg bg-blue-50 ">
             <div class="md:col-span-2">
               <h3 class="text-lg font-semibold text-blue-800">Dados Pessoais</h3>
             </div>
+
             <div>
-              <label for="cpf" class="block text-sm font-medium text-gray-700">CPF <span class="text-red-500">*</span></label>
-              <input id="cpf" type="text" formControlName="cpf" inputmode="numeric"  mask="000.000.000-00" placeholder="000.000.000-00" type="text"
-                class="mt-1 block w-full border rounded-md shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
-                [ngClass]="{'border-red-500': isInvalid('cpf'), 'border-gray-300': !isInvalid('cpf')}"
+              <label for="nr_cpf" class="block text-sm font-medium text-gray-700">CPF <span class="text-red-500">*</span></label>
+              <input id="nr_cpf'" type="text" formControlName="nr_cpf" inputmode="numeric"  mask="000.000.000-00" placeholder="000.000.000-00" type="text"
+                class="mt-1 block w-full placeholder:text-slate-400 border rounded-md shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500 text-gray-900 focus:outline-none  "
+                [ngClass]="{'border-red-500': isInvalid('nr_cpf'), 'border-gray-300': !isInvalid('nr_cpf') }"
+                (blur)="onCpfBlur()"
               >
-              <ng-container *ngIf="isInvalid('cpf')">
-                <p *ngIf="pessoaForm.get('cpf')?.errors?.['required']" class="mt-1 text-xs text-red-600">O CPF é obrigatório.</p>
-                <p *ngIf="pessoaForm.get('cpf')?.errors?.['invalidCpf']" class="mt-1 text-xs text-red-600">O CPF informado é inválido.</p>
-              </ng-container>
+            <div *ngIf="pessoaForm.get('nr_cpfj')?.errors?.['jaExiste']" >
+              Este CPF já está cadastrado.
+            </div>
+            <div  class="mt-1 text-xs text-red-800" *ngIf="cpfValido === false"  style="color: red;"  [ngClass]="tipoAlerta === 'error' ? 'alerta-erro' : 'alerta-sucesso'" role="alert">
+                É obrigatório CPF válido!
+            </div>
+            <div  *ngIf="mensagemDeErro"  [ngClass]="tipoAlerta === 'error' ? 'alerta-erro' : 'alerta-sucesso'" role="alert" >
+                    {{ mensagemDeErro }}
+            </div>
+
             </div>
             <div>
               <label for="nome" class="block text-sm font-medium text-gray-700">Nome Completo <span class="text-red-500">*</span></label>
               <input id="nome" type="text" formControlName="nome" placeholder="Nome completo"
-                class="mt-1 block w-full border rounded-md shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+                class="mt-1 block w-full placeholder:text-slate-400 border rounded-md shadow-sm p-3 focus:ring-blue-500 text-gray-900 focus:outline-none "
                 [ngClass]="{'border-red-500': isInvalid('nome'), 'border-gray-300': !isInvalid('nome')}"
               >
                <p *ngIf="pessoaForm.get('nome')?.errors?.['required'] && isInvalid('nome')" class="mt-1 text-xs text-red-600">O nome é obrigatório.</p>
             </div>
-            <div>
+            <div class="md:col-span-1 lg:col-span-1">
                <label for="rg" class="block text-sm font-medium text-gray-700">RG</label>
               <input id="rg" type="text" formControlName="rg"  inputmode="numeric"  mask="00.000.000-00"  placeholder="00.000.000-00" type="text"
-                class="mt-1 block w-full border rounded-md shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
-              >
+                class="mt-1  py-2 w-40 border rounded-md bg-transparent placeholder:text-slate-400 text-slate-700 text-lg border border-slate-200 rounded-md  pl-2 transition duration-300 ease focus:outline-none focus:border-blue-500 hover:border-slate-500 shadow-sm focus:shadow">
             </div>
-             <div>
-              <label for="orgEmis" class="block text-sm font-medium text-gray-700">Orgão Emissor <span class="text-red-500"></span></label>
-              <input id="orgEmis" type="text" formControlName="orgEmis" placeholder="Ex.: SSP - SP"    type="text"
-                class="mt-1 block w-full border rounded-md shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
-              >
-              </div>
-              <div>
-              <label for="dtEmis" class="block text-sm font-medium text-gray-700">Data expedição <span class="text-red-500"></span></label>
-              <input id="dtEmis" type="text" formControlName="dtEmis" placeholder="99/99/9999" inputmode="date"
-                  mask="99/99/9999"
-                class="mt-1 block w-full border rounded-md shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
-              >
-              </div>
+
+            <div>
+              <label for="nomeSocial" class="block text-sm font-medium text-gray-700">Nome Social </label>
+              <input id="rg" type="text" formControlName="rg"  inputmode="test"   placeholder="nome social" type="text"
+                class="mt-1  py-2 w-70 border rounded-md bg-transparent placeholder:text-slate-400 text-slate-700 text-lg border border-slate-200 rounded-md  pl-2 transition duration-300 ease focus:outline-none focus:border-blue-500 hover:border-slate-500 shadow-sm focus:shadow">
+            </div>
           </div>
-          <div *ngIf="!isPessoaFisica" class="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 border rounded-lg bg-green-50">
+          <div *ngIf="!isPessoaFisica" class="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 border-4 border-green-200 rounded-lg bg-green-50">
             <div class="md:col-span-2">
               <h3 class="text-lg font-semibold text-green-800">Dados Empresariais</h3>
             </div>
+
+
+
             <div>
-              <label for="cnpj" class="block text-sm font-medium text-gray-700">CNPJ <span class="text-red-500">*</span></label>
-              <input id="cnpj" type="text" formControlName="cnpj"  inputmode="numeric" mask="00.000.000/0000-00" placeholder="00.000.000/0000-00"
+              <label for="nr_cnpj" class="block text-sm font-medium text-gray-700">CNPJ <span class="text-red-500">*</span></label>
+              <input id="nr_cnpj" type="text" formControlName="nr_cnpj"  inputmode="numeric" mask="00.000.000/0000-00" placeholder="00.000.000/0000-00"
                  type="text"
-                class="mt-1 block w-full border rounded-md shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
-                [ngClass]="{'border-red-500': isInvalid('cnpj'), 'border-gray-300': !isInvalid('cnpj')}"
-              >
-              <ng-container *ngIf="isInvalid('cnpj')">
-                <p *ngIf="pessoaForm.get('cnpj')?.errors?.['required']" class="mt-1 text-xs text-red-600">O CNPJ é obrigatório.</p>
-                <p *ngIf="pessoaForm.get('cnpj')?.errors?.['invalidCnpj']" class="mt-1 text-xs text-red-600">O CNPJ informado é inválido.</p>
-              </ng-container>
+                class="mt-1 block w-full placeholder:text-slate-400 border rounded-md shadow-sm p-3 focus:ring-blue-500 focus:outline-none focus:border-blue-500  text-gray-900"
+                 [ngClass]="{'border-red-500': isInvalid('nr_cnpj'), 'border-gray-300': !isInvalid('nr_cnpj') }"
+                (blur)="onCnpjBlur()"
+                >
+                <div *ngIf="pessoaForm.get('nr_cnpj')?.errors?.['jaExiste']" >
+                  Este CNPJ já está cadastrado.
+                </div>
+                <div  class="mt-1 text-xs text-red-800" *ngIf="cnpjValido === false"  style="color: red;"  [ngClass]="tipoAlerta === 'error' ? 'alerta-erro' : 'alerta-sucesso'" role="alert">
+                    É obrigatório CNPJ válido!
+                </div>
+                <div  *ngIf="mensagemDeErro"  [ngClass]="tipoAlerta === 'error' ? 'alerta-erro' : 'alerta-sucesso'" role="alert" >
+                        {{ mensagemDeErro }}
+                </div>
             </div>
+
+
+
+
             <div>
               <label for="nmFantasia" class="block text-sm font-medium text-gray-700">Nome Fantasia <span class="text-red-500">*</span></label>
               <input id="nmFantasia" type="text" formControlName="nmFantasia" placeholder="Nome Fantasia"
-                class="mt-1 block w-full border rounded-md shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
-                [ngClass]="{'border-red-500': isInvalid('razaoSocial'), 'border-gray-300': !isInvalid('razaoSocial')}"
+                class="mt-1 block w-full border placeholder:text-slate-400 rounded-md shadow-sm p-3  focus:outline-none focus:border-blue-500  text-gray-900"
+                [ngClass]="{'border-red-500': isInvalid('nmFantasia'), 'border-gray-300': !isInvalid('nmFantasia')}"
               >
-              <p *ngIf="pessoaForm.get('razaoSocial')?.errors?.['required'] && isInvalid('razaoSocial')" class="mt-1 text-xs text-red-600">A Razão Social é obrigatória.</p>
+              <p *ngIf="pessoaForm.get('nmFantasia')?.errors?.['required'] && isInvalid('nmFantasia')" class="mt-1 text-xs text-red-600">A Razão Social é obrigatória.</p>
             </div>
 
             <div class="md:col-span-2">
               <label for="rzSocial" class="block text-sm font-medium text-gray-700">Razão Social <span class="text-red-500">*</span></label>
               <input id="rzSocial" type="text" formControlName="rzSocial" placeholder="Razão Social"
-                class="mt-1 block w-full border rounded-md shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
-                [ngClass]="{'border-red-500': isInvalid('nomeFantasia'), 'border-gray-300': !isInvalid('nomeFantasia')}"
+                class="mt-1 block w-full border rounded-md shadow-sm p-3 placeholder:text-slate-400   focus:outline-none focus:border-blue-500  text-gray-900"
+                [ngClass]="{'border-red-500': isInvalid('rzSocial'), 'border-gray-300': !isInvalid('rzSocial')}"
               >
-              <p *ngIf="pessoaForm.get('nomeFantasia')?.errors?.['required'] && isInvalid('nomeFantasia')" class="mt-1 text-xs text-red-600">O Nome Fantasia é obrigatório.</p>
+              <p *ngIf="pessoaForm.get('rzSocial')?.errors?.['required'] && isInvalid('rzSocial')" class="mt-1 text-xs text-red-600">O Nome Fantasia é obrigatório.</p>
             </div>
           </div>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
@@ -121,66 +135,80 @@
           </div>
         </fieldset>
 
-        <fieldset>
-           <div class="md:col-span-2">
-                 <legend class="text-lg font-semibold text-indigo-700 border-b border-indigo-200 w-full pb-2 mb-6">Contato (Celular, whatsapp, email) </legend>
-              </div>
-          <div  class="grid  md:grid-cols-4 ">
-            <div>
-                <label for="celular" class="block text-sm font-medium text-gray-700">Celular <span class="text-red-500">*</span></label>
-                <input  id="celular" type="text" mask="(00) 0 0000-0000" formControlName="celular" placeholder="Celular"
-                class="mt-1 py-1 w-40 bg-transparent placeholder:text-slate-500 text-slate-700 text-lg border border-slate-200 rounded-md pr-3 pl-2 py-2 transition duration-300 ease focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm focus:shadow">
-            </div>
-            <div >
-                <label for="zap" class="block  text-sm font-medium text-gray-700">WhatsApp </label>
-                <input
-                  id="zap"
-                  type="checkbox"
-                  formControlName="zap"
-                  [(ngModel)]="isChecked"
-                  type="checkbox"
-                  class="w-8 h-10
-                   hover:bg-gray-300 focus:ring-green-500"
-                />
-            </div>
-            <div >
-              <div>
-               <label for="email" class="mt- block  text-sm font-medium text-gray-700">Email </label>
-               <input id="email" type="text" formControlName="email" placeholder="Email"
-                class="mt-1  py-2 w-100  bg-transparent placeholder:text-slate-500 text-slate-700 text-lg border border-slate-200 rounded-md  pl-2 py-2 transition duration-300 ease focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm focus:shadow">
-            </div>
+<fieldset>
+  <div class="md:col-span-2">
+    <legend class="text-lg font-semibold text-indigo-700 border-b border-indigo-200 w-full pb-2 mb-6">
+      Contato (Celular, WhatsApp, Email)
+    </legend>
+  </div>
 
-           </div>
-</div>
-        </fieldset>
+  <!-- Grid responsivo -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+
+    <!-- Celular -->
+    <div>
+      <label for="celular" class="block text-sm font-medium text-gray-700">Celular <span class="text-red-500">*</span></label>
+      <input id="celular"
+             type="text"
+             mask="(00) 0 0000-0000"
+             formControlName="celular"
+             placeholder="Celular"
+             class="mt-1 block w-full rounded-md shadow-sm p-2 border rounded-md shadow-sm md:text-gray-400 focus:outline-none focus:border-blue-500 text-gray-200"
+             [ngClass]="{'border-red-500': isInvalid('celular'), 'border-gray-300': !isInvalid('celular')}" />
+      <p *ngIf="pessoaForm.get('celular')?.errors?.['required'] && isInvalid('celular')"
+         class="mt-1 text-xs text-red-600">
+        O número celular é obrigatório.
+      </p>
+    </div>
+
+    <!-- WhatsApp -->
+    <div>
+      <label for="zap" class="block text-sm font-medium text-gray-700">WhatsApp</label>
+      <input id="zap"
+             type="checkbox"
+             formControlName="zap"
+             class="w-6 h-6 mt-2 hover:bg-gray-300 focus:ring-green-500" />
+    </div>
+
+    <!-- Email -->
+    <div class="md:col-span-2 lg:col-span-2">
+      <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+      <input id="email"
+             type="text"
+             formControlName="email"
+             placeholder="Email"
+             class="mt-1 block w-full w-80   text-sm md:text-gray-400 border border-slate-200 rounded-md pl-2 py-3 transition duration-300 ease focus:outline-none focus:border-blue-500 hover:border-slate-300 shadow-sm focus:shadow" />
+    </div>
+
+  </div>
+</fieldset>
+
 
        <fieldset>
        <br>
        <div formGroupName="endereco" class="grid grid-cols-1 md:grid-cols-4 gap-1">
           <div class="md:col-span-4">
-          <legend class="text-lg font-semibold text-indigo-700 border-b border-indigo-200 w-full pb-2 mb-6">Endereço completo</legend>
+             <legend class="text-lg font-semibold text-indigo-700 border-b border-indigo-200 w-full pb-2 mb-6">Endereço completo</legend>
           </div>
           <div class="md:col-span-2 w-[120px] ">
-            <label for="cep" class="block  text-sm font-medium text-gray-700">CEP</label>
-            <input
-                  id="cep"
-                  type="text"
-                  formControlName="cep"
-                  (blur)="buscarCep()"
-                  placeholder="Pesquisar"
-                  inputmode="numeric"
-                  mask="00.000-000"
-
+            <label for="cep" class="block  text-sm font-medium text-gray-700">CEP <span class="text-red-500">*</span></label>
+            <input id="cep" type="text" formControlName="cep"  placeholder="Pesquisar" inputmode="numeric" mask="00.000-000"
                   maxlength="16"
-                  class="w-full bg-transparent placeholder:text-slate-500 text-slate-700 text-lg border border-slate-200 rounded-md pr-3 pl-2 py-2 transition duration-300 ease focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm focus:shadow"
-                />
-              <div *ngIf="loading" class="mt-1 text-blue-500 text-sm">Buscando endereço...</div>
-              <div *ngIf="erroBusca" class="mt-1 text-red-500 text-sm">
+                class="mt-1 block w-40 border placeholder:text-slate-400  rounded-md shadow-sm p-2  focus:outline-none focus:border-blue-500  text-gray-900"
+             [ngClass]="{
+                'border-red-500': enderecoForm.get('cep')?.invalid && enderecoForm.get('cep')?.touched,
+                'border-gray-300': enderecoForm.get('cep')?.valid || !enderecoForm.get('cep')?.touched
+                }"
+                (blur)="buscarCep()"
+                 >
+
+              <div *ngIf="loading" class="mt-4 w-40 text-blue-500 text-sm">Buscando endereço...</div>
+              <div *ngIf="erroBusca" class="mt-3 text-red-500 text-sm">
                 CEP inválido ou não encontrado. Verifique o número.
               </div>
-              <div *ngIf="enderecoForm.get('cep')?.errors && enderecoForm.get('cep')?.touched" class="mt-1 text-red-500 text-sm">
-                <span *ngIf="enderecoForm.get('cep')?.errors?.['required']">Obrigatório.</span>
-                <span *ngIf="enderecoForm.get('cep')?.errors?.['pattern']">Formato inválido. Use 8 dígitos.</span>
+              <div *ngIf="enderecoForm.get('cep')?.errors && enderecoForm.get('cep')?.touched" class="mt-1 text-red-500 ">
+                <span *ngIf="enderecoForm.get('cep')?.errors?.['required'] "  class="mt-1 text-red-600">Obrigatório.</span>
+                <span *ngIf="enderecoForm.get('cep')?.errors?.['pattern']"  class="mt-1 text-xs text-red-600">Formato inválido. Use 8 dígitos.</span>
               </div>
           </div>
 
@@ -198,15 +226,20 @@
 
           </div>
           <div class="md:col-span-1">
-              <label for="numero" class="block text-sm font-medium text-gray-700">Número</label>
+              <label for="numero" class="block text-sm font-medium text-gray-700">Número <span class="text-red-500">*</span></label>
               <input
                 id="numero"
                 type="text"
                 formControlName="numero"
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              />
+                 placeholder="Número"
+                 class="mt-1 block w-full placeholder:text-slate-400  border rounded-md shadow-sm  p-2  focus:outline-none focus:border-blue-500 text-gray-900"
+                    [ngClass]="{
+                'border-red-500': enderecoForm.get('numero')?.invalid && enderecoForm.get('numero')?.touched,
+                'border-gray-300': enderecoForm.get('numero')?.valid || !enderecoForm.get('numero')?.touched
+                }"
+              >
               <div *ngIf="enderecoForm.get('numero')?.errors && enderecoForm.get('numero')?.touched" class="mt-1 text-red-500 text-sm">
-                O número é obrigatório.
+                Obrigatório.
               </div>
           </div>
 
@@ -217,7 +250,8 @@
                 type="text"
                 formControlName="complemento"
                 class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              />
+
+              >
           </div>
 
 

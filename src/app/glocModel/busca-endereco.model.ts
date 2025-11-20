@@ -1,4 +1,4 @@
-export interface Endereco {
+export interface BucaEnderecoModel {
   cep: string;
   logradouro: string;
 
