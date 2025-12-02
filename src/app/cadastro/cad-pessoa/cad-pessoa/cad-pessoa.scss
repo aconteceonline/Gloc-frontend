@@ -28,3 +28,76 @@
     background-color: #f2f2f2;
     font-weight: bold;
 }
+
+
+
+
+/* cadastro.component.css */
+.container {
+  max-width: 500px;
+  margin: 20px auto;
+  font-family: Arial, sans-serif;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+h2 {
+  padding: 15px;
+  margin: 0;
+  background-color: #f4f4f4;
+  text-align: center;
+}
+
+/* Estilo dos Botões das Abas */
+.tabs-header {
+  display: flex;
+  border-bottom: 1px solid #ccc;
+}
+
+.tabs-header button {
+  flex: 1;
+  padding: 15px;
+  border: none;
+  background: #e0e0e0;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.3s;
+}
+
+.tabs-header button:hover {
+  background: #d0d0d0;
+}
+
+/* Classe dinâmica adicionada pelo Angular */
+.tabs-header button.active {
+  background: white;
+  border-bottom: 3px solid #007bff;
+  color: #007bff;
+}
+
+/* Conteúdo */
+.tabs-content {
+  padding: 20px;
+}
+
+.tab-pane {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+input {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.actions {
+  margin-top: 15px;
+  display: flex;
+  justify-content: space-between;
+}
+
+button.primary { background-color: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; }
+button.secondary { background-color: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; }

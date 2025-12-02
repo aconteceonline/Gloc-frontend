@@ -29,7 +29,8 @@ import { MatDialogModule } from '@angular/material/dialog';
     AppRoutingModule,
     BrowserAnimationsModule,
     MatDialogModule,
-    ReactiveFormsModule,
+
+
 
   ],
   providers: [
@@ -38,12 +39,9 @@ import { MatDialogModule } from '@angular/material/dialog';
       provide: LOCALE_ID,
       useValue: 'pt-BR',
 
+
     },
-   /* {
-      provide: HTTP_INTERCEPTORS,
-      useClass: CpfInterceptor,
-      multi: true
-    },*/
+
     provideBrowserGlobalErrorListeners(),
     provideZonelessChangeDetection(),
     provideHttpClient(withFetch()),

@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, CurrencyPipe } from '@angular/common';
 
 import { CadPessoaRoutingModule } from './cad-pessoa-routing-module';
 import { Cadpessoa } from './cad-pessoa/cad-pessoa';
@@ -24,13 +24,17 @@ import { NgxMaskDirective, NgxMaskPipe, provideNgxMask } from 'ngx-mask';
     MatDialogModule,
     FormsModule,
     NgxMaskDirective,
-    NgxMaskPipe
+    NgxMaskPipe,
+
 
 
 
 ]
 ,
- providers: [provideNgxMask({ /* opções de cfg */ })],
+ providers: [
+  provideNgxMask({ /* opções de cfg */ }),
+  CurrencyPipe,
+ ],
  bootstrap: [CadPessoaModule],
 })
 export class CadPessoaModule { }

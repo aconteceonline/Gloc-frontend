@@ -9,7 +9,7 @@
         <input type="text"  class="flex-1 border rounded-md px-3 py-2"
         [formControl]="buscaControl"
 
-         placeholder="Buscar por nome ou CPF..."
+         placeholder="Buscar por nome, CPF ou CNPJ"
 
          (input)="pagina.set(1)"
         />
@@ -19,7 +19,7 @@
 
           class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-xl leading-none transition-colors bg-blue-200 text-blue-700 hover:bg-blue-300 cursor-pointer"
           title="Cadastrar nova pessoa"
-          (click)="pessoasFiltradas().length === 0 && abrirCadastroPessoa()"
+          (click)="pessoasFiltradas() && abrirCadastroPessoa()"
 
           >
 
@@ -40,9 +40,7 @@
     </div>
 
     <!-- Lista de pessoas -->
-
-
-<ul *ngIf="!carregando() && pessoasPagina().length > 0"
+  <ul *ngIf="!carregando() && pessoasPagina().length > 0"
         class="divide-y divide-gray-200 max-h-80 overflow-y-auto">
 
         <li *ngFor="let pessoa of pessoasPagina()" class="py-3 flex items-center justify-between">
@@ -66,7 +64,12 @@
             </button>
         </li>
     </ul>
-
+<!-- Modal de cadastro -->
+<app-modal-cadastro-pessoa
+  [aberto]="cadastroAberto()"
+  (fechar)="fecharCadastroPessoa()"
+  (salvar)="salvarNovaPessoa($event)">
+</app-modal-cadastro-pessoa>
     <!-- Nenhum resultado -->
     <div *ngIf="!carregando() && pessoasFiltradas().length === 0 && buscaControl.value.length >= 2"
         class="text-sm text-gray-500 text-center py-4">

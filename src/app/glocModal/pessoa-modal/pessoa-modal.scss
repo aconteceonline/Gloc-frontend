@@ -1,0 +1,30 @@
+
+.alerta-erro {
+    /* Cor de fundo vermelha clara */
+
+    /* Cor do texto vermelho escuro */
+    color: #cc0000;
+    padding: 2px;
+    margin-bottom: 5px;
+   // font-weight: bold;
+    font-size: 12px;
+}
+
+
+/* Exemplo de CSS básico para a tabela */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.data-table th, .data-table td {
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: left;
+}
+
+.data-table th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+}

@@ -82,13 +82,13 @@ export class PessoaService {
   );
 }
 
-    readByCNPJ(cnpj: any): Observable<PessoaModel>{
+readByCNPJ(cnpj: any): Observable<PessoaModel>{
     const url = `${this.apiUrl}/${cnpj}`
     return this.http.get<PessoaModel>(url)
-  }
+}
 
   buscarPorTermo(busca: string): Observable<PessoaModel[]> {
-    console.log(' buscar por termo  ', (`${this.myApiUrl}termo/${busca}`))
+ //  console.log(' buscar por cpf cnpj/;  ', (`${this.myApiUrl}termo/${busca}`))
   return this.http.get<PessoaModel[]>(`${this.myApiUrl}termo/${busca}`)
 
 

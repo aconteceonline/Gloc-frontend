@@ -28,3 +28,82 @@
     background-color: #f2f2f2;
     font-weight: bold;
 }
+
+select option:checked ,
+select option:hover,
+select option:focus {
+    /* Define o fundo como azul claro, por exemplo, 'blue-200' */
+    background-color: #BFDBFE !important; /* Tailwind blue-200 */
+    /* Garante que o texto permaneça escuro para contraste */
+    color: #2e415c !important; /* Tailwind gray-800 */
+}
+
+/* cadastro.component.css */
+.container {
+  max-width: 500px;
+  margin: 20px auto;
+  font-family: Arial, sans-serif;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+h2 {
+  padding: 15px;
+  margin: 0;
+  background-color: #f4f4f4;
+  text-align: center;
+}
+
+/* Estilo dos Botões das Abas */
+.tabs-header {
+  display: flex;
+  border-bottom: 1px solid #ccc;
+}
+
+.tabs-header button {
+  flex: 1;
+  padding: 2px;
+  border: none;
+  background: #f8f8f9;
+  cursor: pointer;
+  font-weight: 400;
+  transition: background 1.3s;
+}
+
+.tabs-header button:hover {
+  background: #d0dff8;
+}
+
+/* Classe dinâmica adicionada pelo Angular */
+.tabs-header button.active {
+  background: #ffffff;
+  border-bottom: 2px solid #0f62bf;
+  color: #0f253b;
+}
+
+/* Conteúdo */
+.tabs-content {
+  padding: 10px;
+}
+
+.tab-pane {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+input {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.actions {
+  margin-top: 15px;
+  display: flex;
+  justify-content: space-between;
+}
+
+button.primary { background-color: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; }
+button.secondary { background-color: #8b939b; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; }

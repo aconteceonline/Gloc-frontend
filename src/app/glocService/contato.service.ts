@@ -39,7 +39,7 @@ export class ContatoService {
 
   deleteContato(id: any): Observable<ContatoModel> {
     const  url = `${this.myApiUrl}${this.myApiUrl}/${id}`;
-    console.log("url = ", url)
+  //  console.log("url = ", url)
     return this.http.delete<ContatoModel>(url)
   }
 
