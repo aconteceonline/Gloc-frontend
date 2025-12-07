@@ -7,10 +7,6 @@ import { MenucadastrarModule } from '../menucadastrar/menucadastrar-module';
 
 
 
-
-
-
-
 @NgModule({
   declarations: [
     Layout,

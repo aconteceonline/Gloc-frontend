@@ -18,6 +18,9 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { CurrencyPipe } from '@angular/common';
 import { TipoImovelModel } from '../../../glocModel/tipo-imovel.model';
 import { TipoImovelService } from '../../../glocService/tipo-imovel.service';
+import { SituacaoImovelService } from '../../../glocService/situacao-imovel.service';
+import { SituacaoImovelModel } from '../../../glocModel/situacao-imovel.model';
+
 
 
 @Component({
@@ -75,15 +78,18 @@ export class Cadpessoa implements OnInit {
   private contatoService = inject(ContatoService);
   private enderecoService = inject(EnderecoService);
   private empresaService = inject(EmpresaService);
+
   get enderecoForm(): FormGroup {
     return this.pessoaForm.get('endereco') as FormGroup;
   }
+
   activeTab: string = 'pessoal'; // Valor inicial
   isChecked = false;
   loading: boolean = false;
   erroBusca: boolean = false;
   pessoaForm: FormGroup;
   tiposDeImovel: TipoImovelModel[] = [];
+  situacaoImovel: SituacaoImovelModel[] = [];
 
   props: LayoutProps = {
     titulo: 'Gerencie os seus contratos de locação em uma plataforma imobiliária completa',
@@ -95,6 +101,8 @@ export class Cadpessoa implements OnInit {
          private cepService: CepBuscaService,
          private currencyPipe: CurrencyPipe,
          private tipoImovelService: TipoImovelService,
+         private situacaoImovelService: SituacaoImovelService
+
   ) {
     this.pessoaForm = this.fb.group(
       {
@@ -125,6 +133,32 @@ export class Cadpessoa implements OnInit {
         cidade: [''],
         uf: [''],
       }),
+     // NOVO: FormGroup para interesse
+      interesse: this.fb.group({
+        tituloImovel: [null],
+        tipoImovel: [null],
+        situacao: [null],
+        vlr_venda: [ ],
+        vlr_aluguel: [null],
+        qtde_dorms: [''],
+        qtde_wc: [''],
+        qtde_swet: [''],
+        qtde_lavabo: [''],
+        qtde_vaga: [''],
+        area_construida: [''],
+        piscina_adulto: [''],
+        piscina_infantil: [''],
+        churasqueira: [''],
+        salao_festas: [''],
+        playground: [''],
+        area_pet: [''],
+        academia: [''],
+        condominio: [''],
+        mobiliado: [''],
+        varanda: [''],
+        quintal: [''],
+        obsPessoa: ['']
+      }),
     });
     // Inicializa vazio
   this.pessoaForm.get('nr_cpf');
@@ -134,6 +168,8 @@ export class Cadpessoa implements OnInit {
 
   ngOnInit(): void {
     // Inicialização da escuta reativa (opcional, mas bom para reatividade em tempo real)
+    this.carregarTiposDeImovel();
+    this.carregarSituacaoImovel();
     this.setupCpfCnpjListener();
 
   // Escuta mudanças no campo 'type' para alternar validação
@@ -179,25 +215,53 @@ export class Cadpessoa implements OnInit {
         });
     }
 
+    carregarSituacaoImovel(): void {
+        this.situacaoImovelService.getSituacaoImoveis().subscribe({
+            next: (data) => {
+                // Atribui os dados recebidos da API à lista
+                this.situacaoImovel = data;
 
- formatarValor(campo: string) {
-    const control = this.pessoaForm.get(campo);
+                this.situacaoImovel.sort((a, b) => {
+                const nomeA = a.nm_situacao.toUpperCase(); // Para comparação sem case-sensitive
+                const nomeB = b.nm_situacao.toUpperCase();
 
-    if (control) {
-      let valor = control.value;
+                if (nomeA < nomeB) {
+                    return -1; // 'a' vem antes de 'b'
+                }
+                if (nomeA > nomeB) {
+                    return 1; // 'b' vem antes de 'a'
+                }
+                return 0; // Os nomes são iguais
 
-      if (valor !== null && valor !== '') {
-        // Converte string para número, removendo caracteres não numéricos
-        const numero = Number(valor.toString().replace(/[^\d]/g, '')) / 100;
+                });
+            },
+            error: (err) => {
+                console.error('Erro ao carregar tipos de imóvel:', err);
+                // Lógica de tratamento de erro (ex: mostrar mensagem ao usuário)
+            }
+        });
+    }
 
-        // Aplica o CurrencyPipe
-        const formatado = this.currencyPipe.transform(numero, 'BRL', 'symbol', '1.2-2');
+    formatarValor(campo: string) {
+      const control = this.pessoaForm.get(campo);
+      if (control && control.value) {
+      let valorLimpo = control.value.replace(/\D/g, ''); // Remove tudo que não é dígito
 
-        // Atualiza o campo formatado
-        control.setValue(formatado, { emitEvent: false });
+      if (valorLimpo) {
+        // 2. Formatar (Exemplo: 123456 -> R$ 1.234,56)
+        // Lógica de formatação (pode ser complexa dependendo do formato final)
+        const valorFormatado = new Intl.NumberFormat('pt-BR', {
+          style: 'currency',
+          currency: 'BRL',
+          minimumFractionDigits: 2
+        }).format(parseFloat(valorLimpo) / 100);
+
+        // 3. Atualizar o valor do FormControl
+        control.setValue(valorFormatado, { emitEvent: false }); // 'emitEvent: false' evita loops
       }
     }
   }
+
 
 
 // Opcional: Configura a escuta reativa com debounce para não sobrecarregar o backend
@@ -386,10 +450,15 @@ verificarCpfExistente(cpf: string) {
   }
 
  // NOVO: Getter para o FormGroup Endereço (facilita o uso no template)
-  get enderecoGroup(): FormGroup {
+/*  get enderecoGroup(): FormGroup {
     return this.pessoaForm.get('endereco') as FormGroup;
   }
 
+    get interesseGroup(): FormGroup {
+    return this.pessoaForm.get('interesse') as FormGroup;
+  }
+
+*/
 
  toggleValidation(tipo: string): void {
     const cpfControl = this.pessoaForm.get('nr_cpf');

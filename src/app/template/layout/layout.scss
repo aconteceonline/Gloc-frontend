@@ -1,0 +1,17 @@
+/* Estilos padrão (Expandido) */
+.app-layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+app-sidebar {
+    width: 250px; /* Largura expandida */
+    transition: width 0.3s ease; /* Adiciona transição suave */
+    /* ... outros estilos ... */
+}
+
+.main-content {
+    margin-left: 250px; /* Garante que o conteúdo começa após o menu */
+    transition: margin-left 0.3s ease;
+    flex-grow: 1;
+}

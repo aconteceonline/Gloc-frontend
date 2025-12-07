@@ -30,7 +30,6 @@ interface FotoPreview {
   return crypto.randomUUID?.() ?? Math.random().toString(36).slice(2);
 }*/
 
-
 @Component({
   selector: 'app-cad-imovel',
   standalone: false,
@@ -77,9 +76,6 @@ export class CadImovel implements OnInit {
       return this.imovelForm.get('endereco') as FormGroup;
   }
 
-
-
-
   constructor(
     private fb: FormBuilder,
     public imoveis: ImovelService,
@@ -89,8 +85,6 @@ export class CadImovel implements OnInit {
     private tipoImovelService: TipoImovelService,
     private currencyPipe: CurrencyPipe
   ) {
-
-
      this.imovelForm = this.fb.group({
         titulo: ['', [Validators.required, Validators.minLength(3)]],     descricao: ['', [Validators.required, Validators.minLength(10)]],
         tipo: [null, Validators.required],
@@ -136,24 +130,19 @@ export class CadImovel implements OnInit {
     });
    }
 
-
    ngOnInit(): void {
-
-
         this.carregarTiposDeImovel();
-   }
 
+   }
 
    carregarTiposDeImovel(): void {
         this.tipoImovelService.getTiposImoveis().subscribe({
             next: (data) => {
                 // Atribui os dados recebidos da API à lista
                 this.tiposDeImovel = data;
-
                 this.tiposDeImovel.sort((a, b) => {
                 const nomeA = a.tipo_imovel.toUpperCase(); // Para comparação sem case-sensitive
                 const nomeB = b.tipo_imovel.toUpperCase();
-
                 if (nomeA < nomeB) {
                     return -1; // 'a' vem antes de 'b'
                 }
@@ -161,39 +150,34 @@ export class CadImovel implements OnInit {
                     return 1; // 'b' vem antes de 'a'
                 }
                 return 0; // Os nomes são iguais
-
                 });
             },
             error: (err) => {
                 console.error('Erro ao carregar tipos de imóvel:', err);
-                // Lógica de tratamento de erro (ex: mostrar mensagem ao usuário)
             }
         });
     }
 
+
 // Método para trocar de aba
-  switchTab(tab: string) {
-    this.activeTab = tab;
-  }
-  formatarValor(campo: string) {
-    const control = this.imovelForm.get(campo);
+    switchTab(tab: string) {
+      this.activeTab = tab;
+    }
 
-    if (control) {
-      let valor = control.value;
-
-      if (valor !== null && valor !== '') {
-        // Converte string para número, removendo caracteres não numéricos
-        const numero = Number(valor.toString().replace(/[^\d]/g, '')) / 100;
-
-        // Aplica o CurrencyPipe
-        const formatado = this.currencyPipe.transform(numero, 'BRL', 'symbol', '1.2-2');
-
-        // Atualiza o campo formatado
-        control.setValue(formatado, { emitEvent: false });
+    formatarValor(campo: string) {
+      const control = this.imovelForm.get(campo);
+      if (control) {
+        let valor = control.value;
+        if (valor !== null && valor !== '') {
+          // Converte string para número, removendo caracteres não numéricos
+          const numero = Number(valor.toString().replace(/[^\d]/g, '')) / 100;
+          // Aplica o CurrencyPipe
+          const formatado = this.currencyPipe.transform(numero, 'BRL', 'symbol', '1.2-2');
+          // Atualiza o campo formatado
+          control.setValue(formatado, { emitEvent: false });
+        }
       }
     }
-  }
-
 
     abrirModal() {
         this.modalAberto.set(true);
@@ -210,32 +194,30 @@ export class CadImovel implements OnInit {
         this.contato$ = this.contatoService.readByIdContato(pessoa.id!.toString());
       }
 
- onFilesSelected(event: Event) {
-    const input = event.target as HTMLInputElement;
-    const files = input?.files;
-    if (!files) return;
+     onFilesSelected(event: Event) {
+        const input = event.target as HTMLInputElement;
+        const files = input?.files;
+        if (!files) return;
 
-    Array.from(files).forEach(file => {
-      const reader = new FileReader();
-      reader.onload = () => {
-        this.fotos.update(arr => [
-          ...arr,
-          {
-            id: crypto.randomUUID(),
-            nome: file.name,
-            url: reader.result as string
-          }
-        ]);
-      };
-      reader.readAsDataURL(file);
-    });
-  }
+        Array.from(files).forEach(file => {
+          const reader = new FileReader();
+          reader.onload = () => {
+            this.fotos.update(arr => [
+              ...arr,
+              {
+                id: crypto.randomUUID(),
+                nome: file.name,
+                url: reader.result as string
+              }
+            ]);
+          };
+          reader.readAsDataURL(file);
+        });
+      }
 
-
-  removerFoto(id: string) {
-    this.fotos.update(arr => arr.filter(f => f.id !== id));
-  }
-
+      removerFoto(id: string) {
+        this.fotos.update(arr => arr.filter(f => f.id !== id));
+      }
 
     /*  async onFilesSelected(files: FileList | null) {
         if (!files) return;
@@ -293,10 +275,8 @@ export class CadImovel implements OnInit {
       return;
     }
 
-
     this.imovelForm.reset();
   }
-
 
   /*  cadastrarPessoa() {
       // Aqui você pode abrir outro modal, navegar para outra rota ou exibir um formulário embutido
@@ -353,7 +333,6 @@ export class CadImovel implements OnInit {
           uf: ''
         });
       }
-
      // NOVO: Getter para o FormGroup Endereço (facilita o uso no template)
       get enderecoGroup(): FormGroup {
         return this.imovelForm.get('endereco') as FormGroup;

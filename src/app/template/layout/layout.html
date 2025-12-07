@@ -1,56 +1,130 @@
-
-<header class="fixed top-0 left-0 w-full bg-white shadow-md p-2 bg-gradient-to-r from-blue-500 to-blue-700 text-white p-0 shadow-lg">
-
-
-    <div class=" text-center  ">
-    <h1> <a class="text-8x1 fixed top-0 left-2 font-bold"  routerLink="/principal" >
-                        GLOC - Gestão de Locações
-        </a>
-    </h1>
-            <h1 class="text-2xl font-bold">{{ props.titulo }}</h1>
-            <p class="text-1xl ">{{ props.subTitulo }}</p>
-    </div>
-
-    <div class="mt-0">
-        <hr class="border-t border-blue-300 opacity-50" />
-    </div>
+<div class="flex flex-col h-screen bg-gray-100">
 
 
-    <nav class="mt-0">
-        <ul class="flex justify-center space-x-8 text-white font-semibold">
-            <li>
-                <a class="hover:text-yellow-300">Dashboard</a>
-            </li>
-            <li>
-                <a  routerLink="menuconsultar" class="hover:text-yellow-500">Consultar</a>
-            </li>
-            <li>
-                <a routerLink="menucadastrar" class="hover:text-yellow-300">Cadastrar</a>
-            </li>
-            <li>
-                <a class="hover:text-yellow-300">Cobranças</a>
-            </li>
-              <li>
-                <a class="hover:text-yellow-300">Relatórios</a>
-            </li>
-            <li>
-                <a class="hover:text-yellow-300"><button (click)="logout()">Sair</button></a>
-            </li>
+  <div class="flex flex-1 overflow-hidden">
+    <aside
+      class="bg-gray-800 text-white shadow-lg transition-all duration-300 ease-in-out h-full flex-shrink-0"
+      [ngClass]="{
+        'w-64': !isSidebarCollapsed,
+        'w-20': isSidebarCollapsed
+      }"
+    >
+        <div class="p-4 flex justify-between items-center h-16">
+            <h1 class="text-xl font-bold transition-opacity duration-300"
+                [ngClass]="{'opacity-0 hidden': isSidebarCollapsed, 'opacity-100': !isSidebarCollapsed}">
+                      <h1 class="text-2xl font-semibold text-white">GLOC</h1>
+            </h1>
+            <button (click)="toggleSidebar()" class="text-white hover:text-gray-300 focus:outline-none">
+                <svg [ngClass]="{'rotate-180': isSidebarCollapsed}"
+                    class="w-6 h-6 transition-transform duration-300"
+                    fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"></path>
+                </svg>
+            </button>
+        </div>
 
-        </ul>
+<nav class="mt-4">
+        <ng-container *ngFor="let item of menuItems">
+
+            <button
+                *ngIf="item.isSubMenu"
+                (click)="toggleSubMenu(item)"
+                class="w-full text-left flex items-center p-4 hover:bg-gray-700 transition-colors duration-200 focus:outline-none"
+                [ngClass]="{'bg-gray-700': item.expanded}"
+            >
+                <span class="mr-3 flex-shrink-0">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" [attr.d]="item.icon"></path>
+                    </svg>
+                </span>
+
+                <span
+                    class="flex-1 transition-opacity duration-300"
+                    [ngClass]="{'opacity-0 hidden': isSidebarCollapsed, 'opacity-100': !isSidebarCollapsed}"
+                >
+                    {{ item.title }}
+                </span>
+
+                <span
+                    *ngIf="!isSidebarCollapsed"
+                    class="ml-auto transition-transform duration-300"
+                    [ngClass]="{'rotate-180': item.expanded}"
+                >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </span>
+            </button>
+
+            <a
+                *ngIf="!item.isSubMenu"
+                [routerLink]="item.link"
+                class="flex items-center p-4 hover:bg-gray-700 transition-colors duration-200"
+            >
+                <span class="mr-3 flex-shrink-0">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" [attr.d]="item.icon"></path>
+                    </svg>
+                </span>
+                <span
+                    class="transition-opacity duration-300"
+                    [ngClass]="{'opacity-0 hidden': isSidebarCollapsed, 'opacity-100': !isSidebarCollapsed}"
+                >
+                    {{ item.title }}
+                </span>
+            </a>
+
+
+            <div
+                *ngIf="item.isSubMenu && item.expanded"
+                class="bg-gray-900 overflow-hidden"
+                >
+                <a
+                    *ngFor="let child of item.children"
+                    [routerLink]="child.link"
+                    class="block py-2 pl-12 pr-4 text-sm text-gray-300 hover:bg-gray-700 transition-colors duration-200"
+                > <span
+                        class="transition-opacity duration-300"
+                        [ngClass]="{'opacity-0 hidden': isSidebarCollapsed, 'opacity-100': !isSidebarCollapsed}"
+                    >
+                        {{ child.title }}
+                    </span>
+                </a>
+            </div>
+
+        </ng-container>
     </nav>
-</header>
-
-      <div class="container mx-auto  z-0 p-70 pt-23">
-         <router-outlet></router-outlet>
-      </div>
 
 
+        <div class="p-4 border-t border-gray-700 text-xs text-gray-400">
+            © 2025 Todos os Direitos Reservados
+        </div>
+        </aside>
 
- <footer class=" bg-gray-200 text-center fixed bottom-0 left-0 w-full">
-    <p class="text-gray-600 text-sn">2025 - GLOC - Gestão de Locação. Tosdos os direitos reservados.</p>
- </footer>
+       <main class="flex-1  overflow-y-auto">
 
+  <header class="bg-white shadow-md h-20 flex items-center justify-between px-6 **fixed top-0 left-0 right-0 z-20**">
+     <div></div>
+    <div class="flex items-center space-x-6">
 
+      <button class="relative p-2 text-gray-500 hover:text-gray-700 transition-colors duration-200 focus:outline-none">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
 
+        <span class="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">
+          3
+        </span>
+      </button>
 
+      <button class="flex items-center space-x-2 p-2 rounded-full hover:bg-gray-100 transition-colors duration-200">
+        <svg class="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 0a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+
+        <span class="text-sm font-medium hidden sm:inline">
+          Olá, Usuário
+        </span>
+      </button>
+
+    </div>
+  </header>
+           <router-outlet></router-outlet>
+      </main>
+
+  </div>
+</div>
