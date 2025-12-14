@@ -16,7 +16,7 @@ const routes: Routes = [
       loadChildren: () => import('./template/template-module').then(m => m.TemplateModule), canActivate: [authGuard]
 
     },
-
+      {  path: 'logout', component: Login }
   ]
 
 @NgModule({

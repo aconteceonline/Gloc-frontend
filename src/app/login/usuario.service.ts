@@ -12,7 +12,8 @@ import { catchError, tap } from 'rxjs/operators';
 export class UsuarioService {
   // Substitua pela URL do seu backend que se comunica com a TWS
   private backendUrl = 'http://localhost:3001/tokens'; // Exemplo de URL do backend
-  // private url = 'http://localhost:4200/template'; // Exemplo de URL do backend
+// Chave usada para armazenar o nome de usuário no localStorage
+  private readonly USERNAME_STORAGE_KEY = 'user_name';
 
   constructor(private http: HttpClient) {
 
@@ -20,14 +21,16 @@ export class UsuarioService {
 
   /**
    * Método para iniciar o processo de login na TWS via backend.
-   * @param credentials - Objeto contendo as credenciais de login (ex: username, password, host, port).
+   * @param credentials - Objeto contendo as credenciais de login (ex: username, nome, password, host, port).
    * @returns Um Observable que emite a resposta do backend.
    */
   login(credentials: any): Observable<any> {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json'
+
       })
+
     };
 
     return this.http.post<any>(`${this.backendUrl}`, credentials, httpOptions)
@@ -44,6 +47,15 @@ export class UsuarioService {
 
       );
   }
+
+/**
+   * **NOVO MÉTODO:** Obtém o nome de usuário armazenado.
+   * @returns O nome de usuário, ou null se não estiver logado.
+   */
+  getUsername(): string | null {
+    return localStorage.getItem(this.USERNAME_STORAGE_KEY);
+  }
+
 
   /**
    * Método para verificar o status da conexão com a TWS via backend.
