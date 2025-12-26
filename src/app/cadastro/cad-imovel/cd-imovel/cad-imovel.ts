@@ -69,7 +69,7 @@ export class CadImovel implements OnInit {
   Endereco: EnderecoModel = {
      id_pessoa_fk: 0,
      cep: '',
-     numero: 0,
+     numero: '',
      complemento: '',
   }
   get enderecoForm(): FormGroup {
@@ -141,8 +141,8 @@ export class CadImovel implements OnInit {
                 // Atribui os dados recebidos da API à lista
                 this.tiposDeImovel = data;
                 this.tiposDeImovel.sort((a, b) => {
-                const nomeA = a.tipo_imovel.toUpperCase(); // Para comparação sem case-sensitive
-                const nomeB = b.tipo_imovel.toUpperCase();
+                const nomeA = a.ds_imovel.toUpperCase(); // Para comparação sem case-sensitive
+                const nomeB = b.ds_imovel.toUpperCase();
                 if (nomeA < nomeB) {
                     return -1; // 'a' vem antes de 'b'
                 }

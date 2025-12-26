@@ -49,7 +49,7 @@ export class ModalCadastroPessoa implements OnInit  {
   id: any;
   //res: any | null = null
 
-Pessoa: PessoaModel = {
+  Pessoa: PessoaModel = {
     id_tipo_pessoa_fk: undefined,
     id_cargo_func_fk: 0,
     id_situacao_fk: 0,
@@ -64,7 +64,7 @@ Pessoa: PessoaModel = {
   Endereco: EnderecoModel = {
      id_pessoa_fk: 0,
      cep: '',
-     numero: 0,
+     numero: '',
      complemento: '',
   }
 

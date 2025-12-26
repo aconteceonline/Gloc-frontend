@@ -3,10 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import {  Observable, map } from 'rxjs';
 import { TipoImovelModel} from '../glocModel/tipo-imovel.model';
 
-export interface TipoImovelApi {
-    id: number;
-    tipo_Imovel: string;
-}
+
 
 @Injectable({
   providedIn: 'root'

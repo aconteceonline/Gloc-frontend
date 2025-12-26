@@ -1,4 +1,4 @@
-import {  Component, EventEmitter, inject, OnInit, Output } from '@angular/core';
+import {  ChangeDetectorRef, Component, EventEmitter, inject, OnInit, Output, signal } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormControl  } from '@angular/forms';
 import { LayoutProps } from '../../../template/layout/layoutprops';
 import { CepBuscaService } from '../../../services/CepBuscaService'
@@ -20,6 +20,16 @@ import { TipoImovelModel } from '../../../glocModel/tipo-imovel.model';
 import { TipoImovelService } from '../../../glocService/tipo-imovel.service';
 import { SituacaoImovelService } from '../../../glocService/situacao-imovel.service';
 import { SituacaoImovelModel } from '../../../glocModel/situacao-imovel.model';
+import { TipoCargoModel } from '../../../glocModel/tipo-cargo.model';
+import { TipoCargoService } from '../../../glocService/tipo-cargo.service';
+import { InteresseModel } from '../../../glocModel/interesse.model';
+import { InteresseService } from '../../../glocService/interesse.serivice';
+import { EconomicoModel } from '../../../glocModel/economico.model';
+import { EconomicoService } from '../../../glocService/economico.service';
+import { OrigemRendaModel } from '../../../glocModel/origem-renda.model';
+import { OrigemRendaService } from '../../../glocService/origem-renda.service';
+import { rgValidator } from '../../../validators/rg-validator';
+import { emailValidator } from '../../../validators/email-validator';
 
 
 
@@ -48,60 +58,114 @@ export class Cadpessoa implements OnInit {
       id_situacao_fk: 0,
       id_cpf_cnpj: 0,
       nome: '',
+      rg: '',
       orgao: '',
       dt_expedicao: '',
      }
-  hoje: Date = new Date();
+
+    hoje: Date = new Date();
+
     Endereco: EnderecoModel = {
        id_pessoa_fk: 0,
        cep: '',
-       numero: 0,
+       numero: '',
        complemento: '',
     }
 
 
-  Empresa: EmpresaModel = {
-      id_pessoa_fk: 0,
-      rz_social: '',
-      nm_fantasia: ''
-  }
+    Empresa: EmpresaModel = {
+        id_pessoa_fk: 0,
+        rz_social: '',
+        nm_fantasia: ''
+    }
 
-  Contato: ContatoModel = {
+    Contato: ContatoModel = {
+        id_pessoa_fk: 0,
+        nr_contato: '',
+        whatsapp: false,
+        email: '',
+    }
+    Interesse: InteresseModel = {
       id_pessoa_fk: 0,
-      nr_contato: '',
-      whatsapp: false,
-      email: '',
-  }
+      id_sit_imovel_fk: 0,
+      id_tp_imovel_fk:  0,
+      vr_venda:  0,
+      vr_aluguel:  0,
+      qt_dorms: 0,
+      qt_wc:  0,
+      qt_swet:  0,
+      qt_lavabo: 0,
+      qt_vagas_garagem:  0,
+      qt_area_construida:  0,
+      qt_area_total:  0,
+      piscina_adulto:  false,
+      piscina_infantil: false,
+      churasqueira: false,
+      salao_festa: false,
+      area_pet: false,
+      academia: false,
+      condominio: false,
+      imovel_mobiliado: false,
+      varanda: false,
+      quintal_privativo: false,
+      obs_imovel: '',
+
+    }
+
+    Economico: EconomicoModel = {
+        id_pessoa_fk: 0,
+        id_origem_renda_fk: 0,
+        renda_comprovada: 0,
+        saldo_fgts: 0,
+        recursos_proprios: 0,
+        renda_declarada: 0,
+
+    }
 
   // Injetando o service
   private pessoaService = inject(PessoaService);
   private contatoService = inject(ContatoService);
   private enderecoService = inject(EnderecoService);
   private empresaService = inject(EmpresaService);
+  private economicoService = inject(EconomicoService);
+  private interesseService = inject(InteresseService);
+  private situacaoImovelService = inject(SituacaoImovelService);
+  private tipoImovelService  = inject(TipoImovelService);
+
 
   get enderecoForm(): FormGroup {
     return this.pessoaForm.get('endereco') as FormGroup;
   }
 
   activeTab: string = 'pessoal'; // Valor inicial
+  selectedYear = signal<string>('');
   isChecked = false;
   loading: boolean = false;
   erroBusca: boolean = false;
   pessoaForm: FormGroup;
   tiposDeImovel: TipoImovelModel[] = [];
   situacaoImovel: SituacaoImovelModel[] = [];
-
+  origemDaRenda: OrigemRendaModel[] = [];
+  mostrarMensagem = true;
   props: LayoutProps = {
     titulo: 'Gerencie os seus contratos de locação em uma plataforma imobiliária completa',
     subTitulo: 'Uma solução de longo prazo para negócios de alta prioridade'
   };
+// Gera a lista dos últimos 10 anos dinamicamente
+  years = signal<number[]>(
+    Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - i)
+  );
+  tiposCargos: TipoCargoModel[] = [];
 
   constructor(
          private fb: FormBuilder,
          private cepService: CepBuscaService,
          private currencyPipe: CurrencyPipe,
-         private tipoImovelService: TipoImovelService,
-         private situacaoImovelService: SituacaoImovelService
+         private tipoCargoService: TipoCargoService,
+         private origemRendaSerrvice: OrigemRendaService,
+
+         private cdr: ChangeDetectorRef,
+
 
   ) {
     this.pessoaForm = this.fb.group(
@@ -109,14 +173,15 @@ export class Cadpessoa implements OnInit {
       tipo: ['PF', Validators.required],
       [this.cpfControlName]: [''], // A validação 'required' será adicionada no toggleValidation
       [this.cnpjControlName]: [''], // A validação 'required' será adicionada no toggleValidation
-      rg: [''],
+      rg: ['', [rgValidator()]],
       nome: ['', Validators.required],
       nmFantasia: ['', Validators.required],
       rzSocial: ['', Validators.required],
-      email: [''],
+      email: ['', [emailValidator()]],
+
       celular: ['', Validators.required],
       zap: new FormControl(false) ,
-
+      tipoCargo: ['', Validators.required],
      // NOVO: FormGroup para Endereço
       endereco: this.fb.group({
          cep: [
@@ -135,32 +200,45 @@ export class Cadpessoa implements OnInit {
       }),
      // NOVO: FormGroup para interesse
       interesse: this.fb.group({
-        tituloImovel: [null],
-        tipoImovel: [null],
-        situacao: [null],
-        vlr_venda: [ ],
-        vlr_aluguel: [null],
-        qtde_dorms: [''],
-        qtde_wc: [''],
-        qtde_swet: [''],
-        qtde_lavabo: [''],
-        qtde_vaga: [''],
-        area_construida: [''],
-        piscina_adulto: [''],
-        piscina_infantil: [''],
-        churasqueira: [''],
-        salao_festas: [''],
-        playground: [''],
-        area_pet: [''],
-        academia: [''],
-        condominio: [''],
-        mobiliado: [''],
-        varanda: [''],
-        quintal: [''],
-        obsPessoa: ['']
+
+        id_tipoImovel: [null],
+        id_situacaoImovel: [null],
+        vr_venda: [],
+        vr_aluguel: [],
+        qt_dorms: [],
+        qt_wc: [],
+        qt_swet: [],
+        qt_lavabo: [],
+        qt_vagas_garagem: [],
+        qt_area_total: [ , [Validators.max(10000000),Validators.pattern(/^[0-9]*$/)]],
+        qt_area_construida: [],
+        piscina_adulto: new FormControl(false) ,
+        piscina_infantil: new FormControl(false) ,
+        churasqueira: new FormControl(false) ,
+        salao_festa:  new FormControl(false) ,
+        playground:  new FormControl(false) ,
+        area_pet:  new FormControl(false) ,
+        academia:  new FormControl(false) ,
+        condominio:  new FormControl(false) ,
+        imovel_mobiliado:  new FormControl(false) ,
+        varanda:  new FormControl(false) ,
+        quintal_privativo:  new FormControl(false) ,
+        obs_imovel: [''],
+
       }),
-    });
-    // Inicializa vazio
+    // NOVO: FormGroup para economico
+      economico: this.fb.group({
+        id_origem_renda_fk:  [null],
+        renda_comprovada: [],
+        saldo_fgts: [],
+        recursos_proprios: [],
+        renda_declarada: [],
+        selectedYear: new FormControl('')
+
+
+    }),
+  }),
+          // Inicializa vazio
   this.pessoaForm.get('nr_cpf');
   this.pessoaForm.get('nr_cpf')?.updateValueAndValidity({ onlySelf: true, emitEvent: false });
 
@@ -171,17 +249,45 @@ export class Cadpessoa implements OnInit {
     this.carregarTiposDeImovel();
     this.carregarSituacaoImovel();
     this.setupCpfCnpjListener();
-
-  // Escuta mudanças no campo 'type' para alternar validação
+    this.carregarSituacaoImovel();
+    this.carregarTiposDeCargos()
+    this.carregarOrigemRenda();
+    // Escuta mudanças no campo 'type' para alternar validação
     this.pessoaForm.get('tipo')?.valueChanges.subscribe(tipo => {
       this.toggleValidation(tipo);
     });
-
+    // 2. Define o valor inicial e dispara a validação
+    this.pessoaForm.get('tipo')?.setValue('PF');
+    this.toggleValidation('PF');
     // Configura a validação inicial para PF
     this.toggleValidation('PF');
+}
 
-  }
 
+carregarTiposDeCargos(): void {
+        this.tipoCargoService.getTiposCargos().subscribe({
+            next: (data) => {
+                // Atribui os dados recebidos da API à lista
+                this.tiposCargos = data;
+                this.tiposCargos.sort((a, b) => {
+                const nomeA = a.ds_cargo.toUpperCase(); // Para comparação sem case-sensitive
+                const nomeB = b.ds_cargo.toUpperCase();
+                if (nomeA < nomeB) {
+                    return -1; // 'a' vem antes de 'b'
+                }
+                if (nomeA > nomeB) {
+                    return 1; // 'b' vem antes de 'a'
+                }
+                return 0; // Os nomes são iguais
+                });
+
+
+            },
+            error: (err) => {
+                console.error('Erro ao carregar tipos de cargo:', err);
+            }
+        });
+    }
 
 // Método para trocar de aba
   switchTab(tab: string) {
@@ -190,13 +296,38 @@ export class Cadpessoa implements OnInit {
 
  carregarTiposDeImovel(): void {
         this.tipoImovelService.getTiposImoveis().subscribe({
+    next: (dados) => {
+      this.tiposDeImovel = dados;
+                // Atribui os dados recebidos da API à lista
+                this.tiposDeImovel = dados;
+                this.cdr.detectChanges();
+                this.tiposDeImovel.sort((a, b) => {
+                const nomeA = (a.ds_imovel ?? "").toUpperCase(); // Para comparação sem case-sensitive
+                const nomeB = (b.ds_imovel ?? "").toUpperCase();
+
+                if (nomeA < nomeB) {
+                    return -1; // 'a' vem antes de 'b'
+                }
+                if (nomeA > nomeB) {
+                    return 1; // 'b' vem antes de 'a'
+                }
+                return 0; // Os nomes são iguais
+
+                });
+              }
+
+        });
+    }
+
+    carregarOrigemRenda(): void {
+        this.origemRendaSerrvice.getOrigemRenda().subscribe({
             next: (data) => {
                 // Atribui os dados recebidos da API à lista
-                this.tiposDeImovel = data;
+                this.origemDaRenda = data;
 
-                this.tiposDeImovel.sort((a, b) => {
-                const nomeA = a.tipo_imovel.toUpperCase(); // Para comparação sem case-sensitive
-                const nomeB = b.tipo_imovel.toUpperCase();
+                this.origemDaRenda.sort((a, b) => {
+                const nomeA = (a.nm_origem_renda || "").toUpperCase(); // Para comparação sem case-sensitive
+                const nomeB = (b.nm_origem_renda || "").toUpperCase();
 
                 if (nomeA < nomeB) {
                     return -1; // 'a' vem antes de 'b'
@@ -209,11 +340,13 @@ export class Cadpessoa implements OnInit {
                 });
             },
             error: (err) => {
-                console.error('Erro ao carregar tipos de imóvel:', err);
+                console.error('Erro ao carregar tipo de renda:', err);
                 // Lógica de tratamento de erro (ex: mostrar mensagem ao usuário)
             }
         });
     }
+
+
 
     carregarSituacaoImovel(): void {
         this.situacaoImovelService.getSituacaoImoveis().subscribe({
@@ -244,24 +377,28 @@ export class Cadpessoa implements OnInit {
 
     formatarValor(campo: string) {
       const control = this.pessoaForm.get(campo);
-      if (control && control.value) {
-      let valorLimpo = control.value.replace(/\D/g, ''); // Remove tudo que não é dígito
+    let valor = control?.value;
 
-      if (valorLimpo) {
-        // 2. Formatar (Exemplo: 123456 -> R$ 1.234,56)
-        // Lógica de formatação (pode ser complexa dependendo do formato final)
-        const valorFormatado = new Intl.NumberFormat('pt-BR', {
-          style: 'currency',
-          currency: 'BRL',
-          minimumFractionDigits: 2
-        }).format(parseFloat(valorLimpo) / 100);
+    if (valor) {
+      // Remove pontos de milhar e troca vírgula por ponto para o cálculo
+      let valorLimpo = valor.toString().replace(/\./g, '').replace(',', '.');
+      let numero = parseFloat(valorLimpo);
 
-        // 3. Atualizar o valor do FormControl
-        control.setValue(valorFormatado, { emitEvent: false }); // 'emitEvent: false' evita loops
-      }
+      if (!isNaN(numero)) {
+        // Se for maior que 10 milhões, força o limite
+        if (numero > 100000000) numero = 1000000000;
+
+        // Formata para o padrão brasileiro visual: 10.000.000,00
+        const formatado = numero.toLocaleString('pt-BR', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        });
+
+      control?.setValue(formatado, { emitEvent: false });
+
     }
   }
-
+}
 
 
 // Opcional: Configura a escuta reativa com debounce para não sobrecarregar o backend
@@ -325,7 +462,7 @@ verificarCpfExistente(cpf: string) {
       this.pessoaForm.get(this.cpfControlName)?.setErrors({ 'jaExiste': true });
     } else {
       // CPF não cadastrado — segue o fluxo normalmente, sem alertas
-      this.pessoaForm.get(this.cpfControlName)?.setErrors(null);
+      this.pessoaForm.get(this.cpfControlName)?.valid;
     }
   });
 }
@@ -401,18 +538,15 @@ verificarCpfExistente(cpf: string) {
   buscarCep() {
     this.erroBusca = false;
     const cepControl = this.enderecoForm.get('cep');
-
     // Valida se o campo CEP está preenchido e é válido
     if (cepControl && cepControl.valid) {
       this.loading = true;
       const cepValue = cepControl.value;
-
       this.cepService.buscarEndereco(cepValue).pipe(
         take(1) // Pega apenas a primeira emissão e finaliza
       ).subscribe({
         next: (endereco: Endereco) => {
-          this.loading = false;
-
+         this.loading = true;
           if (endereco.erro) {
             this.erroBusca = true;
             this.limparCamposEndereco();
@@ -460,6 +594,7 @@ verificarCpfExistente(cpf: string) {
 
 */
 
+
  toggleValidation(tipo: string): void {
     const cpfControl = this.pessoaForm.get('nr_cpf');
     const nomeControl = this.pessoaForm.get('nome');
@@ -494,6 +629,7 @@ verificarCpfExistente(cpf: string) {
     nomeFantasiaControl?.updateValueAndValidity();
   }
 
+
   // Helper para verificar se o campo está inválido e foi tocado/modificado
   isInvalid(controlName: string, groupName: string = '', ): boolean {
      let control;
@@ -515,17 +651,21 @@ verificarCpfExistente(cpf: string) {
 /*
 *  pessoaModel
 */
-      this.Pessoa.id_tipo_pessoa_fk = 1;
-      this.Pessoa.id_cargo_func_fk = 1;
+      this.Pessoa.id_cargo_func_fk = this.pessoaForm.value.tipoCargo
       this.Pessoa.id_situacao_fk = 1
       this.Pessoa.nome = this.pessoaForm.value.nome;
       if ( this.pessoaForm.value.tipo == 'PF') {
+           this.Pessoa.id_tipo_pessoa_fk = 1;
            this.Pessoa.id_cpf_cnpj = this.pessoaForm.value.nr_cpf;
         } else{
+            this.Pessoa.id_tipo_pessoa_fk = 2;
             this.Pessoa.id_cpf_cnpj = this.pessoaForm.value.nr_cpf;
       }
+      this.Pessoa.rg = this.pessoaForm.value.rg;
       this.Pessoa.orgao = this.pessoaForm.value.orgEmis;
       this.Pessoa.dt_expedicao = null
+      console.log(" pessoa  ==== ", this.pessoaForm.value )
+      console.log(" pessoa  ==== ", this.Pessoa )
       this.continuaCadastro()
   }
  }
@@ -547,8 +687,15 @@ verificarCpfExistente(cpf: string) {
       complete: () => {
         this.cadastaContato()
         this.cadastraEndereco();
+        if(this.Pessoa.id_tipo_pessoa_fk == 2 ){
+            this.cadastrarEmpresa();
+        }
+        this.cadastraInteresse();
+        this.cadastraEconomico();
+
      }
     });
+
  };
 /*----------------------------------------------
 *  Cadastro Contato
@@ -571,22 +718,75 @@ cadastraEndereco(){
       this.Endereco.cep = this.pessoaForm.value.endereco.cep;
       this.Endereco.numero =  this.pessoaForm.value.endereco.numero;
       this.Endereco.complemento = this.pessoaForm.value.endereco.complemento;
-      this.enderecoService.cadastrarEndereco(this.Endereco).subscribe({
-      complete: () => {
-           this.pessoaForm.reset();
-           alert('Cadastro de realizado com sucesso!');
-     }
-    });
+      this.enderecoService.cadastrarEndereco(this.Endereco).subscribe();
 };
+
+
 /*----------------------------------------------
-*  Cadastro Empresa
+*  Cadastro Interesse
 *-----------------------------------------------
 */
- cadastraEmpresa(){
-      this.Empresa.id_pessoa_fk = this.id
-      this.Empresa.nm_fantasia = this.pessoaForm.value.nmFantasia;
-      this.Empresa.rz_social = this.pessoaForm.value.rzSocial;
-      this.empresaService.cadastrarEmpresa(this.Empresa).subscribe({
+cadastraInteresse(){
+   const form = this.pessoaForm.value.interesse;
+
+ //      console.log( "his.pessoaForm.value.interesse    == ", this.pessoaForm.value.interesse )
+    // Criando um novo objeto para garantir a limpeza dos dados
+    this.Interesse = {
+        ...this.Interesse,
+        id_pessoa_fk: this.id,
+
+        id_sit_imovel_fk: form.id_situacaoImovel,
+
+        id_tp_imovel_fk: form.id_tipoImovel,
+
+        // Tratamento de Moeda (se houver)
+        vr_venda: this.limparMoeda(form.vr_venda),
+        vr_aluguel: this.limparMoeda(form.vr_aluguel),
+
+        // Garantindo valores para os booleanos (evita undefined no banco)
+
+        piscina_adulto: !!form.piscina_adulto,
+        piscina_infantil: !!form.piscina_infantil,
+        qt_dorms: form.qt_dorms,
+        qt_wc: form.qt_wc,
+        qt_swet: form.qt_swet,
+        qt_lavabo: form.qt_lavabo,
+        qt_vagas_garagem: form.qt_vagas_garagem,
+        qt_area_construida: form.qt_area_construida,
+        qt_area_total: form.qt_area_total,
+        churasqueira: !!form.churasqueira,
+        imovel_mobiliado: !!form.imovel_mobiliado,
+        salao_festa: !!form.salao_festa,
+        playground: !!form.playground,
+        area_pet: !!form.area_pet,
+        academia: !!form.academia,
+        condominio: !!form.condominio,
+        varanda: !!form.varanda,
+        quintal_privativo: !!form.quintal_privativo,
+        obs_imovel: form.obs_imovel,
+
+    };
+    this.interesseService.cadastrarInteresse(this.Interesse).subscribe()
+
+}
+/*----------------------------------------------
+*  Cadastro Economico
+*-----------------------------------------------
+*/
+cadastraEconomico(){
+     const formValues = this.pessoaForm.value.economico;
+
+      this.Economico = {
+        ...this.Economico,
+      id_pessoa_fk: this.id,
+      id_origem_renda_fk: formValues.id_origem_renda_fk,
+      renda_comprovada: this.limparMoeda(formValues.renda_comprovada),
+      saldo_fgts:       this.limparMoeda(formValues.saldo_fgts),
+      recursos_proprios: this.limparMoeda(formValues.recursos_proprios),
+      renda_declarada:  this.limparMoeda(formValues.renda_declarada)
+      };
+      console.log (" formValues = ", formValues )
+      this.economicoService.cadastrarEconomico(this.Economico).subscribe({
       complete: () => {
           this.pessoaForm.reset();
            alert('Cadastro de realizado com sucesso!');
@@ -595,6 +795,27 @@ cadastraEndereco(){
     });
 };
 
+limparMoeda(valor: any): number {
+  if (typeof valor !== 'string') return valor;
 
+  const valorLimpo = valor
+    .replace('R$', '')      // Remove o símbolo
+    .replace(/\./g, '')     // Remove o ponto de milhar
+    .replace(',', '.')      // Troca a vírgula decimal por ponto
+    .trim();
+
+  return parseFloat(valorLimpo) || 0;
+}
+
+/*----------------------------------------------
+*  Cadastro Empresa
+*-----------------------------------------------
+*/
+ cadastrarEmpresa(){
+      this.Empresa.id_pessoa_fk = this.id
+      this.Empresa.nm_fantasia = this.pessoaForm.value.nmFantasia;
+      this.Empresa.rz_social = this.pessoaForm.value.rzSocial;
+      this.empresaService.cadastrarEmpresa(this.Empresa).subscribe()
+  };
 };
 
