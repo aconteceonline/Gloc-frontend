@@ -24,6 +24,12 @@ const routes: Routes = [
         pathMatch: 'full',
         data: { titulo: 'MENU CONSULTAR', subTitulo: 'Realiza Consulta de novas Pessoas, Imóveis e Locações'}
       },
+       {
+       path: 'menuconsultar/pessoas',
+        loadChildren: () => import ('../consultas/consulta-pessoas/consultar-pessoas-module').then(m => m.ConsultarPessoasModule),
+        pathMatch: 'full',
+        data: { titulo: 'MENU CONSULTAR', subTitulo: 'Realiza Consulta de novas Pessoas, Imóveis e Locações'}
+      },
       {
         path: 'menucadastrar/pessoa',
         loadChildren: () => import ('../cadastro/cad-pessoa/cad-pessoa-module').then(m => m.CadPessoaModule),

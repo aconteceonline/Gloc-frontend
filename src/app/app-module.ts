@@ -11,6 +11,7 @@ import { authInterceptor } from './auth-interceptor';
 import { MatDialogModule } from '@angular/material/dialog';
 
 
+
 //import { PessoaModal } from './glocModal/pessoa-modal/pessoa-modal';
 
 
@@ -20,6 +21,7 @@ import { MatDialogModule } from '@angular/material/dialog';
   declarations: [
     App,
     Login,
+
 
   ],
   imports: [

@@ -68,7 +68,7 @@ export class Layout  implements  OnInit {
         isSubMenu: true,
         children: [
             { title: 'Novo Cliente', link: '/principal/menucadastrar/pessoa' },
-            { title: 'Lista de Clientes', link: '/menucadastrar/pessoa' },
+            { title: 'Lista de Clientes', link: '/principal/menuconsultar/pessoas' },
         ]
     },
 
