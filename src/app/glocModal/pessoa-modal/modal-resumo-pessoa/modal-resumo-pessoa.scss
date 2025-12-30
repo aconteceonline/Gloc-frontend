@@ -1,0 +1,40 @@
+@media print {
+  :host ::ng-deep {
+    // Esconde absolutamente tudo
+    body * {
+      visibility: hidden !important;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+
+    // Mostra apenas o que está no ID e remove efeitos de transparência/blur
+    #secao-imprimivel, #secao-imprimivel * {
+      visibility: visible !important;
+      display: block !important; // Importante para layout
+      backdrop-filter: none !important;
+      filter: none !important;
+    }
+
+    #secao-imprimivel {
+      position: absolute !important;
+      left: 0 !important;
+      top: 0 !important;
+      width: 100% !important;
+      box-shadow: none !important;
+      border: none !important;
+    }
+
+    // Esconde botões e elementos marcados
+    .no-print, button {
+      display: none !important;
+      visibility: hidden !important;
+    }
+
+    // Garante que o texto dentro do textarea saia impresso (navegadores às vezes ignoram o valor do textarea)
+    textarea {
+      border: none !important;
+      background: none !important;
+      resize: none !important;
+    }
+  }
+}

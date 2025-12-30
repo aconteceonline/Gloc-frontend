@@ -1,66 +1,151 @@
-<div class="p-6 bg-gray-100 min-h-screen">
-  <div class="max-w-4xl mx-auto bg-white/70 backdrop-blur-md shadow-lg rounded-xl overflow-hidden border border-white/40">
+<div class="w-full px-4 md:px-8 py-6">
+  <div class="w-full bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
 
-    <div class="px-6 py-4 border-b border-gray-200/50 flex justify-between items-center bg-white/30">
-      <h2 class="text-xl font-semibold text-gray-800">Lista de Pessoas</h2>
-      <button class="bg-blue-600/90 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm transition shadow-sm">
-        + Novo Cadastro
-      </button>
+    <div class="p-6 border-b border-gray-100">
+
+      <div class="flex justify-between items-center mb-4">
+        <div>
+          <h2 class="text-xl font-bold text-gray-800">Lista de Pessoas</h2>
+          <p class="text-xs text-gray-500">Visualize e gerencie seus registros</p>
+        </div>
+      <a routerLink="/principal/menucadastrar/pessoa"
+        class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg text-sm font-semibold transition-all shadow-md shadow-blue-200 flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+        </svg>
+         Novo Cadastro
+      </a>
+      </div>
+
+<div class="w-full max-w-2xl relative">
+  <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+    <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+    </svg>
+  </span>
+
+  <input
+    type="text"
+    [(ngModel)]="searchText"
+    placeholder="Pesquisar por nome, contato, ocupação, renda e status"
+    class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white outline-none transition-all text-sm placeholder-gray-400"
+  />
+</div>
+
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse" *ngIf="(pessoasPaginadas | filterPessoas: searchText) as results">
+        <thead class="bg-gray-50 text-gray-500 uppercase text-[11px] tracking-wider">
+          <tr>
+            <th class="px-6 py-4 font-semibold">Nome Social</th>
+            <th class="px-6 py-4 font-semibold">Contato</th>
+            <th class="px-6 py-4 font-semibold">Perfil</th>
+            <th class="px-6 py-4 font-semibold">Obejtivo</th>
+            <th class="px-6 py-4 font-semibold">Renda</th>
+            <th class="px-6 py-4 font-semibold">Local</th>
+            <th class="px-6 py-4 font-semibold">Atualizado</th>
+            <th class="px-6 py-4 font-semibold">Status</th>
+            <th class="px-6 py-4 font-semibold text-center">Ações</th>
+          </tr>
+        </thead>
+
+        <tbody class="divide-y divide-gray-100" *ngIf="results.length > 0; else noData">
+          <tr *ngFor="let pessoa of results" class="hover:bg-gray-50/80 transition">
+
+            <td class="px-6 py-4">
+              <button
+                type="button"
+                (click)="prepararResumo(pessoa)"
+                class="text-blue-600 hover:text-blue-800 font-semibold underline underline-offset-4 decoration-blue-200">
+                {{ pessoa.nome_social }}
+              </button>
+            </td>
+            <td class="px-6 py-4">
+              <button
+                  type="button"
+                  (click)="prepararWhats(pessoa)"
+                  class="flex items-center space-x-2 w-fit px-3 py-1 rounded-full bg-green-500/10 hover:bg-green-500/20 text-green-700 border border-green-200/50 backdrop-blur-sm transition-all group"
+                  title="Configurar mensagem WhatsApp"
+                >
+                  <svg class="w-4 h-4 fill-current group-hover:scale-110 transition-transform" viewBox="0 0 24 24">
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                  </svg>
+                  <span class="font-medium underline-offset-4 group-hover:underline">
+
+                    <button type="button" (click)="prepararWhats(pessoa)">
+                      <span>{{ pessoa.nr_contato | telefoneMask }}</span>
+                    </button>
+                  </span>
+
+             </button>
+            </td>
+            <td class="px-6 py-4 text-sm text-gray-600">{{ pessoa.ds_cargo }}</td>
+            <td class="px-6 py-4 text-sm text-gray-600">{{ pessoa.objetivo_interesse }}</td>
+            <td class="px-6 py-4 text-sm font-medium text-gray-900">{{ pessoa.renda_comprovada | currency:'BRL' }}</td>
+            <td class="px-6 py-4 text-sm text-gray-600">{{ pessoa.municipio + '/'}}{{  pessoa.estado }}</td>
+            <td class="px-6 py-4 text-sm text-gray-600">{{ pessoa.updated_at  | date:'dd/MM/yyyy' }}</td>
+
+           <td class="px-6 py-4">
+              <button
+                  type="button"
+                  (click)="prepararWhats(pessoa)"
+                  class="flex items-center space-x-2 w-fit px-3 py-1 rounded-full bg-green-500/10 hover:bg-green-500/20 text-green-700 border border-green-200/50 backdrop-blur-sm transition-all group"
+                  title="Configurar mensagem WhatsApp"
+                >
+                  <svg class="w-4 h-4 fill-current group-hover:scale-110 transition-transform" viewBox="0 0 24 24">
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                  </svg>
+                  <span class="font-medium underline-offset-4 group-hover:underline">
+
+                    <button type="button" (click)="prepararWhats(pessoa)">
+                      <span>{{ pessoa.nr_contato | telefoneMask }}</span>
+                    </button>
+                  </span>
+
+             </button>
+            </td>
+            <td class="px-6 py-4 text-center text-sm font-medium">
+              <button (click)="editarPessoa(pessoa)" class="text-indigo-600 hover:text-indigo-900 mr-3">Editar</button>
+              <button (click)="confirmarExclusao(pessoa)" class="text-red-600 hover:text-red-900">Excluir</button>
+            </td>
+          </tr>
+        </tbody>
+        <ng-template #noData>
+          <tbody>
+            <tr>
+              <td colspan="6" class="px-6 py-20 text-center">
+                <div class="inline-flex flex-col items-center p-10 rounded-3xl bg-blue-50/50 border border-blue-100 shadow-sm">
+
+                  <div class="w-20 h-20 bg-blue-100 text-blue-500 rounded-full flex items-center justify-center mb-6 shadow-inner">
+                    <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                  </div>
+
+                  <h3 class="text-xl font-bold text-slate-800 mb-2">
+                    Nenhum resultado encontrado
+                  </h3>
+
+                  <p class="text-slate-500 text-sm max-w-xs mx-auto mb-8">
+                    Não encontramos registros correspondentes a <span class="font-semibold text-blue-600">"{{ searchText }}"</span>.
+                  </p>
+
+                  <button
+                    (click)="searchText = ''"
+                    class="group flex items-center gap-2 px-6 py-2.5 bg-blue-500 hover:bg-blue-600 text-white text-sm font-bold rounded-xl transition-all shadow-lg shadow-blue-200"
+                  >
+                    <svg class="w-4 h-4 group-hover:rotate-180 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    Limpar Pesquisa
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </ng-template>
+      </table>
     </div>
-
-    <table class="w-full text-left border-collapse">
-      <thead class="bg-gray-100 text-gray-600 uppercase text-xs">
-        <tr>
-          <th class="px-6 py-3 font-medium">Nome</th>
-          <th class="px-6 py-3 font-medium">Contato</th>
-          <th class="px-6 py-3 font-medium">Status</th>
-          <th class="px-6 py-3 font-medium text-center">Ações</th>
-        </tr>
-      </thead>
-      <tbody class="divide-y divide-gray-200">
-        <tr *ngFor="let pessoa of pessoasPaginadas" class="hover:bg-gray-50 transition">
-          <td class="px-6 py-4">
-            <div class="text-sm font-medium text-gray-900">{{ pessoa.nome }}</div>
-            <div class="text-sm text-gray-500">{{ pessoa.email }}</div>
-          </td>
-          <td class="px-6 py-4">
-            <a
-              [href]="'https://wa.me/' + limparNumero(pessoa.contato_formatado)"
-              target="_blank"
-              class="flex items-center space-x-2 w-fit px-3 py-1 rounded-full bg-green-500/10 hover:bg-green-500/20 text-green-700 border border-green-200/50 backdrop-blur-sm transition-all group"
-              title="Chamar no WhatsApp"
-            >
-              <svg class="w-4 h-4 fill-current group-hover:scale-110 transition-transform" viewBox="0 0 24 24">
-                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
-              </svg>
-              <span class="font-medium underline-offset-4 group-hover:underline">
-                {{ pessoa.contato_formatado }}
-              </span>
-            </a>
-          </td>
-          <td class="px-6 py-4">
-            <span [ngClass]="{
-                'bg-green-100 text-green-700': 'Ativo',
-                'bg-red-100 text-red-700':'Inativo'
-              }" class="px-2 py-1 rounded-full text-xs font-semibold">
-              {{ pessoa.nome_status }}
-            </span>
-          </td>
-          <td class="px-6 py-4 text-center">
-            <div class="flex justify-center space-x-2">
-              <button (click)="editarPessoa(pessoa)"
-                class="px-3 py-1.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-md text-sm font-medium transition">
-                Editar
-              </button>
-              <button (click)="confirmarExclusao(pessoa)"
-                class="px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-md text-sm font-medium transition">
-                Excluir
-              </button>
-            </div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
 
     <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
       <span class="text-sm text-gray-700">
@@ -91,7 +176,7 @@
       </div>
       <h3 class="text-lg font-bold text-center text-gray-900">Confirmar Exclusão</h3>
       <p class="mt-2 text-sm text-center text-gray-500">
-        Você tem certeza que deseja excluir <strong>{{ pessoaParaExcluir?.nome }}</strong>? Esta ação é irreversível.
+        Você tem certeza que deseja excluir <strong>{{ pessoaParaExcluir?.nome_social }}</strong>? Esta ação é irreversível.
       </p>
     </div>
 
@@ -105,3 +190,11 @@
     </div>
   </div>
 </div>
+
+<app-modal-msg-whatsapp
+  #modalWhats
+  [templatesWhats]="templatesWhats">
+</app-modal-msg-whatsapp>
+
+<app-modal-resumo-pessoa #modalResumo></app-modal-resumo-pessoa>
+

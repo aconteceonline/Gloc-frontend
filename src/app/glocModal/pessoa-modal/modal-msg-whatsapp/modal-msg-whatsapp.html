@@ -1,0 +1,30 @@
+<div *ngIf="exibirModalWhats" class="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+
+  <div class="fixed inset-0 bg-black/60 backdrop-blur-sm" (click)="fecharModalWhats()"></div>
+
+  <div class="relative bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border border-gray-100">
+    <div class="p-4 border-b flex justify-between items-center">
+      <h3 class="font-bold">Enviar Mensagem</h3>
+      <button (click)="fecharModalWhats()" class="text-gray-400">✕</button>
+    </div>
+
+    <div class="p-6">
+      <p class="text-sm mb-4">Enviar para: <b>{{ pessoaSelecionada?.nome_social }}</b></p>
+
+      <div class="flex flex-wrap gap-2 mb-4">
+        <button *ngFor="let t of templatesWhats"
+                (click)="aplicarTemplate(t.texto)"
+                class="text-xs bg-blue-50 text-blue-600 px-3 py-2 rounded-lg hover:bg-blue-100">
+          {{ t.label }}
+        </button>
+      </div>
+
+      <textarea [(ngModel)]="mensagemCustom" class="w-full border rounded-xl p-3 text-sm h-32"></textarea>
+    </div>
+
+    <div class="p-4 bg-gray-50 flex gap-2">
+      <button (click)="fecharModalWhats()" class="flex-1 py-2 border rounded-lg">Cancelar</button>
+      <button (click)="dispararWhatsapp()" class="flex-1 py-2 bg-green-600 text-white rounded-lg">Enviar WhatsApp</button>
+    </div>
+  </div>
+</div>

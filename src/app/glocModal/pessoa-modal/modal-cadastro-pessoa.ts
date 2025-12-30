@@ -55,6 +55,7 @@ export class ModalCadastroPessoa implements OnInit  {
     id_situacao_fk: 0,
     id_cpf_cnpj: 0,
     nome: '',
+    nome_social: '',
     orgao: '',
     dt_expedicao: '',
    }
@@ -98,6 +99,7 @@ export class ModalCadastroPessoa implements OnInit  {
       [this.cnpjControlName]: [''], // A validação 'required' será adicionada no toggleValidation
       rg: [''],
       nome: ['', Validators.required],
+      nome_social: ['', Validators.required],
       nmFantasia: ['', Validators.required],
       rzSocial: ['', Validators.required],
       email: [''],
@@ -333,6 +335,7 @@ onCelularBlur() {
  toggleValidation(tipo: string): void {
     const cpfControl = this.form.get('nr_cpf');
     const nomeControl = this.form.get('nome');
+    const nome_socialControl = this.form.get('nome_social');
     const cnpjControl = this.form.get('nr_cnpj');
     const razaoSocialControl = this.form.get('rzSocial');
     const nomeFantasiaControl = this.form.get('nmFantasia');
@@ -340,12 +343,12 @@ onCelularBlur() {
     if (tipo === 'PF') {
       // Habilita validação PF
       nomeControl?.setValidators([Validators.required]);
-
+      nome_socialControl?.setValidators([Validators.required]);
       // Desabilita validação PJ
       cnpjControl?.setValidators(null);
       razaoSocialControl?.setValidators(null);
       nomeFantasiaControl?.setValidators(null);
-
+      nome_socialControl?.setValidators(null);
     } else { // PJ
       // Habilita validação PJ
       razaoSocialControl?.setValidators([Validators.required]);
@@ -354,11 +357,13 @@ onCelularBlur() {
       // Desabilita validação PF
       cpfControl?.setValidators(null);
       nomeControl?.setValidators(null);
+      nome_socialControl?.setValidators(null);
     }
 
     // Atualiza o estado dos controles
     cpfControl?.updateValueAndValidity();
     nomeControl?.updateValueAndValidity();
+    nome_socialControl?.updateValueAndValidity();
     cnpjControl?.updateValueAndValidity();
     razaoSocialControl?.updateValueAndValidity();
     nomeFantasiaControl?.updateValueAndValidity();
@@ -396,6 +401,7 @@ onCelularBlur() {
 
       if ( this.form.value.tipo == 'PF') {
            this.Pessoa.nome = this.form.value.nome;
+           this.Pessoa.nome_social = this.form.value.nome_social;
            this.Pessoa.id_cpf_cnpj = this.form.value.nr_cpf;
             console.log( ' cpf  ',     this.Pessoa.id_cpf_cnpj   )
         } else{

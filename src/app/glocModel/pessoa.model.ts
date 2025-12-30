@@ -4,6 +4,7 @@ export interface PessoaModel{
     id_cargo_func_fk?: number,
     id_situacao_fk?: number,
     nome: string;
+    nome_social: string;
     id_cpf_cnpj?: number,
     rg?: string,
     orgao?: string,

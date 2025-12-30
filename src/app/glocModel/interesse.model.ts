@@ -3,7 +3,7 @@ export interface InteresseModel{
     id_pessoa_fk?: number | null;
     id_sit_imovel_fk?: number | null;
     id_tp_imovel_fk?: number | null;
-    vr_venda?: number | null;
+    vr_imovel?: number | null;
     vr_aluguel?: number | null;
     qt_dorms?: number | null;
     qt_wc?: number | null;
@@ -23,6 +23,9 @@ export interface InteresseModel{
     varanda?: boolean,
     imovel_mobiliado: boolean,
     quintal_privativo?: boolean,
-    obs_imovel: string,
+    objetivo_interesse: string,
+    obs_interesse: string,
+    estado: string,
+    municipio: string,
 
 }

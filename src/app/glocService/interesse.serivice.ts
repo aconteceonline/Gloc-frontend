@@ -13,6 +13,7 @@ export class InteresseService {
   private readonly apiUrl = "http://localhost:3001/perfilinteresse";
 
 
+
   constructor(private http: HttpClient) { }
 
 
@@ -20,4 +21,14 @@ export class InteresseService {
        return this.http.post<InteresseModel>(this.apiUrl, glocModel);
   }
 
+// Método corrigido
+  atualizarObservacao(id: number, observacao: string): Observable<any> {
+    console.log("Iniciando atualização do interesse ID:", id);
+
+    // Montamos a URL dinamicamente aqui dentro usando crases (backticks)
+    // A rota final será: http://localhost:3001/perfilinteresse/48
+    return this.http.patch(`${this.apiUrl}/${id}`, {
+      obs_interesse: observacao
+    });
+  }
 }

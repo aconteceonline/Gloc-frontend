@@ -1,14 +1,27 @@
-import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, OnInit, viewChild } from '@angular/core';
 import { ViewListaPessoasModel } from '../../../glocModel/view-lista-pessoas.model';
 import { ViewListarPessoasService } from '../../../glocService/view-lista-pessoas.service';
+import { CurrencyPipe } from '@angular/common';
+import { ModalMsgWhatsapp } from '../../../glocModal/pessoa-modal/modal-msg-whatsapp/modal-msg-whatsapp';
+import { ModalResumoPessoa } from '../../../glocModal/pessoa-modal/modal-resumo-pessoa/modal-resumo-pessoa';
+
 
 export interface Pessoa  {
   id: number;
-  nome: string;
+  id_perfil_interesse: number;
+  nome_social: string;
   email: string;
-  nome_status: string;        // Vem da tabela tstatus
-  contato_formatado: string;  // Versão com máscara para exibir
+  renda_comprovada: number;
+  nome_status: string;
+  nr_contato: string;
+  ds_cargo: string;
+  objetivo_interesse: string,
+  obs_interesse: string,
+  estado: string,
+  municipio: string,
+  updated_at: Date
 }
+
 
 
 @Component({
@@ -18,23 +31,95 @@ export interface Pessoa  {
   styleUrl: './listar-pessoas.scss'
 })
 export class ListarPessoas implements OnInit {
- listarPessoas: ViewListaPessoasModel[] = [];
+// Agora apontando para o novo nome da classe
 
- private viewListarPessoasService  = inject(ViewListarPessoasService);
+  pessoaSelecionada: any = null;
+  mensagemCustom: string = '';
+  exibirModalWhats: boolean = false; // Controle do modal
+  exibirModalResumo: boolean = false; // Controle do modal
+  templatesWhats = [
+  {
+    id: 1,
+    label: '👋 Saudação Inicial',
+    texto: 'Olá [NOME], tudo bem? Gostaria de confirmar o recebimento do seu cadastro em nossa plataforma.'
+  },
+  {
+    id: 2,
+    label: '🏠 Interesse em Imóvel',
+    texto: 'Olá [NOME]! Vi que você tem interesse em um imóvel com [DORMITÓRIOS] dormitórios. Temos algumas opções novas, podemos conversar?'
+  },
+  {
+    id: 3,
+    label: '📄 Documentação',
+    texto: 'Olá! Para prosseguirmos com a sua análise, você poderia me enviar uma foto do seu RG e comprovante de renda?'
+  }
+];
+  listarPessoas: ViewListaPessoasModel[] = [];
+  readonly modalWhats = viewChild.required<ModalMsgWhatsapp>('modalWhats');
+  modalResumo = viewChild.required<ModalResumoPessoa>('modalResumo');
+  private viewListarPessoasService  = inject(ViewListarPessoasService);
 
- private cdr  = inject (ChangeDetectorRef);
-
+  private cdr  = inject (ChangeDetectorRef);
+  private currencyPipe  = inject (CurrencyPipe);
+  searchText: string = '';
 
 
   ngOnInit(): void {
     this.carregarPessoas();
 
   }
+
+// 2. O MÉTODO QUE CHAMA A APLICAÇÃO:
+  prepararWhats(pessoa: any) {
+      const modal = this.modalWhats();
+      if (modal) {
+        modal.abrir(pessoa); // Chama a função do filho
+      } else {
+        console.error('Erro: O modal não foi encontrado via ViewChild!');
+    }
+  }
+
+// 2. O MÉTODO QUE CHAMA A APLICAÇÃO:
+  prepararResumo(pessoa: any) {
+      this.modalResumo().abrir(pessoa);
+  }
+
+// Crie a função para fechar
+fecharModalWhats() {
+    this.exibirModalWhats = false;
+    this.pessoaSelecionada = null;
+}
+fechar() {
+    this.exibirModalResumo = false;
+    this.pessoaSelecionada = null;
+}
+// Atualize o disparar para fechar o modal
+dispararWhatsapp() {
+    if (!this.pessoaSelecionada) return;
+
+    const numeroLimpo = this.pessoaSelecionada.nr_contato.replace(/\D/g, '');
+    const url = `https://wa.me/55${numeroLimpo}?text=${encodeURIComponent(this.mensagemCustom)}`;
+
+    window.open(url, '_blank');
+    this.fecharModalWhats();
+}
+/*
+  aplicarTemplate(texto: string) {
+    // Substitui os placeholders pelos dados reais da pessoa selecionada
+    this.mensagemCustom = texto
+      .replace('[NOME]', this.pessoaSelecionada?.nome_social || 'Cliente')
+      .replace('[CARGO]', this.pessoaSelecionada?.ds_cargo || 'sua área')
+      .replace('[RENDA]', new Intl.NumberFormat('pt-BR', {
+          style: 'currency',
+          currency: 'BRL'
+      }).format(this.pessoaSelecionada?.renda_comprovada || 0));
+  }
+*/
   exibirModalExclusao = false;
   pessoaParaExcluir: Pessoa | null = null;
 // Configurações de Paginação
   paginaAtual: number = 1;
-  itensPorPagina: number = 2;
+  itensPorPagina: number = 5;
 
   // Getter para obter apenas as pessoas da página atual
   get pessoasPaginadas(): ViewListaPessoasModel[] {
@@ -47,7 +132,6 @@ export class ListarPessoas implements OnInit {
   get totalPaginas(): number {
     return Math.ceil(this.listarPessoas.length / this.itensPorPagina);
   }
-
   mudarPagina(novaPagina: number) {
     if (novaPagina >= 1 && novaPagina <= this.totalPaginas) {
       this.paginaAtual = novaPagina;
@@ -55,12 +139,10 @@ export class ListarPessoas implements OnInit {
   }
   editarPessoa(pessoa: ViewListaPessoasModel) {
     if (!pessoa.id) {
-    console.error('ID da pessoa não encontrado');
-    return;
-  }
-    console.log('Editando pessoa:', pessoa);
-    // Aqui você abriria um modal ou navegaria para uma rota de edição
-    alert(`Editar: ${pessoa.nome}`);
+      return;
+    }
+
+    alert(`Editar: ${pessoa.nome_social}`);
   }
 
   excluirPessoa(id: number) {
@@ -113,8 +195,8 @@ export class ListarPessoas implements OnInit {
                   this.cdr.detectChanges();
 
                   this.listarPessoas.sort((a, b) => {
-                      const nomeA = (a.nome ?? "").toUpperCase(); // Para comparação sem case-sensitive
-                      const nomeB = (b.nome ?? "").toUpperCase();
+                      const nomeA = (a.nome_social ?? "").toUpperCase(); // Para comparação sem case-sensitive
+                      const nomeB = (b.nome_social ?? "").toUpperCase();
                       if (nomeA < nomeB) {
                           return -1; // 'a' vem antes de 'b'
                       }

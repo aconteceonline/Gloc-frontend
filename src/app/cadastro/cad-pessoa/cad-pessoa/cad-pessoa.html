@@ -1,6 +1,6 @@
 <div class="flex items-center justify-center min-h-screen p-1 sm:p-1 lg:p-2">
   <div class="w-full max-w-4x2 mx-auto bg-white p-5 rounded-2xl shadow-lg">
-    <h2 class="text-2xl font-bold text-gray-800 mb-2">Cadastro de Novas Pessoas</h2>
+    <h2 class="text-2xl font-bold text-gray-800 mb-2">Cadastro de nova pessoa</h2>
     <p class="text-gray-600 mb-8">Preencha os campos abaixo para registrar uma nova pessoa.</p>
 
   <div class="tabs-header pt-0  pt-0  pr-50">
@@ -128,8 +128,11 @@
 
             <div>
               <label for="nmFantasia" class="block text-sm font-medium text-gray-700">Nome Social </label>
-              <input id="nmFantasia" type="text" formControlName="nmFantasia"  inputmode="test"   placeholder="nome social" type="text"
-                class="mt-1  py-2 w-70 border rounded-md bg-transparent placeholder:text-slate-400 text-slate-700 text-lg border border-slate-200 rounded-md  pl-2 transition duration-300 ease focus:outline-none focus:border-blue-500 hover:border-slate-500 shadow-sm focus:shadow">
+              <input id="nome_social" type="text" formControlName="nome_social"  inputmode="test"   placeholder="nome social" type="text"
+               class="mt-1 block w-full placeholder:text-slate-400 border rounded-md shadow-sm p-3 focus:ring-blue-500 text-gray-900 focus:outline-none "
+                [ngClass]="{'border-red-500': isInvalid('nome_social'), 'border-gray-300': !isInvalid('nome_social')}"
+              >
+               <p *ngIf="pessoaForm.get('nome_social')?.errors?.['required'] && isInvalid('nome_social')" class="mt-1 text-xs text-red-600">O nome social é obrigatório.</p>
             </div>
           </div>
           <div *ngIf="!isPessoaFisica" class="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 border-4 border-green-200 rounded-lg bg-green-50">
@@ -368,31 +371,65 @@
     <div class="tab-pane  pt-0  pr-50">
 
        <fieldset class="mb-30 ">
-          <legend class="text-lg font-semibold text-indigo-700 border-b border-indigo-200 w-full pb-2 mb-6">Dados Imóvel</legend>
+        <legend class="text-lg font-semibold text-indigo-700 border-b border-indigo-200 w-full pb-2 mb-6">Dados Imóvel</legend>
+        <div class="mt-4">
+          <label class="block text-sm font-bold text-gray-700 mb-3">Objetivo de Interesse</label>
+          <div class="grid grid-cols-3 gap-8 mb-8">
+            <button type="button"
+              (click)="pessoaForm.get('interesse.objetivo_interesse')?.setValue('Comprar')"
+              [ngClass]="pessoaForm.get('interesse.objetivo_interesse')?.value === 'Comprar' ? 'bg-blue-600 text-white shadow-lg' : 'bg-gray-100 text-gray-400'"
+              class="flex items-center justify-center px-4 py-3 border border-transparent rounded-xl text-sm font-bold transition-all">
+              Comprar
+            </button>
+
+            <button type="button"
+              (click)="pessoaForm.get('interesse.objetivo_interesse')?.setValue('Vender')"
+              [ngClass]="pessoaForm.get('interesse.objetivo_interesse')?.value === 'Vender' ? 'bg-blue-600 text-white shadow-lg' : 'bg-gray-100 text-gray-400'"
+              class="flex items-center justify-center px-4 py-3 border border-transparent rounded-xl text-sm font-bold transition-all">
+              Vender
+            </button>
+
+            <button type="button"
+              (click)="pessoaForm.get('interesse.objetivo_interesse')?.setValue('Alugar')"
+              [ngClass]="pessoaForm.get('interesse.objetivo_interesse')?.value === 'Alugar' ? 'bg-blue-600 text-white shadow-lg' : 'bg-gray-100 text-gray-400'"
+              class="flex items-center justify-center px-4 py-3 border border-transparent rounded-xl text-sm font-bold transition-all">
+              Alugar
+            </button>
+          </div>
+        </div>
+
           <div class="flex flex-col sm:flex-row sm:space-x-4">
-            <section class=" w-full space-y-5">
-
-
+            <section class=" w-full space-y-8">
               <div class="grid grid-cols-1 md:grid-cols-5 gap-5">
-                <div>
-                  <label class="block text-sm font-medium mb-1">Valor de Venda </label>
-                  <input id="vr_venda" type="text" class="mt-1 block w-full placeholder:text-slate-400 border  border-slate-200  rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 focus:outline-none "
-                    placeholder="Valor"
-                    formControlName="vr_venda"
-                    oninput="this.value = this.value.replace(/[^0-9]/g, '')"
-                    (blur)="formatarValor('interesse.vr_venda')"
+                  <div>
+                    <label class="block text-sm font-medium mb-1">Valor do Imóvel</label>
+                    <input class="mt-1 block w-full placeholder:text-slate-400 border  border-slate-200  rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 focus:outline-none "
+                      type="text"
+                      formControlName="vr_imovel"
+                      [ngClass]="{ 'bg-gray-100 cursor-not-allowed text-gray-800': pessoaForm.get('interesse.vr_imovel')?.disabled }"
+                      class="mt-1 block w-full border border-slate-200 rounded-md shadow-sm p-2 text-gray-900 focus:outline-none"
+                      placeholder="0"
+                       oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                    (blur)="formatarValor('interesse.vr_imovel')"
                     />
-                </div>
-                <div>
-                  <label class="block text-sm font-medium mb-1">Valor de Locação </label>
-                  <input id="vr_aluguel" type="text" class="mt-1 block w-full placeholder:text-slate-400 border  border-slate-200  rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 focus:outline-none "
-                    placeholder="Valor"
-                    formControlName="vr_aluguel"
-                    oninput="this.value = this.value.replace(/[^0-9]/g, '')"
-                    (blur)="formatarValor('interesse.vr_aluguel')"
-                  />
+                  </div>
 
-                </div>
+                  <div >
+                    <label class="block text-sm font-medium mb-1">Valor de Aluguel</label>
+                    <input class="mt-1 block w-full placeholder:text-slate-400 border  border-slate-200  rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 focus:outline-none "
+                      type="text"
+                      formControlName="vr_aluguel"
+                      [ngClass]="{ 'bg-gray-100 cursor-not-allowed text-gray-900': pessoaForm.get('interesse.vr_aluguel')?.disabled }"
+                      class="mt-1 block w-full border border-slate-200 rounded-md shadow-sm p-2 text-gray-900 focus:outline-none"
+                      placeholder="0"
+                       oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                    (blur)="formatarValor('interesse.vr_aluguel')"
+                    />
+                  </div>
+
+
+
+
                 <div>
                   <label class="block text-sm font-medium mb-1">Dormitórios</label>
                   <input  id="qt_dorms" class="mt-1  w-full placeholder:text-slate-400 border  border-slate-200  rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 focus:outline-none"
@@ -403,6 +440,7 @@
                     oninput="this.value = this.value.replace(/[^0-9]/g, '')"
                     formControlName="qt_dorms" />
                 </div>
+
                 <div>
                   <label class="block text-sm font-medium mb-1">Banheiro social</label>
                   <input  id="qt_wc" class="mt-1  w-full placeholder:text-slate-400 border  border-slate-200  rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 focus:outline-none"
@@ -470,9 +508,9 @@
                 <div >
                   <label class="block text-sm font-medium mb-1 text-gray-700 ">Tipo Imóvel</label>
                   <select id="id_tp_imovel_fk"  class="mt-1 block w-full placeholder:text-slate-400 border  border-slate-200  rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500  text-gray-900 focus:outline-none "
-                  formControlName="id_tipoImovel">
+                  formControlName="id_tp_imovel_fk">
                     <option value="" disabled>Selecione o Tipo de Imóvel</option>
-                    <option *ngFor="let id_tipoImovel of tiposDeImovel" [ngValue]="id_tipoImovel.id">
+                    <option *ngFor="let id_tipoImovel of tiposDeImovel" [value]="id_tipoImovel.id">
                             {{ id_tipoImovel.ds_imovel}}
                     </option>
 
@@ -481,7 +519,7 @@
                 <div >
                   <label class="block text-sm font-medium mb-1 text-gray-700 ">Situação do Imóvel</label>
                   <select id="id_sit_imovel_fk" class="mt-1 w-full block  placeholder:text-slate-400 border  border-slate-200  rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500  text-gray-900 focus:outline-none "
-                  formControlName="id_situacaoImovel">
+                  formControlName="id_sit_imovel_fk">
                     <option value="" disabled>Selecione a Situação do Imóvel</option>
                     <option *ngFor="let situacaoImovel of situacaoImovel" [value]="situacaoImovel.id">
                             {{ situacaoImovel.nm_situacao }}
@@ -489,8 +527,30 @@
 
                   </select>
                 </div>
+      <div>
+      <label class="block text-sm font-bold text-slate-800 mb-1">Estado</label>
+      <select formControlName="estado"
+              class="mt-1 block w-full border border-slate-400 rounded-md p-2 text-slate-900 font-semibold focus:ring-2 focus:ring-blue-600 outline-none">
+        <option [value]="null" disabled>Selecione...</option>
+        <option *ngFor="let uf of estados" [value]="uf.sigla">
+          {{ uf.sigla }}
+        </option>
+      </select>
+    </div>
 
-
+    <div>
+      <label class="block text-sm font-bold text-slate-800 mb-1">Município</label>
+      <select formControlName="municipio"
+              [attr.disabled]="municipios.length === 0 ? true : null"
+              class="mt-1 block w-full border border-slate-400 rounded-md p-2 text-slate-900 font-semibold focus:ring-2 focus:ring-blue-600 outline-none disabled:bg-slate-100 disabled:cursor-not-allowed">
+        <option [value]="null">
+          {{ municipios.length > 0 ? 'Selecione a cidade' : 'Selecione o estado primeiro' }}
+        </option>
+        <option *ngFor="let m of municipios" [value]="m.nome">
+          {{ m.nome }}
+        </option>
+      </select>
+    </div>
 
 
               </div>
@@ -554,7 +614,7 @@
               </div>
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Observações </label>
-                <input id="obs_imovel" type="text" formControlName="obs_imovel" class="mt-1 block w-full placeholder:text-slate-400 border  border-slate-200  rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 focus:outline-none ">
+                <input id="obs_interesse" type="text" formControlName="obs_interesse" class="mt-1 block w-full placeholder:text-slate-400 border  border-slate-200  rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 focus:outline-none ">
 
               </div>
             </section>

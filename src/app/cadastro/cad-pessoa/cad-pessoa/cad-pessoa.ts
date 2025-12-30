@@ -30,6 +30,7 @@ import { OrigemRendaModel } from '../../../glocModel/origem-renda.model';
 import { OrigemRendaService } from '../../../glocService/origem-renda.service';
 import { rgValidator } from '../../../validators/rg-validator';
 import { emailValidator } from '../../../validators/email-validator';
+import { IbgeService } from '../../../glocService/Ibge.service';
 
 @Component({
   selector: 'app-cad-pessoa',
@@ -56,6 +57,7 @@ export class Cadpessoa implements OnInit {
       id_situacao_fk: 0,
       id_cpf_cnpj: 0,
       nome: '',
+      nome_social: '',
       rg: '',
       orgao: '',
       dt_expedicao: '',
@@ -81,7 +83,7 @@ export class Cadpessoa implements OnInit {
       id_pessoa_fk: 0,
       id_sit_imovel_fk: 0,
       id_tp_imovel_fk:  0,
-      vr_venda:  0,
+      vr_imovel:  0,
       vr_aluguel:  0,
       qt_dorms: 0,
       qt_wc:  0,
@@ -100,7 +102,10 @@ export class Cadpessoa implements OnInit {
       imovel_mobiliado: false,
       varanda: false,
       quintal_privativo: false,
-      obs_imovel: '',
+      objetivo_interesse: '',
+      obs_interesse: '',
+      estado: '',
+      municipio: '',
   }
   Economico: EconomicoModel = {
         id_pessoa_fk: 0,
@@ -116,8 +121,7 @@ export class Cadpessoa implements OnInit {
   private empresaService = inject(EmpresaService);
   private economicoService = inject(EconomicoService);
   private interesseService = inject(InteresseService);
-  private situacaoImovelService = inject(SituacaoImovelService);
-  private tipoImovelService  = inject(TipoImovelService);
+  private ibgeService = inject(IbgeService);
 //  hoje: Date = new Date();
   tiposCargos: TipoCargoModel[] = [];
   activeTab: string = 'pessoal'; // Valor inicial
@@ -130,6 +134,11 @@ export class Cadpessoa implements OnInit {
   situacaoImovel: SituacaoImovelModel[] = [];
   origemDaRenda: OrigemRendaModel[] = [];
   mostrarMensagem = true;
+  estados: any[] = [];
+  municipios: any[] = [];
+
+
+
   get enderecoForm(): FormGroup {
     return this.pessoaForm.get('endereco') as FormGroup;
   }
@@ -145,10 +154,10 @@ export class Cadpessoa implements OnInit {
   constructor(
          private fb: FormBuilder,
          private cepService: CepBuscaService,
-         private currencyPipe: CurrencyPipe,
          private tipoCargoService: TipoCargoService,
          private origemRendaSerrvice: OrigemRendaService,
-         private cdr: ChangeDetectorRef,
+         private situacaoImovelService:SituacaoImovelService,
+         private tipoImovelService: TipoImovelService
   ) {
     this.pessoaForm = this.fb.group(
       {
@@ -157,6 +166,7 @@ export class Cadpessoa implements OnInit {
       [this.cnpjControlName]: [''], // A validação 'required' será adicionada no toggleValidation
       rg: ['', [rgValidator()]],
       nome: ['', Validators.required],
+      nome_social: ['', Validators.required],
       nmFantasia: ['', Validators.required],
       rzSocial: ['', Validators.required],
       email: ['', [emailValidator()]],
@@ -181,10 +191,9 @@ export class Cadpessoa implements OnInit {
       }),
      // NOVO: FormGroup para interesse
       interesse: this.fb.group({
-
-        id_tipoImovel: [null],
-        id_situacaoImovel: [null],
-        vr_venda: [],
+        id_tp_imovel_fk: [null],
+        id_sit_imovel_fk: [null],
+        vr_imovel: [],
         vr_aluguel: [],
         qt_dorms: [],
         qt_wc: [],
@@ -204,7 +213,10 @@ export class Cadpessoa implements OnInit {
         imovel_mobiliado:  new FormControl(false) ,
         varanda:  new FormControl(false) ,
         quintal_privativo:  new FormControl(false) ,
-        obs_imovel: [''],
+        objetivo_interesse: [''],
+        obs_interesse: [''],
+        estado: [''],    // <--- O campo estado deve estar aqui dentro
+        municipio: ['']
       }),
     // NOVO: FormGroup para economico
       economico: this.fb.group({
@@ -224,15 +236,69 @@ export class Cadpessoa implements OnInit {
     this.carregarTiposDeImovel();
     this.carregarSituacaoImovel();
     this.setupCpfCnpjListener();
-    this.carregarSituacaoImovel();
-    this.carregarTiposDeCargos()
+     this.carregarTiposDeCargos()
     this.carregarOrigemRenda();
     this.pessoaForm.get('tipo')?.valueChanges.subscribe(tipo => {
       this.toggleValidation(tipo);
     });
     this.pessoaForm.get('tipo')?.setValue('PF');
     this.toggleValidation('PF');
-    this.toggleValidation('PF');
+
+
+    // Coloque este código dentro do ngOnInit, logo após a criação do formulário
+    this.pessoaForm.get('interesse.objetivo_interesse')?.valueChanges.subscribe(valor => {
+      const vrVenda = this.pessoaForm.get('interesse.vr_imovel');
+      const vrAluguel = this.pessoaForm.get('interesse.vr_aluguel');
+
+      // Resetamos o estado primeiro (opcional, para garantir limpeza)
+      vrVenda?.enable();
+      vrAluguel?.enable();
+
+      if (valor === 'Comprar') {
+        // Se for Comprar: Inibe os campos de valor (Venda/Aluguel) pois ele é o interessado
+        // ou se você quiser que ele defina pretensão, inverta a lógica abaixo
+      //  vrVenda?.disable();
+      //  vrVenda?.setValue(null);
+        vrAluguel?.disable();
+        vrAluguel?.setValue(null);
+      }
+      else if (valor === 'Vender') {
+        // Se for Vender: Habilita venda e inibe aluguel
+        vrVenda?.enable();
+        vrAluguel?.disable();
+        vrAluguel?.setValue(null);
+      }
+      else if (valor === 'Alugar') {
+        // Se for Alugar: Habilita aluguel e inibe venda
+        vrAluguel?.enable();
+        vrVenda?.disable();
+        vrVenda?.setValue(null);
+      }
+    });
+
+this.ibgeService.getEstados().subscribe({
+    next: (dados) => this.estados = dados,
+    error: (err) => console.error('Erro ao carregar estados', err)
+  });
+
+  // 2. Monitorar mudança do Estado
+  // IMPORTANTE: Verifique se o caminho no get() é 'interesse.estado'
+  this.pessoaForm.get('interesse.estado')?.valueChanges.subscribe(siglaUF => {
+    if (siglaUF) {
+      console.log('Buscando cidades para:', siglaUF); // Debug
+      this.ibgeService.getMunicipios(siglaUF).subscribe({
+        next: (cidades) => {
+          this.municipios = cidades;
+          console.log('Cidades carregadas:', cidades.length);
+          // Limpa a cidade anterior ao trocar o estado
+          this.pessoaForm.get('interesse.municipio')?.setValue(null);
+        },
+        error: (err) => console.error('Erro ao carregar cidades', err)
+      });
+    } else {
+      this.municipios = [];
+    }
+  });
   }
 
   carregarTiposDeCargos(): void {
@@ -271,10 +337,10 @@ export class Cadpessoa implements OnInit {
         this.tiposDeImovel = dados;
                   // Atribui os dados recebidos da API à lista
                   this.tiposDeImovel = dados;
-                  this.cdr.detectChanges();
+
                   this.tiposDeImovel.sort((a, b) => {
-                      const nomeA = (a.ds_imovel ?? "").toUpperCase(); // Para comparação sem case-sensitive
-                      const nomeB = (b.ds_imovel ?? "").toUpperCase();
+                      const nomeA = (a.ds_imovel || "").toUpperCase(); // Para comparação sem case-sensitive
+                      const nomeB = (b.ds_imovel || "").toUpperCase();
                       if (nomeA < nomeB) {
                           return -1; // 'a' vem antes de 'b'
                       }
@@ -319,8 +385,8 @@ export class Cadpessoa implements OnInit {
                 this.situacaoImovel = data;
 
                 this.situacaoImovel.sort((a, b) => {
-                const nomeA = a.nm_situacao.toUpperCase(); // Para comparação sem case-sensitive
-                const nomeB = b.nm_situacao.toUpperCase();
+                const nomeA = (a.nm_situacao || "").toUpperCase(); // Para comparação sem case-sensitive
+                const nomeB = (b.nm_situacao || "").toUpperCase();
 
                 if (nomeA < nomeB) {
                     return -1; // 'a' vem antes de 'b'
@@ -530,12 +596,14 @@ export class Cadpessoa implements OnInit {
   toggleValidation(tipo: string): void {
       const cpfControl = this.pessoaForm.get('nr_cpf');
       const nomeControl = this.pessoaForm.get('nome');
+      const nome_socialControl = this.pessoaForm.get('nome_social');
       const cnpjControl = this.pessoaForm.get('nr_cnpj');
       const razaoSocialControl = this.pessoaForm.get('rzSocial');
       const nomeFantasiaControl = this.pessoaForm.get('nmFantasia');
       if (tipo === 'PF') {
         // Habilita validação PF
         nomeControl?.setValidators([Validators.required]);
+        nome_socialControl?.setValidators([Validators.required]);
         // Desabilita validação PJ
         cnpjControl?.setValidators(null);
         razaoSocialControl?.setValidators(null);
@@ -547,9 +615,11 @@ export class Cadpessoa implements OnInit {
         // Desabilita validação PF
         cpfControl?.setValidators(null);
         nomeControl?.setValidators(null);
+        nome_socialControl?.setAsyncValidators(null);
       }
       cpfControl?.updateValueAndValidity();
       nomeControl?.updateValueAndValidity();
+      nome_socialControl?.updateValueAndValidity();
       cnpjControl?.updateValueAndValidity();
       razaoSocialControl?.updateValueAndValidity();
       nomeFantasiaControl?.updateValueAndValidity();
@@ -575,6 +645,7 @@ export class Cadpessoa implements OnInit {
         this.Pessoa.id_cargo_func_fk = this.pessoaForm.value.tipoCargo
         this.Pessoa.id_situacao_fk = 1
         this.Pessoa.nome = this.pessoaForm.value.nome;
+        this.Pessoa.nome_social = this.pessoaForm.value.nome_social;
         if ( this.pessoaForm.value.tipo == 'PF') {
              this.Pessoa.id_tipo_pessoa_fk = 1;
              this.Pessoa.id_cpf_cnpj = this.pessoaForm.value.nr_cpf;
@@ -644,12 +715,10 @@ export class Cadpessoa implements OnInit {
      this.Interesse = {
           ...this.Interesse,
           id_pessoa_fk: this.id,
-          id_sit_imovel_fk: form.id_situacaoImovel,
-          id_tp_imovel_fk: form.id_tipoImovel,
-          // Tratamento de Moeda (se houver)
-          vr_venda: this.limparMoeda(form.vr_venda),
+          id_sit_imovel_fk: form.id_sit_imovel_fk,
+          id_tp_imovel_fk: form.id_tp_imovel_fk,
+          vr_imovel: this.limparMoeda(form.vr_imovel),
           vr_aluguel: this.limparMoeda(form.vr_aluguel),
-          // Garantindo valores para os booleanos (evita undefined no banco)
           piscina_adulto: !!form.piscina_adulto,
           piscina_infantil: !!form.piscina_infantil,
           qt_dorms: form.qt_dorms,
@@ -668,7 +737,10 @@ export class Cadpessoa implements OnInit {
           condominio: !!form.condominio,
           varanda: !!form.varanda,
           quintal_privativo: !!form.quintal_privativo,
-          obs_imovel: form.obs_imovel,
+          objetivo_interesse: form.objetivo_interesse,
+          obs_interesse: form.obs_interesse,
+          estado: form.estado,
+          municipio: form.municipio,
       };
       this.interesseService.cadastrarInteresse(this.Interesse).subscribe()
   }

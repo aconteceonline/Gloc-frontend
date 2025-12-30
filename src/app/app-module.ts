@@ -1,7 +1,6 @@
 import { NgModule, LOCALE_ID, provideBrowserGlobalErrorListeners, provideZonelessChangeDetection } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-
 import { AppRoutingModule } from './app-routing-module';
 import { App } from './app';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -10,19 +9,10 @@ import { Login } from './login/login';
 import { authInterceptor } from './auth-interceptor';
 import { MatDialogModule } from '@angular/material/dialog';
 
-
-
-//import { PessoaModal } from './glocModal/pessoa-modal/pessoa-modal';
-
-
-
-
 @NgModule({
   declarations: [
     App,
     Login,
-
-
   ],
   imports: [
     BrowserModule,
@@ -32,16 +22,11 @@ import { MatDialogModule } from '@angular/material/dialog';
     BrowserAnimationsModule,
     MatDialogModule,
 
-
-
   ],
   providers: [
-
       {
       provide: LOCALE_ID,
       useValue: 'pt-BR',
-
-
     },
 
     provideBrowserGlobalErrorListeners(),
