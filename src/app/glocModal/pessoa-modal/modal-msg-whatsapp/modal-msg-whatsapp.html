@@ -5,6 +5,7 @@
   <div class="relative bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border border-gray-100">
     <div class="p-4 border-b flex justify-between items-center">
       <h3 class="font-bold">Enviar Mensagem</h3>
+
       <button (click)="fecharModalWhats()" class="text-gray-400">✕</button>
     </div>
 
@@ -19,12 +20,30 @@
         </button>
       </div>
 
-      <textarea [(ngModel)]="mensagemCustom" class="w-full border rounded-xl p-3 text-sm h-32"></textarea>
+    <textarea
+      [(ngModel)]="mensagemCustom"
+      [class.animate-pulse]="carregandoIA"
+      class="w-full border rounded-xl p-3 text-sm h-32 transition-all duration-500">
+
+    </textarea>
+
+
     </div>
 
     <div class="p-4 bg-gray-50 flex gap-2">
       <button (click)="fecharModalWhats()" class="flex-1 py-2 border rounded-lg">Cancelar</button>
+        <button
+    (click)="melhorarComIA()"
+    [disabled]="carregandoIA"
+    class=" bottom-3 right-3 bg-gradient-to-r from-purple-600 to-blue-500 text-white text-xs px-3 py-1.5 rounded-lg shadow-lg hover:scale-105 transition-transform flex items-center gap-2 disabled:opacity-50">
+    <span *ngIf="!carregandoIA">✨ Gerar marketing IA</span>
+    <span *ngIf="carregandoIA" class="animate-spin">🌀</span>
+  </button>
       <button (click)="dispararWhatsapp()" class="flex-1 py-2 bg-green-600 text-white rounded-lg">Enviar WhatsApp</button>
+
     </div>
+
   </div>
+
+
 </div>

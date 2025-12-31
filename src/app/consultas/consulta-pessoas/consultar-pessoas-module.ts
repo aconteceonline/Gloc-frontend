@@ -9,6 +9,7 @@ import { FilterViewPessoasPipe } from '../../glocService/filter-view-pessoas.pip
 import { FormsModule } from '@angular/forms';
 import { ModalMsgWhatsapp } from '../../glocModal/pessoa-modal/modal-msg-whatsapp/modal-msg-whatsapp';
 import { ModalResumoPessoa } from '../../glocModal/pessoa-modal/modal-resumo-pessoa/modal-resumo-pessoa';
+import { provideHttpClient } from '@angular/common/http';
 registerLocaleData(localePt);
 
 @NgModule({
@@ -29,7 +30,8 @@ registerLocaleData(localePt);
  providers: [
   provideNgxMask({ /* opções de cfg */ }),
   CurrencyPipe,
-  { provide: LOCALE_ID, useValue: 'pt-BR' }
+  { provide: LOCALE_ID, useValue: 'pt-BR' },
+  provideHttpClient(),
 
  ],
  bootstrap: [ConsultarPessoasModule],
