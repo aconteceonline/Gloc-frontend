@@ -28,7 +28,7 @@ export class PessoaService {
   private myApiUrl = "http://localhost:3001/";
 
 
- pessoaModel: PessoaModel[] = []
+  pessoaModel: PessoaModel[] = []
 
   constructor() {
   }
@@ -86,13 +86,12 @@ readByCNPJ(cnpj: any): Observable<PessoaModel>{
     const url = `${this.apiUrl}/${cnpj}`
     return this.http.get<PessoaModel>(url)
 }
-
+/* usado pelo app-pessoa-modal */
   buscarPorTermo(busca: string): Observable<PessoaModel[]> {
  //  console.log(' buscar por cpf cnpj/;  ', (`${this.myApiUrl}termo/${busca}`))
   return this.http.get<PessoaModel[]>(`${this.myApiUrl}termo/${busca}`)
 
 
 }
-
 
 }

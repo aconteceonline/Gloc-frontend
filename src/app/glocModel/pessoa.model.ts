@@ -7,7 +7,7 @@ export interface PessoaModel{
     nome_social: string;
     id_cpf_cnpj?: number,
     rg?: string,
-    orgao?: string,
-    dt_expedicao?:  string | null
+    orgao: string,
+    dt_expedicao:  string | null
 
 }

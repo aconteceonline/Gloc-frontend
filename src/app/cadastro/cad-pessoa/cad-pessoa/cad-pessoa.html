@@ -1,13 +1,23 @@
 <div class="flex items-center justify-center min-h-screen p-1 sm:p-1 lg:p-2">
-  <div class="w-full max-w-4x2 mx-auto bg-white p-5 rounded-2xl shadow-lg">
+  <div id="inicio-abas" class="w-full max-w-4x2 mx-auto bg-white p-5 rounded-2xl shadow-lg">
     <h2 class="text-2xl font-bold text-gray-800 mb-2">Cadastro de nova pessoa</h2>
     <p class="text-gray-600 mb-8">Preencha os campos abaixo para registrar uma nova pessoa.</p>
+<div class="flex justify-end w-full mb-4">
 
+    <a routerLink="/principal/menuconsultar/pessoas"
+       class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg text-sm font-semibold transition-all shadow-md shadow-blue-200 flex items-center gap-2">
+       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+       </svg>
+       Listar Pessoas
+    </a>
+
+</div>
   <div class="tabs-header pt-0  pt-0  pr-50">
     <button type="button" [class.active]="activeTab === 'pessoal'" (click)="switchTab('pessoal')">
       <p class="text-gray-900 mb-1">Dados Cadastrais</p>
         </button>
-    <button type="button" [class.active]="activeTab === 'interesse'" (click)="switchTab('interesse')">
+    <button  type="button" [class.active]="activeTab === 'interesse'" (click)="switchTab('interesse')">
         <p class="text-gray-900 mb-0">Perfil Interesse</p>
       </button>
       <button type="button" [class.active]="activeTab === 'economico'" (click)="switchTab('economico')">
@@ -16,8 +26,12 @@
     </div>
 
 <div class="tabs-content ">
+
+
+
+
  <form [formGroup]="pessoaForm"  >
-  <!--
+<!--
  <pre>Status do Formulário: {{ pessoaForm.status }}</pre>
   <pre>Erros CPF: {{ pessoaForm.get('nr_cpf')?.errors | json }}</pre>
   <pre>Erros CNPJ: {{ pessoaForm.get('nr_cnpj')?.errors | json }}</pre>
@@ -32,11 +46,42 @@
     </li>
   </ul>
 </div>
+
 -->
+      @if (msgErroCabecalho) {
+        <div id="alerta-erro" class="mb-6 mx-4 mt-4 rounded-md bg-red-50 p-4 border-l-4 border-red-500 shadow-lg relative z-50">
+          <div class="flex">
+            <div class="flex-shrink-0">
+              <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+              </svg>
+            </div>
+            <div class="ml-3">
+              <h3 class="text-sm font-medium text-red-800">
+                Atenção: Formulário Incompleto
+              </h3>
+              <div class="mt-2 text-sm text-red-700">
+                <p>{{ msgErroCabecalho }}</p>
+              </div>
+            </div>
+            <div class="ml-auto pl-3">
+              <div class="-mx-1.5 -my-1.5">
+                <button (click)="msgErroCabecalho = null" type="button" class="inline-flex rounded-md bg-red-50 p-1.5 text-red-500 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-2">
+                  <span class="sr-only">Fechar</span>
+                  <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L10 10 5.707 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+
 
    <div [class.hidden]="activeTab !== 'pessoal'" class="tab-pane pt-0  pr-50">
 
-      <fieldset class="mb-8 ">
+      <fieldset class="mb-8">
         <legend class="text-lg font-semibold text-indigo-700 border-b border-indigo-200 w-full pb-2 mb-6">Dados de contato</legend>
         <div class="flex flex-col sm:flex-row sm:space-x-4">
             <div class="flex-1">
@@ -78,7 +123,7 @@
 
             <div>
               <label for="nr_cpf" class="block text-sm font-medium text-gray-700">CPF <span class="text-red-500">*</span></label>
-              <input id="nr_cpf'" type="text" formControlName="nr_cpf" inputmode="numeric"  mask="000.000.000-00" placeholder="000.000.000-00" type="text"
+              <input id="nr_cpf'" type="text"  formControlName="nr_cpf" inputmode="numeric"  mask="000.000.000-00" placeholder="000.000.000-00" type="text"
                 class="mt-1 block w-full placeholder:text-slate-400 border rounded-md shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500 text-gray-900 focus:outline-none  "
                 [ngClass]="{
                   'border-red-500 focus:ring-red-500 focus:border-red-500': isInvalid('nr_cpf'),
@@ -98,7 +143,7 @@
             </div>
             <div>
               <label for="nome" class="block text-sm font-medium text-gray-700">Nome Completo <span class="text-red-500">*</span></label>
-              <input id="nome" type="text" formControlName="nome" placeholder="Nome completo"
+              <input id="nome" type="text" (input)="converteInput($event, 'nome')" formControlName="nome" placeholder="Nome completo"
                 class="mt-1 block w-full placeholder:text-slate-400 border rounded-md shadow-sm p-3 focus:ring-blue-500 text-gray-900 focus:outline-none "
                 [ngClass]="{'border-red-500': isInvalid('nome'), 'border-gray-300': !isInvalid('nome')}"
               >
@@ -128,8 +173,8 @@
 
             <div>
               <label for="nmFantasia" class="block text-sm font-medium text-gray-700">Nome Social </label>
-              <input id="nome_social" type="text" formControlName="nome_social"  inputmode="test"   placeholder="nome social" type="text"
-               class="mt-1 block w-full placeholder:text-slate-400 border rounded-md shadow-sm p-3 focus:ring-blue-500 text-gray-900 focus:outline-none "
+              <input id="nome_social" type="text" (input)="converteInput($event, 'nome')" formControlName="nome_social"  inputmode="test"   placeholder="nome social" type="text"
+               class="uppercase mt-1 block w-full placeholder:text-slate-400 border rounded-md shadow-sm p-3 focus:ring-blue-500 text-gray-900 focus:outline-none "
                 [ngClass]="{'border-red-500': isInvalid('nome_social'), 'border-gray-300': !isInvalid('nome_social')}"
               >
                <p *ngIf="pessoaForm.get('nome_social')?.errors?.['required'] && isInvalid('nome_social')" class="mt-1 text-xs text-red-600">O nome social é obrigatório.</p>
@@ -159,7 +204,7 @@
             </div>
             <div>
               <label for="nmFantasia" class="block text-sm font-medium text-gray-700">Nome Fantasia <span class="text-red-500">*</span></label>
-              <input id="nmFantasia" type="text" formControlName="nmFantasia" placeholder="Nome Fantasia"
+              <input id="nmFantasia" type="text" (input)="converteInput($event, 'nmFantasia')" formControlName="nmFantasia" placeholder="Nome Fantasia"
                 class="mt-1 block w-full border placeholder:text-slate-400 rounded-md shadow-sm p-3  focus:outline-none focus:border-blue-500  text-gray-900"
                 [ngClass]="{'border-red-500': isInvalid('nmFantasia'), 'border-gray-300': !isInvalid('nmFantasia')}"
               >
@@ -167,7 +212,7 @@
             </div>
             <div class="md:col-span-2">
               <label for="rzSocial" class="block text-sm font-medium text-gray-700">Razão Social <span class="text-red-500">*</span></label>
-              <input id="rzSocial" type="text" formControlName="rzSocial" placeholder="Razão Social"
+              <input id="rzSocial" type="text" (input)="converteInput($event, 'rzSocial')" formControlName="rzSocial" placeholder="Razão Social"
                 class="mt-1 block w-full border rounded-md shadow-sm p-3 placeholder:text-slate-400   focus:outline-none focus:border-blue-500  text-gray-900"
                 [ngClass]="{'border-red-500': isInvalid('rzSocial'), 'border-gray-300': !isInvalid('rzSocial')}"
               >
@@ -240,8 +285,9 @@
             <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
             <input id="email"
                   type="text"
+                  (input)="converteInput($event, 'email')"
                   formControlName="email"
-                  placeholder="Email"
+                  placeholder="E-mail"
                   class="mt-1 block w-full rounded-md shadow-sm p-2 border rounded-md shadow-sm focus:outline-none focus:border-blue-500 text-gray-900"
                   [ngClass]="{
                       'border-red-500 focus:border-red-500': pessoaForm.get('email')?.invalid && (pessoaForm.get('email')?.touched || pessoaForm.get('email')?.dirty),
@@ -289,6 +335,7 @@
             <input
               id="logradouro"
               type="text"
+              (input)="converteInput($event, 'logradouro')"
               formControlName="logradouro"
               class="mt-1 block w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md shadow-sm cursor-not-allowed"
               readonly
@@ -319,6 +366,7 @@
              <input
                 id="complemento"
                 type="text"
+                (input)="converteInput($event, 'complemento')"
                 formControlName="complemento"
                 class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
 
@@ -366,7 +414,7 @@
 
 
   <!--Perfil de interesse -->
-<div formGroupName="interesse" [class.hidden]="activeTab !== 'interesse'">
+<div   formGroupName="interesse" [class.hidden]="activeTab !== 'interesse'">
 
     <div class="tab-pane  pt-0  pr-50">
 
@@ -376,57 +424,58 @@
           <label class="block text-sm font-bold text-gray-700 mb-3">Objetivo de Interesse</label>
           <div class="grid grid-cols-3 gap-8 mb-8">
             <button type="button"
-              (click)="pessoaForm.get('interesse.objetivo_interesse')?.setValue('Comprar')"
-              [ngClass]="pessoaForm.get('interesse.objetivo_interesse')?.value === 'Comprar' ? 'bg-blue-600 text-white shadow-lg' : 'bg-gray-100 text-gray-400'"
-              class="flex items-center justify-center px-4 py-3 border border-transparent rounded-xl text-sm font-bold transition-all">
-              Comprar
-            </button>
+                (click)="definirObjetivo('Comprar')"
+                [ngClass]="pessoaForm.get('interesse.objetivo_interesse')?.value === 'Comprar' ? 'bg-blue-600 text-white shadow-lg' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'"
+                class="flex items-center justify-center px-4 py-3 border border-transparent rounded-xl text-sm font-bold transition-all">
+                Comprar
+          </button>
 
-            <button type="button"
-              (click)="pessoaForm.get('interesse.objetivo_interesse')?.setValue('Vender')"
-              [ngClass]="pessoaForm.get('interesse.objetivo_interesse')?.value === 'Vender' ? 'bg-blue-600 text-white shadow-lg' : 'bg-gray-100 text-gray-400'"
+          <button type="button"
+              (click)="definirObjetivo('Vender')"
+              [ngClass]="pessoaForm.get('interesse.objetivo_interesse')?.value === 'Vender' ? 'bg-blue-600 text-white shadow-lg' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'"
               class="flex items-center justify-center px-4 py-3 border border-transparent rounded-xl text-sm font-bold transition-all">
               Vender
-            </button>
+          </button>
 
-            <button type="button"
-              (click)="pessoaForm.get('interesse.objetivo_interesse')?.setValue('Alugar')"
-              [ngClass]="pessoaForm.get('interesse.objetivo_interesse')?.value === 'Alugar' ? 'bg-blue-600 text-white shadow-lg' : 'bg-gray-100 text-gray-400'"
+          <button type="button"
+              (click)="definirObjetivo('Alugar')"
+              [ngClass]="pessoaForm.get('interesse.objetivo_interesse')?.value === 'Alugar' ? 'bg-blue-600 text-white shadow-lg' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'"
               class="flex items-center justify-center px-4 py-3 border border-transparent rounded-xl text-sm font-bold transition-all">
               Alugar
-            </button>
+          </button>
           </div>
         </div>
 
           <div class="flex flex-col sm:flex-row sm:space-x-4">
             <section class=" w-full space-y-8">
               <div class="grid grid-cols-1 md:grid-cols-5 gap-5">
-                  <div>
-                    <label class="block text-sm font-medium mb-1">Valor do Imóvel</label>
-                    <input class="mt-1 block w-full placeholder:text-slate-400 border  border-slate-200  rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 focus:outline-none "
-                      type="text"
-                      formControlName="vr_imovel"
-                      [ngClass]="{ 'bg-gray-100 cursor-not-allowed text-gray-800': pessoaForm.get('interesse.vr_imovel')?.disabled }"
-                      class="mt-1 block w-full border border-slate-200 rounded-md shadow-sm p-2 text-gray-900 focus:outline-none"
-                      placeholder="0"
-                       oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                 <div>
+                  <label class="block text-sm font-medium mb-1 text-gray-700">Valor do Imóvel</label>
+                  <input
+                    type="text"
+                    formControlName="vr_imovel"
+                    placeholder="0"
+                    oninput="this.value = this.value.replace(/[^0-9]/g, '')"
                     (blur)="formatarValor('interesse.vr_imovel')"
-                    />
-                  </div>
+                    class="mt-1 block w-full border border-slate-200 rounded-md shadow-sm p-2
+                          text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500
+                          disabled:bg-gray-100 disabled:cursor-not-allowed disabled:text-gray-400"
+                  />
+                </div>
 
-                  <div >
-                    <label class="block text-sm font-medium mb-1">Valor de Aluguel</label>
-                    <input class="mt-1 block w-full placeholder:text-slate-400 border  border-slate-200  rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 focus:outline-none "
-                      type="text"
-                      formControlName="vr_aluguel"
-                      [ngClass]="{ 'bg-gray-100 cursor-not-allowed text-gray-900': pessoaForm.get('interesse.vr_aluguel')?.disabled }"
-                      class="mt-1 block w-full border border-slate-200 rounded-md shadow-sm p-2 text-gray-900 focus:outline-none"
-                      placeholder="0"
-                       oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                <div>
+                  <label class="block text-sm font-medium mb-1 text-gray-700">Valor de Aluguel</label>
+                  <input
+                    type="text"
+                    formControlName="vr_aluguel"
+                    placeholder="0"
+                    oninput="this.value = this.value.replace(/[^0-9]/g, '')"
                     (blur)="formatarValor('interesse.vr_aluguel')"
-                    />
-                  </div>
-
+                    class="mt-1 block w-full border border-slate-200 rounded-md shadow-sm p-2
+                          text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500
+                          disabled:bg-gray-100 disabled:cursor-not-allowed disabled:text-gray-400"
+                  />
+                </div>
 
 
 
@@ -541,15 +590,15 @@
     <div>
       <label class="block text-sm font-bold text-slate-800 mb-1">Município</label>
       <select formControlName="municipio"
-              [attr.disabled]="municipios.length === 0 ? true : null"
-              class="mt-1 block w-full border border-slate-400 rounded-md p-2 text-slate-900 font-semibold focus:ring-2 focus:ring-blue-600 outline-none disabled:bg-slate-100 disabled:cursor-not-allowed">
-        <option [value]="null">
-          {{ municipios.length > 0 ? 'Selecione a cidade' : 'Selecione o estado primeiro' }}
-        </option>
-        <option *ngFor="let m of municipios" [value]="m.nome">
-          {{ m.nome }}
-        </option>
-      </select>
+          class="mt-1 block w-full border border-slate-400 rounded-md p-2 text-slate-900 font-semibold focus:ring-2 focus:ring-blue-600 outline-none
+                 disabled:bg-slate-100 disabled:cursor-not-allowed">
+    <option [ngValue]="null">
+      {{ municipios.length > 0 ? 'Selecione a cidade' : 'Selecione o estado primeiro' }}
+    </option>
+    <option *ngFor="let m of municipios" [ngValue]="m.nome">
+      {{ m.nome }}
+    </option>
+  </select>
     </div>
 
 
@@ -614,19 +663,19 @@
               </div>
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Observações </label>
-                <input id="obs_interesse" type="text" formControlName="obs_interesse" class="mt-1 block w-full placeholder:text-slate-400 border  border-slate-200  rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 focus:outline-none ">
+                <input id="obs_interesse" type="text"  (input)="converteInput($any($event), 'obs_interesse')" formControlName="obs_interesse" class="uppercase mt-1 block w-full placeholder:text-slate-400 border  border-slate-200  rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 focus:outline-none ">
 
               </div>
             </section>
        </div>
-               <div class="actions">
-        <button type="button" class="secondary" (click)="switchTab('pessoal')">Voltar</button>
+       <div class="actions">
+          <button type="button" class="secondary" (click)="switchTab('pessoal')">Voltar</button>
 
-        <div class="flex justify-end">
+          <div class="flex justify-end">
 
-          <button type="button" class="primary" (click)="switchTab('economico')">Próximo</button>
-        </div>
-    </div>
+            <button type="button" class="primary" (click)="switchTab('economico')">Próximo</button>
+          </div>
+      </div>
       </fieldset>
 
 
@@ -637,17 +686,17 @@
 
   </div>
    <!-- Perfil Economico-->
-  <div formGroupName="economico" class="pt-0  pt-0  pr-10" [class.hidden]="activeTab !== 'economico'">
+  <div formGroupName="economico" class="   "  [class.hidden]="activeTab !== 'economico'">
 
-    <div class="tab-pane w-full p-0">
+    <div class="tab-pane w-full p-1 ">
 
       <fieldset class="mb-150 ">
         <legend class="text-lg font-semibold text-indigo-700 border-b border-indigo-200 w-full pb-1 mb-6">Dados Economicos</legend>
 
-      <div class="flex items-center grid grid-cols-1 md:grid-cols-3 gap-4  ">
+      <div class="flex items-center grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <div>
                 <label for="renda_declarada" class="block text-sm font-medium text-gray-700">Último ano IR declarada?</label>
-                <select class="t-1 block w-full placeholder:text-slate-400 border  border-slate-200  rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500  text-gray-900 focus:outline-none "
+                <select class="t-1 block w-full placeholder:text-slate-400 border  border-slate-200  rounded-md shadow-sm p-1   focus:ring-blue-500 focus:border-blue-500  text-gray-900 focus:outline-none "
                   id="years"
                   formControlName="selectedYear">
                   <option value="" disabled>Escolha um ano</option>
@@ -717,24 +766,34 @@
                    (blur)="formatarValor('economico.recursos_proprios')"/>
           </div>
       </div>
-        <div class="actions">
-          <button type="button" class="secondary" (click)="switchTab('interesse')">Voltar</button>
-            <button type="submit"
-             [disabled]="pessoaForm.invalid || pessoaForm.pending"
-             [style.opacity]="(pessoaForm.invalid || pessoaForm.pending) ? '0.5' : '1'"
-              class="primary bg-blue-700 text-white px-4 py-2 rounded"
-              [ngClass]="{
-                'bg-blue-600 hover:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500': pessoaForm.valid || pessoaForm.pending,
-                'bg-gray-400 cursor-not-allowed': pessoaForm.invalid || pessoaForm.pending}"
-              class="px-1 py-1 bg-blue-500 text-white rounded" (click)="onSubmit() ">
-              Finalizar Cadastro
-         </button>
-     </div>
-      </fieldset>
+    <div class="actions">
+          <button type="button" class="secondary" (click)="switchTab('interesse')">
+              Voltar
+          </button>
 
+          <button
+                type="submit"
+                (click)="onSubmit()"
+                [disabled]="isSubmitting"
+                class="px-4 py-2 rounded text-white font-semibold transition-colors duration-200
+                      bg-blue-600 hover:bg-blue-700
+                      disabled:bg-gray-400 disabled:cursor-not-allowed disabled:hover:bg-gray-400">
 
+                @if (isSubmitting) {
+                    <span class="flex items-center gap-2">
+                        <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Salvando...
+                    </span>
+                } @else {
+                    <span>Finalizar Cadastro</span>
+                }
+            </button>
+      </div>
+     </fieldset>
     </div>
-
   </div>
     </form>
   </div>
