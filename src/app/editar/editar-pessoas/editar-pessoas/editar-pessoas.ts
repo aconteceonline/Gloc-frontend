@@ -1,117 +1,108 @@
 import { ChangeDetectorRef, Component, EventEmitter, inject, OnInit, Output, signal } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, FormControl  } from '@angular/forms';
-import { HttpErrorResponse } from '@angular/common/http';
-import { catchError, debounceTime, of, take, throwError, } from 'rxjs';
-import { LayoutProps } from '../../../template/layout/layoutprops';
-import { validarCPF } from '../../../validators/cpf-validator';
-import { validarCNPJ } from '../../../validators/cnpj-validator';
-
-import { criarFormularioPessoa } from '../cad-pessoa/criarFormularioPessoa';
-//import { CurrencyPipe } from '@angular/common';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
+import { PessoaService } from '../../../glocService/pessoa.service';
+import { ContatoService } from '../../../glocService/contato.service';
+import { BucaEnderecoModel as Endereco } from '../../../glocModel/busca-endereco.model';
+import { EnderecoService } from '../../../glocService/endereco.service';
+import { EconomicoService } from '../../../glocService/economico.service';
+import { InteresseService } from '../../../glocService/interesse.serivice';
+import { IbgeService } from '../../../glocService/Ibge.service';
+import { FormUtilsService } from '../../../glocService/formUtils.service';
+import { OrigemRendaService } from '../../../glocService/origem-renda.service';
+//import { CepBuscaService } from '../../../services/CepBuscaService';
+import { Cep_Service } from '../../../glocService/Cep.service';
+import { TipoCargoService } from '../../../glocService/tipo-cargo.service';
+import { SituacaoImovelService } from '../../../glocService/situacao-imovel.service';
+import { TipoImovelService } from '../../../glocService/tipo-imovel.service';
+import { FormValidationService } from '../../../glocService/FormValidationService';
+import { criarFormularioPessoa } from '../../../cadastro/cad-pessoa/cad-pessoa/criarFormularioPessoa';
+import { TipoCargoModel } from '../../../glocModel/tipo-cargo.model';
 import { TipoImovelModel } from '../../../glocModel/tipo-imovel.model';
 import { SituacaoImovelModel } from '../../../glocModel/situacao-imovel.model';
-import { TipoCargoModel } from '../../../glocModel/tipo-cargo.model';
 import { OrigemRendaModel } from '../../../glocModel/origem-renda.model';
 import { PessoaModel } from '../../../glocModel/pessoa.model';
-import { BucaEnderecoModel as Endereco } from '../../../glocModel/busca-endereco.model';
-import { TipoImovelService } from '../../../glocService/tipo-imovel.service';
-import { SituacaoImovelService } from '../../../glocService/situacao-imovel.service';
-import { TipoCargoService } from '../../../glocService/tipo-cargo.service';
-import { InteresseService } from '../../../glocService/interesse.serivice';
-import { EconomicoService } from '../../../glocService/economico.service';
-import { OrigemRendaService } from '../../../glocService/origem-renda.service';
-import { ContatoService } from '../../../glocService/contato.service';
-import { EnderecoService } from '../../../glocService/endereco.service';
-import { EmpresaService } from '../../../glocService/empresa.service';
-import { PessoaService } from '../../../glocService/pessoa.service';
-import { CepBuscaService } from '../../../services/CepBuscaService'
-import { Cep_Service } from '../../../glocService/Cep.service';
-import { FormUtilsService } from '../../../glocService/formUtils.service';
-import { IbgeService } from '../../../glocService/Ibge.service';
-import { FormValidationService } from '../../../glocService/FormValidationService';
-
-//import { aplicarRegraObjetivoInteresse} from './cad-pessoa.logic';
+import { LayoutProps } from '../../../template/layout/layoutprops';
+import { catchError, debounceTime, of, take, throwError } from 'rxjs';
+import { validarCPF } from '../../../validators/cpf-validator';
+import { HttpErrorResponse } from '@angular/common/http';
+import { InteresseFormService } from '../../../glocService/interesse-form.service';
+//import { ViewportScroller } from '@angular/common';
 
 import {
-  getInicialPessoa, getInicialEndereco, getInicialEmpresa,
+  getInicialPessoa, getInicialEndereco,
   getInicialContato, getInicialInteresse, getInicialEconomico,
-  EXCECOES_GERAIS, CAMPOS_PF_OBRIGATORIOS, CAMPOS_PJ_OBRIGATORIOS,
-  CPF_CONTROL_NAME, CNPJ_CONTROL_NAME, gerarUltimosAnos,
-} from '../cad-pessoa/cad-pessoa.constants';
-import { InteresseFormService } from '../../../glocService/interesse-form.service';
-import { ViewportScroller } from '@angular/common';
-
+  EXCECOES_GERAIS, CAMPOS_PF_OBRIGATORIOS,
+  CPF_CONTROL_NAME,  gerarUltimosAnos,
+} from './editar-pessoa-pf.constants';
+import { editarFormularioPessoaPF } from './editarFormularioPessoaPF';
 
 
 
 @Component({
-  selector: 'app-cad-pessoa',
+  selector: 'app-editar-pessoas',
   standalone: false,
-  templateUrl: './cad-pessoa.html',
-  styleUrl: './cad-pessoa.scss'
+  templateUrl: './editar-pessoas.html',
+  styleUrl: './editar-pessoas.scss'
 })
-export class Cadpessoa implements OnInit {
+export class EditarPessoas implements OnInit {
 // 1. Injeção de dependências moderna (sem construtor)
   private fb = inject(FormBuilder);
   private pessoaService = inject(PessoaService);
   private contatoService = inject(ContatoService);
   private enderecoService = inject(EnderecoService);
-  private empresaService = inject(EmpresaService);
   private economicoService = inject(EconomicoService);
   private interesseService = inject(InteresseService);
   private ibgeService = inject(IbgeService);
   private formUtils  = inject (FormUtilsService);
   private origemRendaSerrvice = inject (OrigemRendaService);
-  private cepBuscaService = inject (CepBuscaService)
-  private cepService = inject (Cep_Service)
+ // private cepBuscarService = inject (CepBuscaService)
   private tipoCargoService = inject (TipoCargoService)
   private situacaoImovelService = inject (SituacaoImovelService)
   private tipoImovelService = inject (TipoImovelService);
   private formValidationService = inject (FormValidationService);
   private interesseFormService = inject(InteresseFormService);
-  private viewportScroller  = inject(ViewportScroller);
+  private cepService = inject (Cep_Service)
+ // private viewportScroller  = inject(ViewportScroller);
+  private route = inject(ActivatedRoute); // Para pegar o ID da URL
+  private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
-
-
 // 2. Inicialização do Formulário
-  pessoaForm: FormGroup = criarFormularioPessoa(this.fb);
+  pessoaForm: FormGroup = editarFormularioPessoaPF(this.fb);
 
 // Variáveis de Controle / UI
   id: any;
+  private ultimoCepPesquisado: string = '';
   public tipoAlerta: 'error' | 'success' | null = null;
   public mensagemDeErro: string | null = null;
-  //res: any | null = null
   msgErroCabecalho: string | null = null;
+  pessoaId: number | null = null;
 
 // Constantes expostas para o Template
   readonly cpfControlName = CPF_CONTROL_NAME;
-  readonly cnpjControlName = CNPJ_CONTROL_NAME;
   readonly EXCECOES_GERAIS = EXCECOES_GERAIS;
   readonly CAMPOS_PF_OBRIGATORIOS = CAMPOS_PF_OBRIGATORIOS;
-  readonly CAMPOS_PJ_OBRIGATORIOS = CAMPOS_PJ_OBRIGATORIOS;
-
 
   // Controle de Validação Local
   cpfValido: boolean | null = null;
   cnpjValido: boolean | null = null;
+
   isSubmitting: boolean = false;
 
 // Modelos de Dados (Inicializados via Função)
   Pessoa = getInicialPessoa();
   Endereco = getInicialEndereco();
-  Empresa = getInicialEmpresa();
   Contato = getInicialContato();
   Interesse = getInicialInteresse();
   Economico = getInicialEconomico()
 
-
 // Signals e Estado
  activeTab: string = 'pessoal'; // Valor inicial
+ isLoading = signal(true);
  selectedYear = signal<string>('');
  years = signal<number[]>(gerarUltimosAnos(10)); // Usando a função utilitária
 
 // Listas de Dados
-  //hoje: Date = new Date();
   tiposCargos: TipoCargoModel[] = [];
   tiposDeImovel: TipoImovelModel[] = [];
   situacaoImovel: SituacaoImovelModel[] = [];
@@ -119,11 +110,12 @@ export class Cadpessoa implements OnInit {
   estados: any[] = [];
   municipios: any[] = [];
 
-// Saídasa
+
+// Saídas
   @Output() cadastrada = new EventEmitter<PessoaModel>()
 
   // isChecked = false;
-  private ultimoCepPesquisado: string = '';
+ //Usadp ma busca do cep
   loading: boolean = false;
   erroBusca: boolean = false;
  // pessoaForm: FormGroup;
@@ -131,6 +123,8 @@ export class Cadpessoa implements OnInit {
 
 // Getters
   get enderecoForm(): FormGroup { return this.pessoaForm.get('endereco') as FormGroup; }
+  get interesseForm(): FormGroup { return this.pessoaForm.get('interesse') as FormGroup; }
+  get economicoForm(): FormGroup { return this.pessoaForm.get('economico') as FormGroup; }
   get isPessoaFisica(): boolean { return this.pessoaForm.get('tipo')?.value === 'PF'; }
 
 // Props visuais
@@ -142,16 +136,128 @@ export class Cadpessoa implements OnInit {
 // CICLO DE VIDA
 // ==================================================================================
   ngOnInit(): void {
-      this.carregarDadosIniciais();
-      this.inicializarEstadoFormulario();
-      // --- LISTENERS SEGUROS ---
-      this.setupCpfCnpjListener();
-      this.setupMudancaTipoPessoa();
-      this.monitorarPreenchimento();
-      this.iniciarListenerEstadoSeguro(); // Mantém só este que popula o combo
-    //inibi acesso compos da aba interesse
-      this.bloqueiaCampoInteresses();
+    this.carregarListasAuxiliares();
+    const idParam = this.route.snapshot.paramMap.get('id');
+    if (idParam) {
+      this.pessoaId = Number(idParam); // ou +idParam
+      this.carregarDadosPessoa(this.pessoaId);
+      this.carregarDadosContato(this.pessoaId);
+      this.carregarDadosEndereco(this.pessoaId);
+      this.carregarDadosPerfilInteresse(this.pessoaId);
+      this.carregarDadosPerfilEconomico(this.pessoaId);
+
+    } else {
+      // Se não tem ID, volta pra lista
+      this.router.navigate(['/editarpessoas/buscar/${id}']);
+    }
+    this.carregarDadosIniciais();
+    this.inicializarEstadoFormulario();
+    // --- LISTENERS SEGUROS ---
+    this.setupCpfCnpjListener();
+    this.setupMudancaTipoPessoa();
+    this.monitorarPreenchimento();
+    this.iniciarListenerEstadoSeguro(); // Mantém só este que popula o combo
+   //inibi acesso compos da aba interesse
+    this.bloqueiaCampoInteresses();
   }
+
+ngAfterContentChecked(): void {
+    this.cdr.detectChanges();
+  }
+carregarListasAuxiliares() {
+    // Implemente a carga dos seus selects aqui
+    // Ex: this.service.getEstados().subscribe(...)
+    // Popule this.years
+    const currentYear = new Date().getFullYear();
+    this.years.set(Array.from({length: 5}, (_, i) => currentYear - i));
+  }
+
+carregarDadosPessoa(id: number) {
+  this.isLoading.set(true);
+
+  this.pessoaService.getPorId(id).subscribe({
+    next: (pessoa: any) => {
+      this.pessoaForm.patchValue(pessoa);
+      this.pessoaForm.get('nr_cpf')?.setValue(pessoa.id_cpf_cnpj);
+      this.carregarTipoCargo(pessoa.id_cargo_func_fk);
+
+      console.log('Pessoa carregado:', pessoa);
+      this.isLoading.set(false);
+    },
+    error: (err) => {
+      alert('Erro ao carregar dados da pessoa.');
+    }
+  });
+
+}
+
+carregarDadosContato(idFK: number) {
+    this.contatoService.readByIdContato(idFK).subscribe({
+        next: (contato: any) => {
+            if(contato) {
+                console.log('Contato carregado:', contato);
+                this.pessoaForm.patchValue(contato);
+                this.pessoaForm.get('celular')?.setValue(contato.nr_contato);
+                this.pessoaForm.get('zap')?.setValue(contato.whatsapp);
+             }
+        },
+        error: (err) => {
+            // Opcional: não alertar se for apenas 404 (sem endereço cadastrado ainda)
+            console.warn('Contato não encontrado ou erro:', err);
+        }
+    });
+
+
+}
+
+carregarDadosEndereco(idFK: number) {
+  this.enderecoService.getPorIdPessoaFK(idFK).subscribe({
+  next: (endereco: any) => {
+            if (endereco) {
+                this.enderecoForm.patchValue(endereco);
+                this.buscarCep();
+            }
+        },
+        error: (err) => console.warn(err)
+
+    });
+}
+
+carregarTipoCargo(idFK: number){
+ this.tipoCargoService.getPorIdPessoaFK(idFK).subscribe({
+  next: (cargo: any) => {
+        console.log('cargo   :', cargo.ds_cargo);
+            if (cargo) {
+                this.pessoaForm.get('tipoCargo')?.setValue(cargo.id);
+            }
+        },
+        error: (err) => {console.warn('Cargo não encontrado ou erro:', err);}
+    });
+}
+
+carregarDadosPerfilInteresse(idFK: number) {
+ this.interesseService.getPorIdPessoaFK(idFK).subscribe({
+  next: (interesse: any) => {
+
+     console.log('interesse   : ', interesse)
+            if (interesse) {
+                this.interesseForm.patchValue(interesse);
+            }
+        },
+        error: (err) => console.warn(err)
+    });
+}
+
+carregarDadosPerfilEconomico(idFK: number) {
+ this.economicoService.getPorIdPessoaFK(idFK).subscribe({
+  next: (economico: any) => {
+       if (economico) {
+         this.economicoForm.patchValue(economico);
+        }
+      },
+      error: (err) => console.warn(err)
+    });
+}
 
 // ==================================================================================
 // 1. CARREGAMENTO DE DADOS (Loaders)
@@ -169,7 +275,6 @@ export class Cadpessoa implements OnInit {
         this.tiposDeImovel = dados;
                   // Atribui os dados recebidos da API à lista
                   this.tiposDeImovel = dados;
-
                   this.tiposDeImovel.sort((a, b) => {
                       const nomeA = (a.ds_imovel || "").toUpperCase(); // Para comparação sem case-sensitive
                       const nomeB = (b.ds_imovel || "").toUpperCase();
@@ -189,7 +294,6 @@ export class Cadpessoa implements OnInit {
             next: (data) => {
                 // Atribui os dados recebidos da API à lista
                 this.situacaoImovel = data;
-
                 this.situacaoImovel.sort((a, b) => {
                 const nomeA = (a.nm_situacao || "").toUpperCase(); // Para comparação sem case-sensitive
                 const nomeB = (b.nm_situacao || "").toUpperCase();
@@ -201,7 +305,6 @@ export class Cadpessoa implements OnInit {
                     return 1; // 'b' vem antes de 'a'
                 }
                 return 0; // Os nomes são iguais
-
                 });
             },
             error: (err) => {
@@ -210,6 +313,7 @@ export class Cadpessoa implements OnInit {
             }
         });
   }
+
   carregarTiposDeCargos(): void {
         this.tipoCargoService.getTiposCargos().subscribe({
             next: (data) => {
@@ -226,8 +330,6 @@ export class Cadpessoa implements OnInit {
                 }
                 return 0; // Os nomes são iguais
                 });
-
-
             },
             error: (err) => {
                 console.error('Erro ao carregar tipos de cargo:', err);
@@ -239,11 +341,9 @@ export class Cadpessoa implements OnInit {
             next: (data) => {
                 // Atribui os dados recebidos da API à lista
                 this.origemDaRenda = data;
-
                 this.origemDaRenda.sort((a, b) => {
-                const nomeA = (a.nm_origem_renda || "").toUpperCase(); // Para comparação sem case-sensitive
+                const nomeA = (a.nm_origem_renda || "").toUpperCase();
                 const nomeB = (b.nm_origem_renda || "").toUpperCase();
-
                 if (nomeA < nomeB) {
                     return -1; // 'a' vem antes de 'b'
                 }
@@ -251,7 +351,6 @@ export class Cadpessoa implements OnInit {
                     return 1; // 'b' vem antes de 'a'
                 }
                 return 0; // Os nomes são iguais
-
                 });
             },
             error: (err) => {
@@ -260,6 +359,7 @@ export class Cadpessoa implements OnInit {
             }
         });
   }
+
   private carregarEstados() {
      this.ibgeService.getEstados().subscribe({
       next: (dados) => this.estados = dados,
@@ -291,32 +391,12 @@ export class Cadpessoa implements OnInit {
   */
   monitorarPreenchimento() {
     this.pessoaForm.valueChanges.subscribe(valores => {
-
-      // Começamos com a lista básica de exceções (email, rg, piscina...)
       const excecoesAtuais = [...this.EXCECOES_GERAIS];
 
-      // LÓGICA DE DECISÃO (PF vs PJ)
-      // Baseado no campo 'tipo'
-      if (valores.tipo === 'PF') {
-        // Se é PF:
-        // 1. Ignoramos os campos de PJ (adiciona na lista de exceções)
-        excecoesAtuais.push(...this.CAMPOS_PJ_OBRIGATORIOS);
-        // 2. Os campos de PF (CPF, Nome, Nome Social) NÃO entram na exceção,
-        //    então o Service vai obrigar que eles estejam preenchidos.
-      } else {
-        // Se é PJ:
-        // 1. Ignoramos os campos de PF (adiciona na lista de exceções)
-        excecoesAtuais.push(...this.CAMPOS_PF_OBRIGATORIOS);
-        // 2. Os campos de PJ (CNPJ, Fantasia, RzSocial) NÃO entram na exceção.
-      }
-
-      // CHAMA O SERVICE
       const estaCompleto = this.formUtils.isFormularioCompletamentePreenchido(
         this.pessoaForm,
         excecoesAtuais
       );
-
-      // ATUALIZA O STATUS
       this.atualizarStatusSituacao(estaCompleto);
     });
   }
@@ -331,13 +411,7 @@ export class Cadpessoa implements OnInit {
     // Verifica se precisa atualizar para evitar loops ou chamadas desnecessárias
     if (campoStatus && campoStatus.value !== novoStatus) {
       campoStatus.setValue(novoStatus, { emitEvent: false });
-
-      console.log(`Status alterado para: ${isCompleto ? 'ATIVO (Completo)' : 'PENDENTE (Faltam dados)'}`);
-
-      // Opcional: Debug para ver o que falta
-      if (!isCompleto) {
-        // console.log('Exceções atuais:', excecoesAtuais); // Precisa mover excecoesAtuais para escopo se quiser logar aqui
-      }
+//      console.log(`Status alterado para: ${isCompleto ? 'ATIVO (Completo)' : 'PENDENTE (Faltam dados)'}`);
     }
   }
 // ==================================================================================
@@ -394,7 +468,6 @@ switchTab(tabName: string) {
       // Remove pontos, traços, espaços e outros caracteres não numéricos
       const cleanedValue = rawValue.replace(/\D/g, '');
 
-      // Se você usa uma máscara de CPF/CNPJ, é crucial atualizar o valor
       // do controle para o valor limpo, para que o validador funcione corretamente.
       if (rawValue !== cleanedValue) {
            control?.setValue(cleanedValue, { emitEvent: false }); // Atualiza o controle sem disparar o valueChanges
@@ -406,42 +479,8 @@ switchTab(tabName: string) {
         this.verificarCpfExistente(cpf);
      }
   }
-  onCnpjBlur() {
-      const value = this.pessoaForm.get('nr_cnpj')?.value;
-      this.cnpjValido = validarCNPJ(value);
-      if(!this.cnpjValido){
-           this.tipoAlerta = 'error'
-           this.pessoaForm.get(this.cnpjControlName)?.setErrors({ 'invalido': true });
-      }
-      this.mensagemDeErro = null; // Limpa o erro anterior
-      this.tipoAlerta = null;
-      const control = this.pessoaForm.get(this.cnpjControlName);
-
-  // --- NOVO: Limpeza do Valor ---
-      const rawValue = control?.value || '';
-      // Remove pontos, traços, espaços e outros caracteres não numéricos
-      const cleanedValue = rawValue.replace(/\D/g, '');
-
-      // Se você usa uma máscara de CPF/CNPJ, é crucial atualizar o valor
-      // do controle para o valor limpo, para que o validador funcione corretamente.
-      if (rawValue !== cleanedValue) {
-           control?.setValue(cleanedValue, { emitEvent: false }); // Atualiza o controle sem disparar o valueChanges
-      }
 
 
-     /* if (control?.invalid) {
-        // Trata erros de validação local (ex: campo vazio)
-        this.tipoAlerta = 'error';
-        this.mensagemDeErro = 'CPF inválido ou incompleto.';
-        return;
-      }*/
-
-      const cnpj = control?.value;
-
-      if (cnpj) {
-        this.verificarCnpjExistente(cnpj);
-      }
-  }
 // 4. Lógica de Busca no Backend
   verificarCpfExistente(cpf: string) {
     this.pessoaService.readByCPF(cpf).pipe(
@@ -467,49 +506,18 @@ switchTab(tabName: string) {
       }
     });
   }
-    // 4. Lógica de Busca no Backend
-  verificarCnpjExistente(cnpj: string) {
-      this.pessoaService.readByCNPJ(cnpj).subscribe({
-        next: (response: any) => {
-          // Assumindo que um retorno de sucesso significa que o cadastro EXISTE
-          this.tipoAlerta = 'error';
-          this.mensagemDeErro = `Já existe cadastro com esse CPF ${cnpj}`;
 
-          // (Opcional) Força uma marcação de erro no FormControl
-          this.pessoaForm.get(this.cpfControlName)?.setErrors({ 'jaExiste': true });
-        },
-     /*   error: (error) => {
-          // Se o erro for um 404 (Not Found), significa que está DISPONÍVEL
-          if (error.status === 404) {
-            this.tipoAlerta = 'success';
-      //      this.mensagemDeErro = `CPF ${cpf} está disponível para cadastro.`;
-        //    this.continuaCadastro();
-          } else {
-            // Trata outros erros de servidor (500)
-            this.tipoAlerta = 'error';
-            this.mensagemDeErro = 'Erro de servidor ao verificar CPF.';
-          }
-        },*/
-      });
-  }
-  // Função disparada ao perder o foco (onBlur)
 
-// seu-componente.ts
 buscarCep() {
  // Pega o valor do campo CEP do formulário
   const cep = this.enderecoForm.get('cep')?.value;
 
-if (cep) {
-    const cepLimpo = cep.replace(/\D/g, '');
-
+  if (cep) {
+      const cepLimpo = cep.replace(/\D/g, '');
       if (cepLimpo.length < 8) return;
-        // 2. A MÁGICA: Se for igual ao que já pesquisamos, PARA TUDO.
       if (cepLimpo === this.ultimoCepPesquisado) return;
-
-      // 3. Se passou, atualiza a variável e segue
       this.ultimoCepPesquisado = cepLimpo;
       this.loading = true;
-
       this.cepService.buscarCep(cepLimpo).subscribe({
        next: (dados) => {
             this.loading = false; // V
@@ -518,19 +526,15 @@ if (cep) {
                 alert('CEP não encontrado!');
                 return;
               }
-
               // Preenchimento com os campos da ViaCEP
-              // Nota: Ajuste os nomes à esquerda (seus formControls) conforme seu projeto
               this.enderecoForm.patchValue({
-                logradouro: dados.logradouro,      // ViaCEP usa 'logradouro'
-                bairro: dados.bairro,            // ViaCEP usa 'bairro'
-                cidade: dados.localidade,        // ViaCEP usa 'localidade' para Cidade
-                uf: dados.uf,                // ViaCEP usa 'uf'
-                complemento: dados.complemento   // Opcional
-          });
+                logradouro: dados.logradouro,
+                bairro: dados.bairro,
+                cidade: dados.localidade,
+                uf: dados.uf,
 
-          // Debug
-          console.log('Dados recebidos:', dados);
+          });
+//          console.log('Dados recebidos:', dados);
         },
         error: (err) => {
           this.loading = false;
@@ -539,49 +543,9 @@ if (cep) {
         }
       });
     }
+ }
 
-}
-
-
-/*  buscarCep() {
-      this.erroBusca = false;
-      const cepControl = this.enderecoForm.get('cep');
-      // Valida se o campo CEP está preenchido e é válido
-      if (cepControl && cepControl.valid) {
-        this.loading = true;
-        const cepValue = cepControl.value;
-        this.cepService.buscarEndereco(cepValue).pipe(
-          take(1) // Pega apenas a primeira emissão e finaliza
-        ).subscribe({
-          next: (endereco: Endereco) => {
-           this.loading = true;
-            if (endereco.erro) {
-              this.erroBusca = true;
-              this.limparCamposEndereco();
-            } else {
-              // Atualiza os campos do formulário (apenas os do endereço)
-              this.enderecoForm.patchValue({
-                logradouro: endereco.logradouro,
-                bairro: endereco.bairro,
-                cidade: endereco.localidade,
-                uf: endereco.uf,
-              });
-
-              // Opcional: focar no campo número após o preenchimento
-              document.getElementById('numero')?.focus();
-            }
-          },
-          error: () => {
-            this.loading = false;
-            this.erroBusca = true;
-            this.limparCamposEndereco();
-          }
-        });
-      } else if (cepControl && cepControl.dirty) {
-        this.limparCamposEndereco();
-      }
-  }
-  */
+/*
  limparCamposEndereco() {
       this.enderecoForm.patchValue({
         logradouro: '',
@@ -590,25 +554,17 @@ if (cep) {
         uf: ''
       });
   }
+*/
   toggleValidation(tipo: string): void {
       const cpfControl = this.pessoaForm.get('nr_cpf');
       const nomeControl = this.pessoaForm.get('nome');
       const nome_socialControl = this.pessoaForm.get('nome_social');
-      const cnpjControl = this.pessoaForm.get('nr_cnpj');
-      const razaoSocialControl = this.pessoaForm.get('rzSocial');
-      const nomeFantasiaControl = this.pessoaForm.get('nmFantasia');
+
       if (tipo === 'PF') {
         // Habilita validação PF
         nomeControl?.setValidators([Validators.required]);
         nome_socialControl?.setValidators([Validators.required]);
-        // Desabilita validação PJ
-        cnpjControl?.setValidators(null);
-        razaoSocialControl?.setValidators(null);
-        nomeFantasiaControl?.setValidators(null);
-      } else { // PJ
-        // Habilita validação PJ
-        razaoSocialControl?.setValidators([Validators.required]);
-        nomeFantasiaControl?.setValidators([Validators.required]);
+        } else {
         // Desabilita validação PF
         cpfControl?.setValidators(null);
         nomeControl?.setValidators(null);
@@ -617,9 +573,7 @@ if (cep) {
       cpfControl?.updateValueAndValidity();
       nomeControl?.updateValueAndValidity();
       nome_socialControl?.updateValueAndValidity();
-      cnpjControl?.updateValueAndValidity();
-      razaoSocialControl?.updateValueAndValidity();
-      nomeFantasiaControl?.updateValueAndValidity();
+
   }
   // Helper para verificar se o campo está inválido e foi tocado/modificado
   isInvalid(controlName: string, groupName: string = '', ): boolean {
@@ -636,100 +590,86 @@ if (cep) {
 // 5. SUBMISSÃO DO FORMULÁRIO (Save)
 // ==================================================================================
 onSubmit() {
-    console.log('--- CLIQUE EM SALVAR ---');
-
-    // 1. LIMPEZA E VALIDAÇÃO VISUAL
     this.msgErroCabecalho = null;
-
     if (this.pessoaForm.invalid) {
       this.focarNaAbaComErro();
       const erroEncontrado = this.formValidationService.getPrimeiroErro(this.pessoaForm);
       this.msgErroCabecalho = erroEncontrado || "Existem campos obrigatórios não preenchidos.";
-
       this.pessoaForm.markAllAsTouched();
       this.rolarParaTopo(); // (Assumindo que você criou essa função auxiliar ou use o setTimeout aqui)
-
-      return; // PARE AQUI
+      return;
     }
-
-    // 2. REGRA DE NEGÓCIO: ATIVO (1) vs PENDENTE (3)
-
-    // Nota: Como já adicionamos 'rg' no arquivo de constantes, não precisa repetir aqui.
     const excecoesParaAtivo = [...this.EXCECOES_GERAIS];
-    const tipo = this.pessoaForm.get('tipo')?.value;
-
-    if (tipo === 'PF') {
-        excecoesParaAtivo.push(...this.CAMPOS_PJ_OBRIGATORIOS);
-    } else {
-        excecoesParaAtivo.push(...this.CAMPOS_PF_OBRIGATORIOS);
-    }
-
+    excecoesParaAtivo.push(...this.CAMPOS_PF_OBRIGATORIOS);
     const estaCompleto = this.formUtils.isFormularioCompletamentePreenchido(
         this.pessoaForm,
         excecoesParaAtivo
     );
-
     const idSituacaoCalculado = estaCompleto ? 1 : 3;
-
-    // 3. ATUALIZAÇÃO DO OBJETO
     this.isSubmitting = true;
     const formValues = this.pessoaForm.value;
-
     this.Pessoa = {
         ...this.Pessoa,
         id_cargo_func_fk: formValues.tipoCargo,
-
-        // --- USA O VALOR CALCULADO ---
         id_situacao_fk: idSituacaoCalculado,
-        // -----------------------------
-
         nome: formValues.nome,
         nome_social: formValues.nome_social,
         rg: formValues.rg,
         orgao: formValues.orgEmis,
-        // Usa a formatação de data para evitar erro de SQL
         dt_expedicao: this.formatarDataParaSQL(formValues.dt_expedicao),
-        id_tipo_pessoa_fk: formValues.tipo === 'PF' ? 1 : 2,
-        id_cpf_cnpj: formValues.tipo === 'PF' ? formValues.nr_cpf : formValues.nr_cnpj
+        id_tipo_pessoa_fk:   1,
+        id_cpf_cnpj:  formValues.nr_cpf
     };
-
-    // 4. DEBUG (AGORA NO LUGAR CERTO)
-    console.log('Status Calculado:', idSituacaoCalculado);
-    console.log('Objeto Pessoa Pronto para Envio:', this.Pessoa);
-
-    this.cadastrarPessoa();
+    this.salvarPessoa();
   }
-// --- FUNÇÃO NOVA PARA TROCAR A ABA ---
-focarNaAbaComErro() {
-  const controls = this.pessoaForm.controls;
+
+  private salvarPessoa() {
+    const dadosParaSalvar = this.pessoaForm.getRawValue(); // getRawValue pega até campos disabled
+    console.log('dadosParaSalvar PEssoas: id ', this.pessoaId);
+    this.pessoaService.atualizar(this.pessoaId, dadosParaSalvar).subscribe({
+        next: (response) => {
+            this.id = response?.id || this.pessoaId;
+            console.log('Pessoas: id ', this.id);
+            this.salvarDadosDependentes();
+        },
+        error: (err) => {
+            console.error('Erro ao salvar pessoa ', err);
+            this.tipoAlerta = 'error';
+            this.mensagemDeErro = 'Erro ao salvar dados pessoais.';
+            this.isSubmitting = false;
+        }
+    });
+  }
+
+  // --- FUNÇÃO NOVA PARA TROCAR A ABA ---
+  focarNaAbaComErro() {
+    const controls = this.pessoaForm.controls;
 
   // 1. Verifica Aba Pessoal (Campos soltos ou grupo endereco)
-  if (
-    controls['nome']?.invalid ||
-    controls['nr_cpf']?.invalid ||
-    controls['nr_cnpj']?.invalid ||
-    controls['celular']?.invalid ||
-    controls['email']?.invalid ||
-    controls['endereco']?.invalid
-  ) {
-    console.log('Erro encontrado na aba PESSOAL');
-    this.switchTab('pessoal');
-    return;
-  }
+    if (
+      controls['nome']?.invalid ||
+      controls['nr_cpf']?.invalid ||
+      controls['celular']?.invalid ||
+      controls['email']?.invalid ||
+      controls['endereco']?.invalid
+    ) {
+      console.log('Erro encontrado na aba PESSOAL');
+      this.switchTab('pessoal');
+      return;
+    }
+    // 2. Verifica Aba Interesse
+    if (controls['interesse']?.invalid) {
+      console.log('Erro encontrado na aba INTERESSE');
+      this.switchTab('interesse');
+      return;
+    }
 
-  // 2. Verifica Aba Interesse
-  if (controls['interesse']?.invalid) {
-    console.log('Erro encontrado na aba INTERESSE');
-    this.switchTab('interesse');
-    return;
-  }
-
-  // 3. Verifica Aba Economico
-  if (controls['economico']?.invalid) {
-    console.log('Erro encontrado na aba ECONOMICO');
-    this.switchTab('economico');
-    return;
-  }
+    // 3. Verifica Aba Economico
+    if (controls['economico']?.invalid) {
+      console.log('Erro encontrado na aba ECONOMICO');
+      this.switchTab('economico');
+      return;
+    }
 }
 // ========================================================================
 // FUNÇÃO AUXILIAR PARA DEBUG (Adicione na classe Cadpessoa)
@@ -760,21 +700,6 @@ identificarCamposVazios(excecoes: string[]) {
         }
     });
 }
-  private cadastrarPessoa() {
-    this.pessoaService.cadastrarPessoa(this.Pessoa).subscribe({
-        next: (response) => {
-            this.id = response.id;
-            this.salvarDadosDependentes();
-        },
-        error: (err) => {
-            console.error('Erro ao salvar pessoa', err);
-            this.tipoAlerta = 'error';
-            this.mensagemDeErro = 'Erro ao salvar dados pessoais.';
-            this.isSubmitting = false;
-        }
-    });
-  }
-
 // Adicione essa função auxiliar na sua classe para achar o campo culpado
 getFormValidationErrors() {
   const result: any[] = [];
@@ -784,73 +709,51 @@ getFormValidationErrors() {
       result.push({ control: key, error: controlErrors });
     }
   });
-  return result;
-}
+    return result;
+ }
 
-
-  /*----------------------------------------------
-  *  Cadastro Pessoa
-  *-----------------------------------------------
-  */
- /* cadastraPessoa(){
-     this.pessoaService.cadastrarPessoa(this.Pessoa).subscribe({
-            next: (response) => {
-                 this.id = response.id;
-            },
-        complete: () => {
-          this.cadastaContato()
-          this.cadastraEndereco();
-          if(this.Pessoa.id_tipo_pessoa_fk == 2 ){
-              this.cadastrarEmpresa();
-          }
-          this.cadastraInteresse();
-          this.cadastraEconomico();
-       }
-      });
-  };*/
-
-private salvarDadosDependentes() {
-    this.cadastrarContato();
-    this.cadastrarEndereco();
-
-    if (this.Pessoa.id_tipo_pessoa_fk === 2) {
-        this.cadastrarEmpresa();
-    }
-
-    this.cadastrarInteresse();
-    this.cadastrarEconomico();
+ private salvarDadosDependentes() {
+    this.salvarContato();
+    this.salvarEndereco();
+    this.salvarInteresse();
+    this.salvarEconomico();
   }
 
   /*----------------------------------------------
   *  Cadastro Contato
   *-----------------------------------------------
   */
-  cadastrarContato(){
+  salvarContato(){
+     //   const dadosParaSalvar = this.pessoaForm.getRawValue();
         this.Contato.id_pessoa_fk = this.id
         this.Contato.nr_contato = this.pessoaForm.value.celular;
         this.Contato.email = this.pessoaForm.value.email;
         this.Contato.whatsapp = this.pessoaForm.value.zap;
-        this.contatoService.cadastrarContato(this.Contato).subscribe();
+  //      console.log(' enviando dados contato ', this.Contato )
+        this.contatoService.updateContato(this.id, this.Contato).subscribe();
   };
   /*----------------------------------------------
   *  Cadastro Endereco
   *-----------------------------------------------
   */
-  cadastrarEndereco(){
+  salvarEndereco(){
         this.Endereco.id_pessoa_fk = this.id
         this.Endereco.cep = this.pessoaForm.value.endereco.cep;
         this.Endereco.numero =  this.pessoaForm.value.endereco.numero;
         this.Endereco.complemento = this.pessoaForm.value.endereco.complemento;
-        this.enderecoService.cadastrarEndereco(this.Endereco).subscribe();
+  //      console.log(' enviando dados endereco ', this.Endereco )
+        this.enderecoService.updateEndereco(this.id, this.Endereco).subscribe();
   };
   /*----------------------------------------------
   *  Cadastro Interesse
   *-----------------------------------------------
   */
-  cadastrarInteresse(){
- const form = this.pessoaForm.value.interesse;
+  salvarInteresse(){
+ //const form = this.pessoaForm.value.interesse;
+     this.Interesse.id_pessoa_fk = this.id
+    const dadosParaSalvar = this.interesseForm.getRawValue();
 
-    this.Interesse = {
+/*    this.Interesse = {
         ...this.Interesse,
         id_pessoa_fk: this.id,
         id_sit_imovel_fk: form.id_sit_imovel_fk ? Number(form.id_sit_imovel_fk) : null,
@@ -879,26 +782,20 @@ private salvarDadosDependentes() {
         obs_interesse: form.obs_interesse,
         estado: form.estado,
         municipio: form.municipio,
-    };
+    };*/
 
-    this.interesseService.cadastrarInteresse(this.Interesse).subscribe({
-        next: () => console.log('Interesse salvo com sucesso'),
-        error: (err) => console.error('Erro ao salvar interesse', err)
-    });
+    this.interesseService.atualizar(this.id, dadosParaSalvar).subscribe();
 }
   /*----------------------------------------------
   *  Cadastro Economico
   *-----------------------------------------------
   */
-  cadastrarEconomico() {
+  salvarEconomico() {
       const formValues = this.pessoaForm.value.economico;
 
       this.Economico = {
           ...this.Economico,
           id_pessoa_fk: this.id,
-
-          // --- CORREÇÃO DO ERRO DE TIPO ---
-          // Troque 'null' por 'undefined'
           id_origem_renda_fk: formValues.id_origem_renda_fk ? Number(formValues.id_origem_renda_fk) : undefined,
           // --------------------------------
 
@@ -908,8 +805,15 @@ private salvarDadosDependentes() {
           renda_declarada: this.limparMoeda(formValues.renda_declarada)
       };
 
-      // ... restante do código (subscribe, next, error) ...
-      this.economicoService.cadastrarEconomico(this.Economico).subscribe({
+          const excecoesParaAtivo = [...this.EXCECOES_GERAIS];
+          excecoesParaAtivo.push(...this.CAMPOS_PF_OBRIGATORIOS);
+          const estaCompleto = this.formUtils.isFormularioCompletamentePreenchido(
+              this.pessoaForm,
+              excecoesParaAtivo
+          );
+          const idSituacaoCalculado = estaCompleto ? 1 : 3;
+
+      this.economicoService.atualizar(this.id, this.Economico).subscribe({
           next: () => {
                alert('Cadastro realizado com sucesso!');
                this.pessoaForm.reset();
@@ -922,20 +826,12 @@ private salvarDadosDependentes() {
                this.tipoAlerta = 'error';
                this.mensagemDeErro = 'Erro ao salvar dados financeiros.';
                this.isSubmitting = false;
-          }
-      });
-  }
+          },
 
-  /*----------------------------------------------
-  *  Cadastro Empresa
-  *-----------------------------------------------
-  */
-  cadastrarEmpresa(){
-        this.Empresa.id_pessoa_fk = this.id
-        this.Empresa.nm_fantasia = this.pessoaForm.value.nmFantasia;
-        this.Empresa.rz_social = this.pessoaForm.value.rzSocial;
-        this.empresaService.cadastrarEmpresa(this.Empresa).subscribe()
-    };
+      });
+      this.Pessoa.id_situacao_fk = idSituacaoCalculado,
+      this.pessoaService.atualizarStatus(this.pessoaId, this.Pessoa).subscribe()
+  }
 
 // ==================================================================================
 // 6. UTILS (Helpers)
@@ -963,28 +859,6 @@ private salvarDadosDependentes() {
       .trim();
     return parseFloat(valorLimpo) || 0;
   }
-
-  // Transforma string R$ 1.000,00 em number 1000.00
- /* private limparMoeda(valor: any): number {
-    if (typeof valor !== 'string') return valor;
-    const valorLimpo = valor
-      .replace('R$', '')
-      .replace(/\./g, '')
-      .replace(',', '.')
-      .trim();
-    return parseFloat(valorLimpo) || 0;
-  }
-
-  // Ordenador Genérico (evita repetição de código)
-  private ordenarLista<T>(lista: T[], campoNome: keyof T): T[] {
-    return lista.sort((a, b) => {
-        const nomeA = (String(a[campoNome]) || "").toUpperCase();
-        const nomeB = (String(b[campoNome]) || "").toUpperCase();
-        if (nomeA < nomeB) return -1;
-        if (nomeA > nomeB) return 1;
-        return 0;
-    });
-  }*/
 
 // Adicione isso dentro da classe Cadpessoa
     private formatarDataParaSQL(data: any): string | null {

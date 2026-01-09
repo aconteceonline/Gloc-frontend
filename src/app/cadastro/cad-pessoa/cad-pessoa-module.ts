@@ -30,8 +30,8 @@ import { NgxMaskDirective, NgxMaskPipe, provideNgxMask } from 'ngx-mask';
 
 
 
-]
-,
+],
+
  providers: [
   provideNgxMask({ /* opções de cfg */ }),
   CurrencyPipe,

@@ -9,10 +9,12 @@ import { Login } from './login/login';
 import { authInterceptor } from './auth-interceptor';
 import { MatDialogModule } from '@angular/material/dialog';
 
+
 @NgModule({
   declarations: [
     App,
     Login,
+
   ],
   imports: [
     BrowserModule,

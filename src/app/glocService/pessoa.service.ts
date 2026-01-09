@@ -25,7 +25,6 @@ export class PessoaService {
   private http = inject(HttpClient);
   apiUrl = "http://localhost:3001/pessoas";
 
-  private myApiUrl = "http://localhost:3001/";
 
 
   pessoaModel: PessoaModel[] = []
@@ -37,36 +36,22 @@ export class PessoaService {
      return this.http.get<PessoaModel[]>(`${this.apiUrl}`);
   }
 
-  getIdCelPessoa(cel: any): Observable<PessoaModel>{
-    const url = `${this.myApiUrl}${this.myApiUrl}/${cel}`
-    return this.http.get<PessoaModel>(url)
-  }
-
-  getListNomePessoa(): Observable<PessoaModel[]>{
-    return this.http.get<PessoaModel[]>(`${this.myApiUrl}${this.apiUrl}`);
-
-  }
-
   cadastrarPessoa(glocModel: PessoaModel): Observable<PessoaModel> {
      return this.http.post<PessoaModel>(this.apiUrl, glocModel);
   }
 
-  updatePessoa(glocModel: any): Observable<PessoaModel> {
-
-    const  url = `${this.myApiUrl}${this.myApiUrl}/${glocModel.id}`;
-     return this.http.put<PessoaModel>(url, glocModel);
-
+  getPorId(id: number): Observable< PessoaModel> {
+  return this.http.get< PessoaModel>(`${this.apiUrl}/buscar/${id}`);
   }
 
-  deletePessoa(id: any): Observable<PessoaModel> {
-    const  url = `${this.myApiUrl}${this.myApiUrl}/${id}`;
-    return this.http.delete<PessoaModel>(url)
+  atualizar(id: any, pessoa:  PessoaModel): Observable<any> {
+    return this.http.put(`${this.apiUrl}/${id}`, pessoa);
   }
 
-  readByIdPessoa(id: any): Observable<PessoaModel>{
-    const url = `${this.myApiUrl}${this.myApiUrl}/${id}`
-    return this.http.get<PessoaModel>(url)
+  atualizarStatus(id: any, pessoa:  PessoaModel): Observable<any> {
+    return this.http.put(`${this.apiUrl}/status/${id}`, pessoa);
   }
+
 
  readByCPF(cpf: any): Observable<PessoaModel | null> {
   const url = `${this.apiUrl}/${cpf}`;
@@ -89,7 +74,7 @@ readByCNPJ(cnpj: any): Observable<PessoaModel>{
 /* usado pelo app-pessoa-modal */
   buscarPorTermo(busca: string): Observable<PessoaModel[]> {
  //  console.log(' buscar por cpf cnpj/;  ', (`${this.myApiUrl}termo/${busca}`))
-  return this.http.get<PessoaModel[]>(`${this.myApiUrl}termo/${busca}`)
+  return this.http.get<PessoaModel[]>(`${this.apiUrl}termo/${busca}`)
 
 
 }

@@ -2,11 +2,10 @@ import { InteresseModel } from '../../../glocModel/interesse.model';
 import { EconomicoModel } from '../../../glocModel/economico.model';
 import { EnderecoModel } from '../../../glocModel/endereco.model';
 import { ContatoModel } from '../../../glocModel/contato.model';
-import { EmpresaModel } from '../../../glocModel/empresa.model';
 import { PessoaModel } from '../../../glocModel/pessoa.model';
 
 export const CPF_CONTROL_NAME = 'nr_cpf';
-export const CNPJ_CONTROL_NAME = 'nr_cnpj';
+
 
 // --- LISTA CENTRAL DE CAMPOS OPCIONAIS ---
 // Se um campo estiver nesta lista e estiver vazio, o sistema
@@ -18,6 +17,8 @@ export const EXCECOES_GERAIS = [
   'orgao',
   'dt_expedicao',
   'complemento',
+  'selectedYear',
+
 
   // Checkboxes (Booleanos nunca são "vazios", mas é bom listar para documentar)
   'piscina_adulto', 'piscina_infantil', 'churasqueira', 'salao_festa',
@@ -43,7 +44,7 @@ export const EXCECOES_GERAIS = [
 ];
 
 export const CAMPOS_PF_OBRIGATORIOS = [CPF_CONTROL_NAME, 'nome', 'nome_social'];
-export const CAMPOS_PJ_OBRIGATORIOS = [CNPJ_CONTROL_NAME, 'nmFantasia', 'rzSocial'];
+
 
 // --- Funções Factory (Garante objetos limpos e novos) ---
 
@@ -65,9 +66,7 @@ export function getInicialEndereco(): EnderecoModel {
   return { id_pessoa_fk: 0, cep: '', numero: '', complemento: '' };
 }
 
-export function getInicialEmpresa(): EmpresaModel {
-    return { id_pessoa_fk: 0, rz_social: '', nm_fantasia: '' };
-}
+
 
 export function getInicialContato(): ContatoModel {
     return { id_pessoa_fk: 0, nr_contato: '', whatsapp: false, email: '' };

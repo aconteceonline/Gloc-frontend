@@ -4,6 +4,9 @@ import { ViewListarPessoasService } from '../../../glocService/view-lista-pessoa
 import { CurrencyPipe } from '@angular/common';
 import { ModalMsgWhatsapp } from '../../../glocModal/pessoa-modal/modal-msg-whatsapp/modal-msg-whatsapp';
 import { ModalResumoPessoa } from '../../../glocModal/pessoa-modal/modal-resumo-pessoa/modal-resumo-pessoa';
+import { Router } from '@angular/router';
+import { PessoaService } from '../../../glocService/pessoa.service';
+import { PessoaModel } from '../../../glocModel/pessoa.model';
 
 
 export interface Pessoa  {
@@ -22,8 +25,6 @@ export interface Pessoa  {
   updated_at: Date
 }
 
-
-
 @Component({
   selector: 'app-listar-pessoas',
   standalone: false,
@@ -31,8 +32,10 @@ export interface Pessoa  {
   styleUrl: './listar-pessoas.scss'
 })
 export class ListarPessoas implements OnInit {
-// Agora apontando para o novo nome da classe
 
+  private pessoaService = inject(PessoaService);
+  private router = inject(Router);
+  pessoas: PessoaModel[] = [];
   pessoaSelecionada: any = null;
   mensagemCustom: string = '';
   exibirModalWhats: boolean = false; // Controle do modal
@@ -62,6 +65,7 @@ export class ListarPessoas implements OnInit {
   private cdr  = inject (ChangeDetectorRef);
   private currencyPipe  = inject (CurrencyPipe);
   searchText: string = '';
+  isDeleting: boolean = false;
 
 
   ngOnInit(): void {
@@ -142,8 +146,11 @@ dispararWhatsapp() {
       return;
     }
 
-    alert(`Editar: ${pessoa.nome_social}`);
+    // 2. Navega para a rota de edição passando o ID como parâmetro
+    // Ajuste o caminho inicial conforme sua estrutura de rotas (ex: /principal/menuconsultar...)
+    this.router.navigate(['principal/editarpessoas/buscar', pessoa.id]);
   }
+
 
   excluirPessoa(id: number) {
   // Mantemos esta apenas se for deletar direto sem modal
@@ -174,24 +181,52 @@ dispararWhatsapp() {
 
   // Executa a exclusão real
   executarExclusao() {
-    if (this.pessoaParaExcluir) {
-      this.listarPessoas = this.listarPessoas.filter(p => p.id !== this.pessoaParaExcluir!.id);
-      this.cancelarExclusao();
+   if (!this.pessoaParaExcluir) return;
 
-      // Ajuste de página caso a página fique vazia
-      if (this.pessoasPaginadas.length === 0 && this.paginaAtual > 1) {
-        this.paginaAtual--;
+    this.isDeleting = true;
+    const id = this.pessoaParaExcluir.id;
+
+    // Objeto com o novo status (Exclusão Lógica)
+    // Ajuste o nome do campo 'id_situacao_fk' se no seu banco for diferente
+    const dadosParaAtualizar: PessoaModel = {
+      id_tipo_pessoa_fk: 0, // ou null, dependendo da sua interface
+      id_cargo_func_fk: 0,
+      id_situacao_fk: 2,
+      id_cpf_cnpj: 0,
+      nome: '',
+      nome_social: '',
+      rg: '',
+      orgao: '',
+      dt_expedicao: ''
+
+    };
+
+    // Chama o serviço de ATUALIZAR (PUT ou PATCH), não o DELETE
+    this.pessoaService.atualizarStatus(id, dadosParaAtualizar ).subscribe({
+      next: () => {
+        this.pessoas = this.pessoas.filter((p: any) => p.id !== id);
+        this.cancelarExclusao();
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        alert('Erro ao tentar excluir.');
+      },
+      complete: () => {
+        this.isDeleting = false;
       }
-    }
+    });
   }
 
  carregarPessoas(): void {
     this.viewListarPessoasService.getListaPessoas().subscribe({
-      next: (dados) => {
-
+      next: (dados: any[]) => {
         this.listarPessoas = dados;
-                  // Atribui os dados recebidos da API à lista
-                  this.listarPessoas = dados;
+
+          this.listarPessoas = dados.filter((p: any) =>{
+         const status = (p.nome_status || '').toUpperCase();
+
+        return status === 'ATIVO' || status === 'PENDENTE';
+      });
                   this.cdr.detectChanges();
 
                   this.listarPessoas.sort((a, b) => {

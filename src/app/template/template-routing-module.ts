@@ -10,32 +10,29 @@ const routes: Routes = [
      component: Layout ,
 
      children:  [
-      {
-        path: 'menucadastrar',
-        loadChildren: () => import ('../menucadastrar/menucadastrar-module').then(m => m.MenucadastrarModule ),
-        pathMatch: 'full',
-        data: { titulo: 'MENU CADASTRAR', subTitulo: 'Realiza Cadastro de novas Pessoas, Imóveis e Locações'},
 
-      },
-
-      {
-       path: 'menuconsultar',
-        loadChildren: () => import ('../menuconsultar/menuconsultar-module').then(m => m.MenuconsultarModule),
-        pathMatch: 'full',
-        data: { titulo: 'MENU CONSULTAR', subTitulo: 'Realiza Consulta de novas Pessoas, Imóveis e Locações'}
-      },
+//lista pessoas
        {
        path: 'menuconsultar/pessoas',
         loadChildren: () => import ('../consultas/consulta-pessoas/consultar-pessoas-module').then(m => m.ConsultarPessoasModule),
         pathMatch: 'full',
         data: { titulo: 'MENU CONSULTAR', subTitulo: 'Realiza Consulta de novas Pessoas, Imóveis e Locações'}
       },
+//editar pessoa
+       {
+       path: 'editarpessoas/buscar/:id',
+        loadChildren: () => import ('../editar/editar-pessoas/editar-pessoas-module').then(m => m.EditarPessoasModule),
+        pathMatch: 'full',
+        data: { titulo: 'CADASTRO PESSOAS', subTitulo: 'Edita Pessoas, Imóveis e Locações'}
+      },
+//cadastra Pessoa
       {
         path: 'menucadastrar/pessoa',
         loadChildren: () => import ('../cadastro/cad-pessoa/cad-pessoa-module').then(m => m.CadPessoaModule),
          pathMatch: 'full',
         data: { titulo: 'CADASTRO PESSOAS', subTitulo: 'Cadastre aqui os novas pessoas'}
       },
+//cadatra imovel
       {
         path: 'menucadastrar/cadimovel',
         loadChildren: () => import ('../cadastro/cad-imovel/cad-imovel-module').then(m => m.CadImovelModule),
@@ -49,6 +46,11 @@ const routes: Routes = [
       },
 
 
+      {
+        path: 'dashboard',
+        loadChildren: () => import ('../consultas/dashboard/dashboard-module').then(m => m.DashboardModule), pathMatch: 'full',
+
+      },
 
 
     ]

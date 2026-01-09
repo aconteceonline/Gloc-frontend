@@ -36,19 +36,12 @@ export class InteresseFormService {
     // 4. Aplica a Regra de Negócio Específica
     if (objetivo === 'Alugar') {
       // --- CENÁRIO: ALUGUEL ---
-      // O campo 'vr_imovel' não faz sentido aqui.
       vrImovelControl?.setValue(null); // Limpa valor antigo
       vrImovelControl?.disable();      // Trava o campo visualmente
-
-      // O 'vr_aluguel' continua habilitado (pelo passo 1)
-
     } else {
       // --- CENÁRIO: COMPRAR ou VENDER ---
-      // O campo 'vr_aluguel' não faz sentido aqui.
       vrAluguelControl?.setValue(null); // Limpa valor antigo
       vrAluguelControl?.disable();      // Trava o campo visualmente
-
-      // O 'vr_imovel' continua habilitado (pelo passo 1)
     }
   }
 }

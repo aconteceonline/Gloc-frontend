@@ -10,11 +10,11 @@ import { EnderecoModel } from '../glocModel/endereco.model';
   providedIn: 'root'
 })
 export class CepBuscaService {
- private readonly API_URL = 'https://brasilapi.com.br/api/cep/v2/';
+ private readonly API_URL = 'https://brasilapi.com.br/api/cep/v1/';
 
  constructor(private http: HttpClient) { }
 
-  buscarEndereco(cep: string): Observable<Endereco> {
+  buscarEndereco(cep: any): Observable<Endereco> {
     // 1. Limpa o CEP (remove traço e outros)
     const cepLimpo = cep.replace(/\D/g, '');
 

@@ -30,13 +30,10 @@ export class ContatoService {
      return this.http.post<ContatoModel>(this.apiUrl, glocModel);
   }
 
-   updateContato(glocModel: any): Observable<ContatoModel> {
-
-    const  url = `${this.myApiUrl}${this.myApiUrl}/${glocModel.id}`;
-     return this.http.put<ContatoModel>(url, glocModel);
+   updateContato(id_pessoa_fk: any, contato:  ContatoModel): Observable<any> {
+    return this.http.put(`${this.apiUrl}/${id_pessoa_fk}`, contato );
 
   }
-
   deleteContato(id: any): Observable<ContatoModel> {
     const  url = `${this.myApiUrl}${this.myApiUrl}/${id}`;
   //  console.log("url = ", url)

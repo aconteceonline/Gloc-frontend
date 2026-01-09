@@ -24,5 +24,9 @@ export class OrigemRendaService {
   cadastrarOrigemRenda(glocModel: OrigemRendaModel): Observable<OrigemRendaModel> {
      return this.http.post<OrigemRendaModel>(this.apiUrl, glocModel);
   }
+ getPorIdPessoaFK(id: number): Observable< OrigemRendaModel> {
+     console.log('service id Origem Renda   ', id)
+  return this.http.get< OrigemRendaModel>(`${this.apiUrl}/research/${id}`);
+  }
 
 }

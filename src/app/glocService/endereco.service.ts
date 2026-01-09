@@ -14,7 +14,7 @@ export class EnderecoService {
   private http = inject(HttpClient);
   apiUrl = "http://localhost:3001/enderecos";
 
-  private myApiUrl!: string;
+  private myApiUrl = "http://localhost:3001/editarEndereco";
 
 
  pessoaModel: EnderecoModel[] = []
@@ -31,12 +31,9 @@ export class EnderecoService {
      return this.http.post<EnderecoModel>(this.apiUrl, glocModel);
   }
 
-   updateEndereco(glocModel: any): Observable<EnderecoModel> {
-
-    const  url = `${this.myApiUrl}${this.myApiUrl}/${glocModel.id}`;
-     return this.http.put<EnderecoModel>(url, glocModel);
-
-  }
+   updateEndereco(id_pessoa_fk: any, endereco:  EnderecoModel): Observable<any> {
+      return this.http.put(`${this.apiUrl}/${id_pessoa_fk}`, endereco );
+   }
 
   deleteEndereco(id: any): Observable<EnderecoModel> {
     const  url = `${this.myApiUrl}${this.myApiUrl}/${id}`;
@@ -47,6 +44,16 @@ export class EnderecoService {
   readByIdEndereco(id: any): Observable<EnderecoModel>{
     const url = `${this.myApiUrl}${this.myApiUrl}/${id}`
     return this.http.get<EnderecoModel>(url)
+  }
+
+
+  getPorIdPessoaFK(id_pessoa_fk: number): Observable< EnderecoModel> {
+     console.log('service id_pessoa_fk   ', id_pessoa_fk)
+  return this.http.get< EnderecoModel>(`${this.myApiUrl}/research/${id_pessoa_fk}`);
+  }
+
+  atualizar(id: any, endereco: EnderecoModel): Observable<any> {
+    return this.http.put(`${this.myApiUrl}/${id}`, endereco);
   }
 
 }

@@ -21,5 +21,15 @@ getTiposCargos(): Observable<TipoCargoModel[]> {
         return this.http.get<TipoCargoModel[]>(this.apiUrl);
     }
 
+ getPorIdPessoaFK(id: number): Observable< TipoCargoModel> {
+     console.log('service id cargo   ', id)
+  return this.http.get< TipoCargoModel>(`${this.apiUrl}/research/${id}`);
+  }
+
+  atualizar(id: any, cargo: TipoCargoModel): Observable<any> {
+    return this.http.put(`${this.apiUrl}/${id}`, cargo);
+  }
+
+
 
 }
