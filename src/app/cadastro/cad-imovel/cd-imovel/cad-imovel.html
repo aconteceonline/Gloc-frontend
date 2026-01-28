@@ -1,93 +1,165 @@
-
-<div  class="flex items-center justify-center  p-6 sm:p-6 lg:p-6">
+<div class="flex items-center justify-center p-6 sm:p-6 lg:p-6">
   <div class="w-full max-w-4x2 mx-auto bg-white p-5 rounded-2xl shadow-lg">
-    <h2 class="text-2xl font-bold text-gray-800 mb-2">Cadastro de Novos imóveis</h2>
-    <p class="text-gray-600 mb-8">Preencha os campos abaixo para registrar novo imóvel.</p>
+    <h2 class="text-2xl font-bold text-gray-800 mb-2">
+      Cadastro de Novos imóveis
+    </h2>
+    <p class="text-gray-600 mb-8">
+      Preencha os campos abaixo para registrar novo imóvel.
+    </p>
 
-<div class="tabs-header">
-    <button
-      [class.active]="activeTab === 'pessoal'"
-      (click)="switchTab('pessoal')">
-      <p class="text-gray-900 mb-1">Dados Cadastrais</p>
-    </button>
-    <button
-      [class.active]="activeTab === 'endereco'"
-      (click)="switchTab('endereco')">
-      <p class="text-gray-900 mb-0">Perfil do imóvel</p>
-    </button>
+    <div class="tabs-header">
+      <button
+        [class.active]="activeTab === 'cadImovel'"
+        (click)="switchTab('cadImovel')"
+      >
+        <p class="text-gray-900 mb-1">Dados Cadastrais</p>
+      </button>
+      <button
+        [class.active]="activeTab === 'perfilImovel'"
+        (click)="switchTab('perfilImovel')"
+      >
+        <p class="text-gray-900 mb-0">Perfil do imóvel</p>
+      </button>
+      <button
+        *ngIf="imovelForm.get('permitir_venda')?.value"
+        [class.active]="activeTab === 'perfilVendas'"
+        (click)="switchTab('perfilVendas')"
+      >
+        <p class="text-gray-900 mb-0">Informações de Venda</p>
+      </button>
 
-  </div>
+      <button
+        *ngIf="imovelForm.get('permitir_aluguel')?.value"
+        [class.active]="activeTab === 'perfilAluguel'"
+        (click)="switchTab('perfilAluguel')"
+      >
+        <p class="text-gray-900 mb-0">Informações de Locação</p>
+      </button>
+    </div>
 
-  <div class="tabs-content">
-
-    @if (activeTab === 'pessoal') {
+    <div class="tabs-content">
+      @if (sucesso()) {
+      <div
+        class="mb-4 p-4 text-sm text-green-800 rounded-lg bg-green-50 border border-green-200 flex items-center animate-bounce"
+        role="alert"
+      >
+        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+          <path
+            fill-rule="evenodd"
+            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+            clip-rule="evenodd"
+          ></path>
+        </svg>
+        <div><span class="font-bold">Pronto!</span> {{ sucesso() }}</div>
+      </div>
+      } @if (activeTab === 'cadImovel') {
       <div class="tab-pane">
-       <form [formGroup]="imovelForm">
-<p>O formulário está inválido? {{ imovelForm.invalid ? 'SIM' : 'NÃO' }}</p>
-          <legend class="text-lg font-semibold text-indigo-700 border-b border-indigo-200 w-full pb-2 mb-4">Contato</legend>
+        <form [formGroup]="imovelForm">
+          <p>
+            O formulário está inválido? {{ imovelForm.invalid ? 'SIM' : 'NÃO' }}
+          </p>
+          <legend
+            class="text-lg font-semibold text-indigo-700 border-b border-indigo-200 w-full pb-2 mb-4"
+          >
+            Contato
+          </legend>
+          <section
+            class="bg-white shadow-sm rounded-lg w-full p-0 space-y-6 mb-4"
+          >
+            <!-- Se houver pessoa selecionada -->
+            <div class="block text-sm font-medium text-gray-700 mb-3">
+              Localise proprietário para o imóvel
+            </div>
+            <div
+              *ngIf="pessoaSelecionada(); else campoContato"
+              class="border border-indigo-200 rounded-md p-2 bg-gray-80 flex justify-between items-center"
+            >
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 space-x-10">
+                <div class="flex flex-col">
+                  <label class="text-sm font-semibold text-gray-800">
+                    Nome do Proprietário
+                  </label>
+                  <p
+                    class="mt-1 w-full rounded-md border-gray-300 sm:text-sm p-2 bg-gray-50 border"
+                  >
+                    {{ pessoaSelecionada()?.nome }}
+                  </p>
+                </div>
+                <div class="flex flex-col">
+                  <label class="text-sm font-semibold text-gray-800">
+                    {{ pessoaSelecionada()?.id_tipo_pessoa_fk == 1 ? 'CPF' :
+                    'CNPJ' }}
+                  </label>
+                  <p
+                    class="mt-1 w-full w-100 rounded-md border-gray-300 sm:text-sm p-2 bg-gray-50 border"
+                  >
+                    {{ pessoaSelecionada()?.id_cpf_cnpj |
+                    cpfCnpjMask:(pessoaSelecionada()?.id_tipo_pessoa_fk) }}
+                  </p>
+                </div>
+                <div class="md:col-span-1">
+                  <label class="text-sm font-semibold text-gray-800">
+                    Número de Contato
+                  </label>
+                  <p
+                    *ngIf="contato$ | async as contato"
+                    class="mt-2 w-35 rounded-md border-gray-300 sm:text-sm p-2 bg-gray-50 border"
+                  >
+                    {{ contato.nr_contato | telefoneMask }}
+                  </p>
+                </div>
 
-          <section class="bg-white shadow-sm rounded-lg w-full p-0 space-y-6" >
+                <div class="flex flex-col gap-3">
+                  <label class="text-sm font-semibold text-gray-800">
+                    WhatsApp
+                  </label>
+                  <p
+                    *ngIf="contato$ | async as contato"
+                    class="mt-1 w-12 rounded-md border-gray-300 sm:text-sm p-2 bg-gray-50 border"
+                  >
+                    {{ contato.whatsapp ? 'Sim' : 'Não'}}
+                  </p>
+                </div>
+              </div>
 
-                  <!-- Se houver pessoa selecionada -->
-            <div *ngIf="pessoaSelecionada(); else campoContato" class="border  border-indigo-200 rounded-md p-2 bg-gray-80 flex justify-between items-center">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 space-x-10 ">
-                    <div class="flex flex-col ">
-                            <label class="text-sm font-semibold w-full text-gray-800">
-                                Nome do Contato
-                            </label>
-                            <p class="mt-1 w-full rounded-md border-gray-300 sm:text-sm p-2 bg-gray-50 border">
-                                {{ pessoaSelecionada()?.nome }}
-                            </p>
-                    </div>
-                    <div class="flex flex-col  ">
-                            <label class="text-sm font-semibold text-gray-800">
-                                {{ pessoaSelecionada()?.id_tipo_pessoa_fk == 1 ? 'CPF' : 'CNPJ' }}
-                            </label>
-                            <p  class="mt-1 w-full w-100  rounded-md border-gray-300 sm:text-sm p-2 bg-gray-50 border">
-                                {{ pessoaSelecionada()?.id_cpf_cnpj | cpfCnpjMask:(pessoaSelecionada()?.id_tipo_pessoa_fk) }}
-                            </p>
-                    </div>
-                    <div  class="flex flex-col ">
-                            <label class="text-sm font-semibold text-gray-800">
-                                Número de Contato
-                            </label>
-                            <p  *ngIf="contato$ | async as contato"  class="mt-2  w-35 rounded-md border-gray-300 sm:text-sm p-2 bg-gray-50 border">
-                                {{ contato.nr_contato  | telefoneMask }}
-                            </p>
-                    </div>
+              <!-- Ícone de lupa para nova busca -->
+              <button
+                type="button"
+                class="w-9 h-9 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center hover:bg-blue-200"
+                title="Buscar outro contato"
+                (click)="abrirModal()"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="2"
+                  stroke="currentColor"
+                  class="w-5 h-5"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 104.5 4.5a7.5 7.5 0 0012.15 12.15z"
+                  />
+                </svg>
+              </button>
+            </div>
 
-                    <div  class="flex flex-col gap-3">
-                            <label class="text-sm font-semibold text-gray-800">
-                                WhatsApp
-                            </label>
-                            <p *ngIf="contato$ | async as contato"  class="mt-1  w-12 rounded-md border-gray-300 sm:text-sm p-2 bg-gray-50 border">
-                                {{ contato.whatsapp ? 'Sim' : 'Não'}}
-                            </p>
-                    </div>
-                  </div>
-
-                    <!-- Ícone de lupa para nova busca -->
-                    <button type="button"
-                            class="w-9 h-9 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center hover:bg-blue-200"
-                            title="Buscar outro contato"
-                            (click)="abrirModal()">
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                          stroke-width="2" stroke="currentColor" class="w-5 h-5">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                              d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 104.5 4.5a7.5 7.5 0 0012.15 12.15z" />
-                      </svg>
-                    </button>
-                  </div>
-
-                  <!-- Se não houver pessoa selecionada -->
-                  <ng-template #campoContato>
-                    <div class="border rounded-md px-3 py-2 flex justify-between items-center cursor-pointer hover:bg-gray-100"
-                        (click)="abrirModal()">
-                      <span class="text-gray-500">Nome, cpf/cnpj e contato</span>
-                      <span class="text-blue-600 text-sm hover:underline">Selecionar</span>
-                    </div>
-                  </ng-template>
-
+            <!-- Se não houver pessoa selecionada -->
+            <ng-template #campoContato>
+              <div
+                class="border rounded-md px-3 py-2 flex justify-between items-center cursor-pointer hover:bg-gray-100"
+                (click)="abrirModal()"
+              >
+                <span class="text-gray-500"
+                  >Pesquise proprietário por Nome, cpf/cnpj e contato</span
+                >
+                <span class="text-blue-600 text-sm hover:underline"
+                  >Selecionar</span
+                >
+              </div>
+            </ng-template>
           </section>
 
           <!-- Modal -->
@@ -96,41 +168,103 @@
             [aberto]="modalAberto()"
             (fechar)="fecharModal()"
             (selecionar)="selecionarPessoa($event)"
-            >
+          >
           </app-pessoa-modal>
 
-   <!-- Endereço -->
+          <div class="flex flex-col md:flex-row gap-2">
+            <div class="flex-1">
+              <label
+                for="zap"
+                class="block text-sm font-medium text-gray-700 mb-3"
+                >Nome do contato<span class="text-red-500">*</span></label
+              >
+              <input
+                id="nmContato"
+                type="text"
+                formControlName="nome_contato_imovel"
+                placeholder="Nome conatato"
+                class="mt-1 block w-full placeholder:text-slate-400 rounded-md shadow-sm p-2 border rounded-md shadow-sm focus:outline-none focus:border-blue-500 text-gray-900"
+              />
+            </div>
+            <div class="flex-1">
+              <label
+                for="zap"
+                class="block text-sm font-medium text-gray-700 mb-3"
+                >Contato<span class="text-red-500">*</span></label
+              >
+              <input
+                id="contato"
+                type="text"
+                mask="(00) 0 0000-0000"
+                formControlName="contato_imovel"
+                placeholder="Celular"
+                class="mt-1 block w-full placeholder:text-slate-400 rounded-md shadow-sm p-2 border rounded-md shadow-sm focus:outline-none focus:border-blue-500 text-gray-900"
+              />
+            </div>
+          </div>
+          <!-- Endereço -->
 
-
-          <div formGroupName="endereco" class="grid grid-cols-1 md:grid-cols-4 gap-1">
-              <div class="md:col-span-4">
-                <legend class="text-lg font-semibold text-indigo-700 border-b border-indigo-200 w-full pb-2 mb-6">Endereço completo</legend>
-              </div>
-              <div class="md:col-span-2 w-[120px] ">
-                <label for="cep" class="block  text-sm font-medium text-gray-700">CEP <span class="text-red-500">*</span></label>
-                <input id="cep" type="text" formControlName="cep"  placeholder="Pesquisar" inputmode="numeric" mask="00.000-000"
-                      maxlength="16"
-                    class="mt-1 block w-40 border placeholder:text-slate-400  rounded-md shadow-sm p-2  focus:outline-none focus:border-blue-500  text-gray-900"
+          <div
+            formGroupName="endereco"
+            class="grid grid-cols-1 md:grid-cols-4 gap-1"
+          >
+            <div class="md:col-span-4">
+              <legend
+                class="text-lg font-semibold text-indigo-700 border-b border-indigo-200 w-full pb-2 mb-6"
+              >
+                Endereço completo
+              </legend>
+            </div>
+            <div class="md:col-span-2 w-[120px]">
+              <label for="cep" class="block text-sm font-medium text-gray-700"
+                >CEP <span class="text-red-500">*</span></label
+              >
+              <input
+                id="cep"
+                type="text"
+                formControlName="cep"
+                placeholder="Pesquisar"
+                inputmode="numeric"
+                mask="00.000-000"
+                maxlength="16"
+                class="mt-1 block w-40 border placeholder:text-slate-400 rounded-md shadow-sm p-2 focus:outline-none focus:border-blue-500 text-gray-900"
                 [ngClass]="{
                     'border-red-500': enderecoForm.get('cep')?.invalid && enderecoForm.get('cep')?.touched,
                     'border-gray-300': enderecoForm.get('cep')?.valid || !enderecoForm.get('cep')?.touched
                     }"
-                    (blur)="buscarCep()"
-                    >
+                (blur)="buscarCep()"
+              />
 
-                  <div *ngIf="loading" class="mt-4 w-40 text-blue-500 text-sm">Buscando endereço...</div>
-                  <div *ngIf="erroBusca" class="mt-3 text-red-500 text-sm">
-                    CEP inválido ou não encontrado. Verifique o número.
-                  </div>
-                  <div *ngIf="enderecoForm.get('cep')?.errors && enderecoForm.get('cep')?.touched" class="mt-1 text-red-500 ">
-                    <span *ngIf="enderecoForm.get('cep')?.errors?.['required'] "  class="mt-1 text-red-600">Obrigatório.</span>
-                    <span *ngIf="enderecoForm.get('cep')?.errors?.['pattern']"  class="mt-1 text-xs text-red-600">Formato inválido. Use 8 dígitos.</span>
-                  </div>
+              <div *ngIf="loading" class="mt-4 w-40 text-blue-500 text-sm">
+                Buscando endereço...
               </div>
+              <div *ngIf="erroBusca" class="mt-3 text-red-500 text-sm">
+                CEP inválido ou não encontrado. Verifique o número.
+              </div>
+              <div
+                *ngIf="enderecoForm.get('cep')?.errors && enderecoForm.get('cep')?.touched"
+                class="mt-1 text-red-500"
+              >
+                <span
+                  *ngIf="enderecoForm.get('cep')?.errors?.['required'] "
+                  class="mt-1 text-red-600"
+                  >Obrigatório.</span
+                >
+                <span
+                  *ngIf="enderecoForm.get('cep')?.errors?.['pattern']"
+                  class="mt-1 text-xs text-red-600"
+                  >Formato inválido. Use 8 dígitos.</span
+                >
+              </div>
+            </div>
 
-              <div class="md:col-span-4">
+            <div class="md:col-span-4">
               <div>
-                <label for="logradouro" class="block text-sm font-medium text-gray-700">Rua/Logradouro</label>
+                <label
+                  for="logradouro"
+                  class="block text-sm font-medium text-gray-700"
+                  >Rua/Logradouro</label
+                >
                 <input
                   id="logradouro"
                   type="text"
@@ -139,308 +273,1109 @@
                   readonly
                 />
               </div>
-
-              </div>
-              <div class="md:col-span-1">
-                  <label for="numero" class="block text-sm font-medium text-gray-700">Número <span class="text-red-500">*</span></label>
-                  <input
-                    id="numero"
-                    type="text"
-                    formControlName="numero"
-                    placeholder="Número"
-                    class="mt-1 block w-full placeholder:text-slate-400  border rounded-md shadow-sm  p-2  focus:outline-none focus:border-blue-500 text-gray-900"
-                        [ngClass]="{
+            </div>
+            <div class="md:col-span-1">
+              <label
+                for="numero"
+                class="block text-sm font-medium text-gray-700"
+                >Número <span class="text-red-500">*</span></label
+              >
+              <input
+                id="numero"
+                type="text"
+                formControlName="numero"
+                placeholder="Número"
+                class="mt-1 block w-full placeholder:text-slate-400 border rounded-md shadow-sm p-2 focus:outline-none focus:border-blue-500 text-gray-900"
+                [ngClass]="{
                     'border-red-500': enderecoForm.get('numero')?.invalid && enderecoForm.get('numero')?.touched,
                     'border-gray-300': enderecoForm.get('numero')?.valid || !enderecoForm.get('numero')?.touched
                     }"
-                  >
-                  <div *ngIf="enderecoForm.get('numero')?.errors && enderecoForm.get('numero')?.touched" class="mt-1 text-red-500 text-sm">
-                    Obrigatório.
-                  </div>
+              />
+              <div
+                *ngIf="enderecoForm.get('numero')?.errors && enderecoForm.get('numero')?.touched"
+                class="mt-1 text-red-500 text-sm"
+              >
+                Obrigatório.
               </div>
+            </div>
 
-              <div class="md:col-span-3">
-                <label for="complemento" class="block text-sm font-medium text-gray-700">Complemento (opcional)</label>
+            <div class="md:col-span-3">
+              <label
+                for="complemento"
+                class="block text-sm font-medium text-gray-700"
+                >Complemento (opcional)</label
+              >
+              <input
+                id="complemento"
+                type="text"
+                formControlName="complemento"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+
+            <div class="md:col-span-2">
+              <div>
+                <label
+                  for="bairro"
+                  class="block text-sm font-medium text-gray-700"
+                  >Bairro</label
+                >
                 <input
-                    id="complemento"
-                    type="text"
-                    formControlName="complemento"
-                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-
-                  >
+                  id="bairro"
+                  type="text"
+                  formControlName="bairro"
+                  class="mt-1 block w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md shadow-sm cursor-not-allowed"
+                  readonly
+                />
               </div>
-
-
-
-              <div class="md:col-span-2">
-                <div>
-                  <label for="bairro" class="block text-sm font-medium text-gray-700">Bairro</label>
-                    <input
-                      id="bairro"
-                      type="text"
-                      formControlName="bairro"
-                      class="mt-1 block w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md shadow-sm cursor-not-allowed"
-                      readonly
-                    />
-                </div>
-              </div>
-              <div class="md:col-span-2">
-                  <label for="cidade" class="block text-sm font-medium text-gray-700">Cidade</label>
-                  <input
-                    id="cidade"
-                    type="text"
-                    formControlName="cidade"
-                    class="mt-1 block w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md shadow-sm cursor-not-allowed"
-                    readonly
-                  />
-              </div>
-              <div class=" w-16">
-                  <label for="uf" class="block text-sm font-medium text-gray-700">UF</label>
-                  <input
-                    id="uf"
-                    type="text"
-                    formControlName="uf"
-                    class="mt-1 block w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md shadow-sm cursor-not-allowed"
-                    readonly
-                  />
-              </div>
+            </div>
+            <div class="md:col-span-2">
+              <label
+                for="cidade"
+                class="block text-sm font-medium text-gray-700"
+                >Cidade</label
+              >
+              <input
+                id="cidade"
+                type="text"
+                formControlName="cidade"
+                class="mt-1 block w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md shadow-sm cursor-not-allowed"
+                readonly
+              />
+            </div>
+            <div class="w-16">
+              <label for="uf" class="block text-sm font-medium text-gray-700"
+                >UF</label
+              >
+              <input
+                id="uf"
+                type="text"
+                formControlName="uf"
+                class="mt-1 block w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md shadow-sm cursor-not-allowed"
+                readonly
+              />
+            </div>
           </div>
 
-
-
-        <div class="flex justify-end">
-          <button class="primary" (click)="switchTab('endereco')">Próximo</button>
-        </div>
-
+          <div class="flex justify-end">
+            <button class="primary" (click)="switchTab('perfilImovel')">
+              Próximo
+            </button>
+          </div>
         </form>
-
       </div>
 
-    }
-
-    @if (activeTab === 'endereco') {
+      } @if (activeTab === 'perfilImovel') {
       <div class="tab-pane">
-               <form [formGroup]="imovelForm">
- <fieldset class="mb-8 ">
-    <legend class="text-lg font-semibold text-indigo-700 border-b border-indigo-200 w-full pb-2 mb-6">Dados Imóvel</legend>
-    <div class="flex flex-col sm:flex-row sm:space-x-4">
+        <form [formGroup]="imovelForm">
+          <fieldset class="mb-8">
+            <legend
+              class="text-lg font-semibold text-indigo-700 border-b border-indigo-200 w-full pb-2 mb-6"
+            >
+              Dados Imóvel
+            </legend>
+            <div class="flex flex-col sm:flex-row sm:space-x-4">
+              <section class="w-full space-y-5">
+                <!-- Título -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2"
+                    >Título<span class="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    class="mt-1 block w-full placeholder:text-slate-400 border border-slate-200 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 focus:outline-none"
+                    formControlName="titulo_imovel"
+                    placeholder="Ex: Casa com quintal amplo"
+                  />
+                </div>
 
+                <!-- Tipo e preço -->
+                <div
+                  class="flex items-center grid grid-cols-1 md:grid-cols-4 gap-4"
+                >
+                  <div>
+                    <label class="block text-sm font-medium mb-1 text-gray-700"
+                      >Tipo Imóvel<span class="text-red-500">*</span></label
+                    >
+                    <select
+                      id="tipo_imovel"
+                      class="mt-1 block w-full placeholder:text-slate-400 border border-slate-200 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 focus:outline-none"
+                      formControlName="tipo_imovel"
+                    >
+                      <option [ngValue]="null">Selecione o Tipo</option>
+                      <option
+                        *ngFor="let tipo_imovel of tiposDeImovel"
+                        [value]="tipo_imovel.id"
+                      >
+                        {{ tipo_imovel.ds_imovel }}
+                      </option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium mb-1 text-gray-700"
+                      >Situação do Imóvel<span class="text-red-500"
+                        >*</span
+                      ></label
+                    >
+                    <select
+                      id="situacao_imovel"
+                      class="mt-1 block w-full placeholder:text-slate-400 border border-slate-200 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 focus:outline-none"
+                      formControlName="situacao_imovel"
+                    >
+                      <option [ngValue]="null">Selecione a Situação</option>
+                      <option
+                        *ngFor="let situacao_imovel of situacaoImovel"
+                        [value]="situacao_imovel.id"
+                      >
+                        {{ situacao_imovel.nm_situacao }}
+                      </option>
+                    </select>
+                  </div>
 
-      <section class=" w-full space-y-5">
-        <!-- Título -->
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Título <span class="text-red-500">*</span></label>
-          <input type="text" class="mt-1 block w-full placeholder:text-slate-400 border  border-slate-200  rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 focus:outline-none "
-                 [class.border-red-500]="imovelForm.get('titulo')?.invalid && imovelForm.get('titulo')?.touched"
-                 formControlName="titulo" placeholder="Ex: Casa com quintal amplo" />
-        </div>
+                  <div
+                    class="md:col-span-2 w-full mt-4 p-7 bg-slate-50 border border-slate-200 rounded-lg shadow-sm"
+                  >
+                    <p
+                      class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-4"
+                    >
+                      Opções de Ofertas
+                    </p>
 
+                    <div class="flex flex-row items-center w-full gap-8">
+                      <label class="flex items-center cursor-pointer group">
+                        <div class="relative flex items-center">
+                          <input
+                            type="checkbox"
+                            formControlName="permitir_venda"
+                            class="peer h-5 w-5 cursor-pointer transition-all appearance-none rounded border border-slate-300 checked:bg-blue-600 checked:border-blue-600 focus:ring-2 focus:ring-blue-500"
+                          />
+                          <svg
+                            class="absolute w-3.5 h-3.5 left-0.5 top-0.5 text-white opacity-0 peer-checked:opacity-100 pointer-events-none"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="4"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                          >
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                          </svg>
+                        </div>
+                        <span
+                          class="ml-3 text-sm font-medium text-gray-700 group-hover:text-blue-700 transition-colors whitespace-nowrap"
+                        >
+                          Disponível para Venda
+                        </span>
+                      </label>
 
+                      <label class="flex items-center cursor-pointer group">
+                        <div class="relative flex items-center">
+                          <input
+                            type="checkbox"
+                            formControlName="permitir_aluguel"
+                            class="peer h-5 w-5 cursor-pointer transition-all appearance-none rounded border border-slate-300 checked:bg-blue-600 checked:border-blue-600 focus:ring-2 focus:ring-blue-500"
+                          />
+                          <svg
+                            class="absolute w-3.5 h-3.5 left-0.5 top-0.5 text-white opacity-0 peer-checked:opacity-100 pointer-events-none"
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="4"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                          >
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                          </svg>
+                        </div>
+                        <span
+                          class="ml-3 text-sm font-medium text-gray-700 group-hover:text-blue-700 transition-colors whitespace-nowrap"
+                        >
+                          Disponível para Locação
+                        </span>
+                      </label>
+                    </div>
 
-        <!-- Tipo e preço -->
-        <div class="flex items-center grid grid-cols-1 md:grid-cols-4 gap-4 ">
-          <div >
-            <label class="block text-sm font-medium mb-1 text-gray-700 ">Tipo Imóvel<span class="text-red-500">*</span></label>
-            <select id="tipo_imovel" class="mt-1 block w-full placeholder:text-slate-400 border  border-slate-200  rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500  text-gray-900 focus:outline-none "
-             formControlName="tipo">
-              <option [ngValue]="null">Selecione o Tipo</option>
-              <option *ngFor="let tipo_imovel of tiposDeImovel" [value]="tipo_imovel.id">
-                      {{ tipo_imovel.ds_imovel }}
-              </option>
-            </select>
-          </div>
-          <div >
-            <label class="block text-sm font-medium mb-1 text-gray-700 ">Situação do Imóvel<span class="text-red-500">*</span></label>
-            <select id="tipo_imovel" class="mt-1 block w-full placeholder:text-slate-400 border  border-slate-200  rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500  text-gray-900 focus:outline-none "
-             formControlName="tipo">
-              <option [ngValue]="null">Selecione a Situação</option>
-              <option *ngFor="let tipo_imovel of tiposDeImovel" [value]="tipo_imovel.id">
-                      {{ tipo_imovel.ds_imovel }}
-              </option>
-            </select>
-          </div>
-        </div>
+                    <p
+                      class="mt-4 text-[15px] text-slate-500 italic border-t border-slate-200 pt-2"
+                    >
+                      * Marcar estas opções habilitará as abas correspondentes.
+                    </p>
+                  </div>
+                </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div>
-            <label class="block text-sm font-medium mb-1">Valor de Venda </label>
-            <input id="vlr_venda" type="text" class="mt-1 block w-full placeholder:text-slate-400 border  border-slate-200  rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 focus:outline-none "
-              placeholder="Valor"
-              formControlName="vlr_venda"
-              (blur)="formatarValor('vlr_venda')"
-               />
-          </div>
-          <div>
-            <label class="block text-sm font-medium mb-1">Valor de Locação </label>
-            <input id="vlr_aluguel" type="text" class="mt-1 block w-full placeholder:text-slate-400 border  border-slate-200  rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 focus:outline-none "
-            placeholder="Valor"
-            formControlName="vlr_aluguel"
-            (blur)="formatarValor('vlr_aluguel')"
-            />
-          </div>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium mb-1"
+                      >Dormitórios</label
+                    >
+                    <input
+                      id="qtde_dorms"
+                      class="mt-1 w-full placeholder:text-slate-400 border border-slate-200 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 focus:outline-none"
+                      placeholder="0"
+                      formControlName="qtde_dorms"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium mb-1"
+                      >Banheiro social</label
+                    >
+                    <input
+                      id="qtde_wc"
+                      class="mt-1 w-full placeholder:text-slate-400 border border-slate-200 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 focus:outline-none"
+                      placeholder="0"
+                      formControlName="qtde_wc"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium mb-1">Suite</label>
+                    <input
+                      id="qtde_swet"
+                      class="mt-1 w-full placeholder:text-slate-400 border border-slate-200 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 focus:outline-none"
+                      placeholder="0"
+                      formControlName="qtde_swet"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium mb-1">Lavabo</label>
+                    <input
+                      id="qtde_lavabo"
+                      class="mt-1 w-full placeholder:text-slate-400 border border-slate-200 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 focus:outline-none"
+                      placeholder="0"
+                      formControlName="qtde_lavabo"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium mb-1"
+                      >Garagem</label
+                    >
+                    <input
+                      id="qtde_vaga"
+                      class="mt-1 w-full placeholder:text-slate-400 border border-slate-200 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 focus:outline-none"
+                      placeholder="0"
+                      formControlName="qtde_vaga"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium mb-1"
+                      >Área (m²)</label
+                    >
+                    <input
+                      id="area_construida"
+                      class="w-full placeholder:text-slate-400 border border-slate-200 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 focus:outline-none"
+                      placeholder="0"
+                      formControlName="area_construida"
+                    />
+                  </div>
+                </div>
 
-          <div>
-            <label class="block text-sm font-medium mb-1">Dormitórios<span class="text-red-500">*</span></label>
-            <input  id="qtde_dorms" class="mt-1  w-full placeholder:text-slate-400 border  border-slate-200  rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 focus:outline-none"
-              placeholder="0"
-              formControlName="qtde_dorms" />
-          </div>
-          <div>
-            <label class="block text-sm font-medium mb-1">Banheiro social<span class="text-red-500">*</span></label>
-            <input  id="qtde_wc" class="mt-1  w-full placeholder:text-slate-400 border  border-slate-200  rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 focus:outline-none"
-              placeholder="0" formControlName="qtde_wc"  />
-          </div>
-          <div>
-            <label class="block text-sm font-medium mb-1">Suite</label>
-            <input  id="qtde_swet" class="mt-1  w-full placeholder:text-slate-400 border  border-slate-200  rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 focus:outline-none"
-            placeholder="0" formControlName="qtde_swet" />
-          </div>
-          <div>
-            <label class="block text-sm font-medium mb-1">Lavabo</label>
-            <input id="qtde_lavabo" class="mt-1  w-full placeholder:text-slate-400 border  border-slate-200  rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 focus:outline-none"
-              placeholder="0" formControlName="qtde_lavabo"  />
-          </div>
-          <div>
-            <label class="block text-sm font-medium mb-1">Garagem</label>
-            <input id="qtde_vaga" class="mt-1  w-full placeholder:text-slate-400 border  border-slate-200  rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 focus:outline-none"
-              placeholder="0" formControlName="qtde_vaga" />
-          </div>
-         <div>
-            <label class="block text-sm font-medium mb-1">Área (m²)</label>
-            <input id="area_construida" class="  w-full placeholder:text-slate-400 border  border-slate-200  rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 focus:outline-none"
-               placeholder="0" formControlName="area_construida" />
-          </div>
-        </div>
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                  <div class="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id="piscina_adulto"
+                      class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                      formControlName="piscina_adulto"
+                    />
+                    <label
+                      for="piscina_adulto"
+                      class="text-sm font-medium text-gray-700"
+                      >Piscina Adulto</label
+                    >
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id="piscina_infantil"
+                      class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                      formControlName="piscina_infantil"
+                    />
+                    <label
+                      for="piscina_infantil"
+                      class="text-sm font-medium text-gray-700"
+                      >Piscina Infantil</label
+                    >
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id="churrasqueira"
+                      class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                      formControlName="churasqueira"
+                    />
+                    <label
+                      for="churrasqueira"
+                      class="text-sm font-medium text-gray-700"
+                      >Churrasqueira</label
+                    >
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id="salao_festas"
+                      class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                      formControlName="salao_festas"
+                    />
+                    <label
+                      for="salao_festas"
+                      class="text-sm font-medium text-gray-700"
+                      >Salão de Festas</label
+                    >
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id="playground"
+                      class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                      formControlName="playground"
+                    />
+                    <label
+                      for="playground"
+                      class="text-sm font-medium text-gray-700"
+                      >Playground</label
+                    >
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id="area_pet"
+                      class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                      formControlName="area_pet"
+                    />
+                    <label
+                      for="area_pet"
+                      class="text-sm font-medium text-gray-700"
+                    >
+                      Área pet</label
+                    >
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id="academia"
+                      class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                      formControlName="academia"
+                    />
+                    <label
+                      for="academia"
+                      class="text-sm font-medium text-gray-700"
+                    >
+                      Academia</label
+                    >
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id="condominio"
+                      class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                      formControlName="condominio"
+                    />
+                    <label
+                      for="condominio"
+                      class="text-sm font-medium text-gray-700"
+                      >Em condominio</label
+                    >
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id="mobiliado"
+                      class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                      formControlName="mobiliado"
+                    />
+                    <label
+                      for="mobiliado"
+                      class="text-sm font-medium text-gray-700"
+                      >Mobiliado</label
+                    >
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <input
+                      id="varanda"
+                      type="checkbox"
+                      id="varanda"
+                      class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                      formControlName="varanda"
+                      min="0"
+                    />
+                    <label class="text-sm font-medium text-gray-700"
+                      >Varanda</label
+                    >
+                  </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
-          <div class="flex items-center gap-2">
-             <input type="checkbox" id="piscina_adulto"  class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                formControlName="piscina_adulto"/>
-              <label for="piscina_adulto" class="text-sm font-medium text-gray-700">Piscina Adulto</label>
-          </div>
-          <div class="flex items-center gap-2">
-             <input type="checkbox" id="piscina_infantil"  class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                formControlName="piscina_infantil"/>
-              <label for="piscina_infantil" class="text-sm font-medium text-gray-700">Piscina Infantil</label>
-          </div>
-          <div class="flex items-center gap-2">
-              <input type="checkbox" id="churrasqueira"  class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                  formControlName="churasqueira"/>
-                <label for="churrasqueira" class="text-sm font-medium text-gray-700">Churrasqueira</label>
-          </div>
-          <div class="flex items-center gap-2">
-              <input type="checkbox" id="salao_festas"  class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                  formControlName="salao_festas"/>
-                <label for="salao_festas" class="text-sm font-medium text-gray-700">Salão de Festas</label>
-          </div>
-          <div class="flex items-center gap-2">
-              <input type="checkbox" id="playground"  class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                  formControlName="playground"/>
-                <label for="playground" class="text-sm font-medium text-gray-700">Playground</label>
-          </div>
-          <div class="flex items-center gap-2">
-              <input type="checkbox" id="area_pet"  class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                  formControlName="area_pet"/>
-                <label for="area_pet" class="text-sm font-medium text-gray-700"> Área pet</label>
-          </div>
-          <div class="flex items-center gap-2">
-              <input type="checkbox" id="academia"  class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                  formControlName="academia"/>
-                <label for="academia" class="text-sm font-medium text-gray-700"> Academia</label>
-          </div>
-          <div class="flex items-center gap-2">
-              <input type="checkbox" id="condominio"  class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                  formControlName="condominio"/>
-                <label for="condominio" class="text-sm font-medium text-gray-700">Em condominio</label>
-          </div>
-          <div class="flex items-center gap-2">
-              <input type="checkbox" id="mobiliado"  class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                  formControlName="mobiliado"/>
-                <label for="mobiliado" class="text-sm font-medium text-gray-700">Mobiliado</label>
+                  <div class="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id="quintal"
+                      class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                      formControlName="quintal"
+                      min="0"
+                    />
+                    <label class="text-sm font-medium text-gray-700"
+                      >Quintal Privativo</label
+                    >
+                  </div>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2"
+                    >Observações</label
+                  >
+                  <input
+                    type="text"
+                    class="mt-1 block w-full placeholder:text-slate-400 border border-slate-200 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 focus:outline-none"
+                    formControlName="observacoes"
+                    placeholder="Ex: Proprietario não aceita pet"
+                  />
+                </div>
+              </section>
             </div>
-          <div class="flex items-center gap-2">
-                <input id="varanda"  type="checkbox" id="varanda"  class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" formControlName="varanda" min="0" />
-                <label class="text-sm font-medium text-gray-700">Varanda</label>
-            </div>
-
-          <div class="flex items-center gap-2">
-              <input type="checkbox" id="quintal" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" formControlName="quintal" min="0" />
-              <label class="text-sm font-medium text-gray-700">Quintal Privativo</label>
-          </div>
-
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Observações <span class="text-red-500">*</span></label>
-          <input type="text" class="mt-1 block w-full placeholder:text-slate-400 border  border-slate-200  rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 focus:outline-none "
-                 [class.border-red-500]="imovelForm.get('titulo')?.invalid && imovelForm.get('titulo')?.touched"
-                 formControlName="titulo" placeholder="Ex: Proprietario não aceita pet" />
-        </div>
-      </section>
-
-</div>
-</fieldset>
-
-
+          </fieldset>
 
           <!-- Upload de fotos -->
           <div class="md:col-span-4">
-             <legend class="text-lg font-semibold text-indigo-700 border-b border-indigo-200 w-full pb-2 mb-6">Fotos do Imóvel</legend>
+            <legend
+              class="text-lg font-semibold text-indigo-700 border-b border-indigo-200 w-full pb-2 mb-6"
+            >
+              Fotos do Imóvel
+            </legend>
           </div>
-         <section class="bg-white shadow-sm rounded-lg p-6 space-y-4">
+          <section class="bg-white shadow-sm rounded-lg p-6 space-y-4">
+            <div class="dropzone">
+              <p class="text-sm text-gray-600">Selecione ou arraste imagens</p>
+              <input
+                type="file"
+                multiple
+                accept="image/*"
+                class="mt-3 block"
+                (change)="onFilesSelected($event)"
+              />
+            </div>
+            <br />
+          </section>
+          <div
+            class="flex justify-between items-center mt-8 pt-6 border-t border-gray-200"
+          >
+            <div class="flex-none">
+              <button
+                *ngIf="abaAnterior"
+                type="button"
+                (click)="switchTab(abaAnterior)"
+                class="px-6 py-2.5 rounded-lg font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 transition-all shadow-sm flex items-center gap-2"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-4 w-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M15 19l-7-7 7-7"
+                  />
+                </svg>
+                Voltar
+              </button>
+            </div>
 
+            <div class="flex gap-3">
+              <button
+                *ngIf="activeTab !== ultimaAba"
+                type="button"
+                (click)="switchTab(proximaAba!)"
+                class="px-8 py-2.5 rounded-lg font-semibold bg-blue-600 text-white hover:bg-blue-700 shadow-md transition-all flex items-center gap-2"
+              >
+                Próximo
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-4 w-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
+              </button>
 
-          <div class="dropzone">
-            <p class="text-sm text-gray-600">Selecione ou arraste imagens</p>
-            <input type="file" multiple accept="image/*"
-                  class="mt-3 block"
-                  (change)="onFilesSelected($event)" />
+              <button
+                *ngIf="activeTab === ultimaAba"
+                type="button"
+                (click)="salvar()"
+                [disabled]="imovelForm.invalid"
+                class="px-6 py-2 rounded-lg font-semibold transition-all duration-300"
+                [ngClass]="{
+                  'bg-indigo-600 text-white hover:bg-indigo-700 shadow-md': imovelForm.valid,
+                  'bg-gray-300 text-gray-500 cursor-not-allowed': imovelForm.invalid
+                }"
+              >
+                Salvar Cadastro
+              </button>
+            </div>
           </div>
-          <br>
-        </section>
-
-        <div class="actions">
-          <button class="secondary" (click)="switchTab('pessoal')">Voltar</button>
-          <button class="primary bg-blue-500 text-white px-4 py-2 rounded" >Salvar Cadastro</button>
-        </div>
-        <br>
-        <div  class="flex items-center gap-3 ">
-                  <legend class="text-lg font-semibold text-indigo-700 border-b border-indigo-200 w-full pb-2 mb-6">Lista (preview dos salvos)</legend>
-        </div>
-        <!-- Grid de previews -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
-          <div *ngFor="let foto of fotos()" class="relative group">
-            <img [src]="foto.url" [alt]="foto.nome"
-                class="w-full h-32 object-cover rounded-md border" />
-            <button type="button"
-                    class="absolute top-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100"
-                    (click)="removerFoto(foto.id)">
-              Remover Foto
-            </button>
+          <br />
+          <div class="flex items-center gap-3">
+            <legend
+              class="text-lg font-semibold text-indigo-700 border-b border-indigo-200 w-full pb-2 mb-6"
+            >
+              Lista (preview dos salvos)
+            </legend>
           </div>
-        </div>
+          <!-- Grid de previews -->
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+            <div *ngFor="let foto of fotos()" class="relative group">
+              <img
+                [src]="foto.url"
+                [alt]="foto.nome"
+                class="w-full h-32 object-cover rounded-md border"
+              />
+              <button
+                type="button"
+                class="absolute top-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100"
+                (click)="removerFoto(foto.id)"
+              >
+                Remover Foto
+              </button>
+            </div>
+          </div>
 
-        <section >
-
-
-          <div *ngFor="let item of imoveis.imoveis()" class="border rounded-md p-1 mb-3">
-            <div class="flex justify-between items-start">
-              <div>
-                <p class="font-semibold">{{ item.titulo_imovel }}</p>
-                <p class="text-sm text-gray-600"> {{ item.area_construida }} m² • R$ {{ item.vlr_aluguel }}</p>
+          <section>
+            <div
+              *ngFor="let item of imoveis.imoveis()"
+              class="border rounded-md p-1 mb-3"
+            >
+              <div class="flex justify-between items-start">
+                <div>
+                  <p class="font-semibold">{{ item.titulo_imovel }}</p>
+                  <p class="text-sm text-gray-600">
+                    {{ item.area_construida }} m² • R$ {{ item.vlr_aluguel }}
+                  </p>
+                </div>
+                <button class="text-red-600 text-sm">Excluir</button>
               </div>
-              <button class="text-red-600 text-sm" >Excluir</button>
+              <div class="grid grid-cols-10 gap-20 mt-20">
+                <img
+                  *ngFor="let f of item.fotos | slice:0:3"
+                  [src]="f.url"
+                  class="w-full h-20 object-cover rounded"
+                />
+              </div>
             </div>
-            <div class="grid grid-cols-10 gap-20 mt-20">
-              <img *ngFor="let f of item.fotos | slice:0:3" [src]="f.url" class="w-full h-20 object-cover rounded" />
+          </section>
+        </form>
+      </div>
+
+      } @if (activeTab === 'perfilVendas') {
+      <div class="tab-pane">
+        <form [formGroup]="imovelForm">
+          <fieldset class="mb-8">
+            <legend
+              class="text-lg font-semibold text-indigo-700 border-b border-indigo-200 w-full pb-2 mb-6"
+            >
+              Dados Imóvel
+            </legend>
+            <div class="flex flex-col sm:flex-row sm:space-x-4">
+              <section class="w-full space-y-5">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium mb-1 text-gray-600"
+                      >Valor de Oferta
+                    </label>
+                    <input
+                      id="vlr_venda"
+                      type="text"
+                      class="block w-full appearance-none rounded-lg border border-gray-300 bg-white px-4 py-2 pr-8 leading-tight shadow-sm focus:border-blue-500 text-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      placeholder="Valor"
+                      formControlName="vlr_venda"
+                      (blur)="formatarValor('vlr_venda')"
+                    />
+                  </div>
+                  <div class="w-full max-w-xs">
+                    <label
+                      for="status"
+                      class="block text-sm font-medium text-gray-700 mb-1"
+                    >
+                      Aceita financiamento bancario?
+                    </label>
+                    <div class="relative">
+                      <select
+                        id="status"
+                        class="block w-full appearance-none rounded-lg border border-gray-300 bg-white px-4 py-2 pr-8 leading-tight shadow-sm focus:border-blue-500 text-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      >
+                        <option [ngValue]="null" disabled selected>
+                          Selecione uma opção
+                        </option>
+                        <option [ngValue]="true">Sim</option>
+                        <option [ngValue]="false">Não</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="w-full max-w-xs">
+                    <label
+                      for="status"
+                      class="block text-sm font-medium text-gray-700 mb-1"
+                    >
+                      Aceita Contrato de Gaveta?
+                    </label>
+                    <div class="relative">
+                      <select
+                        id="status"
+                        class="block w-full appearance-none rounded-lg border border-gray-300 bg-white px-4 py-2 pr-8 leading-tight shadow-sm focus:border-blue-500 text-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      >
+                        <option [ngValue]="null" disabled selected>
+                          Selecione uma opção
+                        </option>
+                        <option [ngValue]="true">Sim</option>
+                        <option [ngValue]="false">Não</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="w-full max-w-xs">
+                    <label
+                      for="status"
+                      class="block text-sm font-medium text-gray-700 mb-1"
+                    >
+                      Aceita permuta?
+                    </label>
+                    <div class="relative">
+                      <select
+                        id="status"
+                        class="block w-full appearance-none rounded-lg border border-gray-300 bg-white px-4 py-2 pr-8 leading-tight shadow-sm focus:border-blue-500 text-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      >
+                        <option [ngValue]="null" disabled selected>
+                          Selecione uma opção
+                        </option>
+                        <option [ngValue]="true">Sim</option>
+                        <option [ngValue]="false">Não</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="w-full max-w-xs">
+                    <label
+                      for="status"
+                      class="block text-sm font-medium text-gray-700 mb-1"
+                    >
+                      Financiamento direto com proprietario?
+                    </label>
+                    <div class="relative">
+                      <select
+                        id="status"
+                        class="block w-full appearance-none rounded-lg border border-gray-300 bg-white px-4 py-2 pr-8 leading-tight shadow-sm focus:border-blue-500 text-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      >
+                        <option [ngValue]="null" disabled selected>
+                          Selecione uma opção
+                        </option>
+                        <option [ngValue]="true">Sim</option>
+                        <option [ngValue]="false">Não</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div
+                    *ngIf="podeEditarAno()"
+                    class="animate-fade-in w-full max-w-xs"
+                  >
+                    <label
+                      for="ano"
+                      class="block text-sm font-medium text-gray-700 mb-1"
+                    >
+                      Previsão de entrega do imóvel
+                    </label>
+                    <div class="relative">
+                      <select
+                        formControlName="anoSelecionado"
+                        class="block w-full border border-slate-200 rounded-md shadow-sm p-2 pr-10 bg-white text-gray-900 focus:ring-blue-500 focus:border-blue-500 focus:outline-none appearance-none transition-colors"
+                      >
+                        <option [ngValue]="null">Selecione o ano</option>
+                        <option *ngFor="let ano of listaAnos" [value]="ano">
+                          {{ ano }}
+                        </option>
+                      </select>
+
+                      <div
+                        class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400"
+                      >
+                        <svg class="h-5 w-5 fill-current" viewBox="0 0 20 20">
+                          <path d="M7 7l3-3 3 3m0 6l-3 3-3-3" />
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div
+                    *ngIf="isImovelPronto()"
+                    class="animate-fade-in w-full max-w-xs"
+                  >
+                    <label class="block text-sm font-medium text-gray-700 mb-1"
+                      >Idade da construção</label
+                    >
+                    <div class="relative">
+                      <select
+                        formControlName="idadeConstrucao"
+                        class="block w-full border border-slate-200 rounded-md p-2 appearance-none bg-white"
+                      >
+                        <option [ngValue]="null">Selecione a idade</option>
+                        <option
+                          *ngFor="let idade of idadesImovel"
+                          [value]="idade"
+                        >
+                          {{ idade }}
+                        </option>
+                      </select>
+                      <div
+                        class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400"
+                      >
+                        <svg class="h-5 w-5 fill-current" viewBox="0 0 20 20">
+                          <path d="M7 7l3-3 3 3m0 6l-3 3-3-3" />
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            </div>
+          </fieldset>
+          <div
+            class="flex justify-between items-center mt-8 pt-6 border-t border-gray-200"
+          >
+            <div class="flex-none">
+              <button
+                *ngIf="abaAnterior"
+                type="button"
+                (click)="switchTab(abaAnterior)"
+                class="px-6 py-2.5 rounded-lg font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 transition-all shadow-sm flex items-center gap-2"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-4 w-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M15 19l-7-7 7-7"
+                  />
+                </svg>
+                Voltar
+              </button>
+            </div>
+
+            <div class="flex gap-3">
+              <button
+                *ngIf="activeTab !== ultimaAba"
+                type="button"
+                (click)="switchTab(proximaAba!)"
+                class="px-6 py-2 rounded-lg font-semibold bg-blue-600 text-white hover:bg-blue-700 shadow-md transition-all"
+              >
+                Próximo
+              </button>
+
+              <button
+                *ngIf="activeTab === ultimaAba"
+                type="button"
+                (click)="salvar()"
+                [disabled]="imovelForm.invalid"
+                class="px-6 py-2 rounded-lg font-semibold transition-all duration-300"
+                [ngClass]="{
+          'bg-indigo-600 text-white hover:bg-indigo-700 shadow-md': imovelForm.valid,
+          'bg-gray-300 text-gray-500 cursor-not-allowed': imovelForm.invalid
+        }"
+              >
+                Salvar Cadastro
+              </button>
             </div>
           </div>
+        </form>
+      </div>
 
-      </section>
-    </form>
-   </div>
-  }
- </div>
- </div>
+      } @if (activeTab === 'perfilAluguel') {
+      <div class="tab-pane">
+        <form [formGroup]="imovelForm">
+          <fieldset class="mb-8">
+            <legend
+              class="text-lg font-semibold text-indigo-700 border-b border-indigo-200 w-full pb-2 mb-6"
+            >
+              Dados Imóvel
+            </legend>
+            <div class="flex flex-col sm:flex-row sm:space-x-4">
+              <section class="w-full space-y-5">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1"
+                      >Valor de Locação
+                    </label>
+                    <input
+                      id="vlr_aluguel"
+                      type="text"
+                      class="block w-full appearance-none rounded-lg border border-gray-300 bg-white px-4 py-2 pr-8 leading-tight shadow-sm focus:border-blue-500 text-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      placeholder="Valor"
+                      formControlName="vlr_aluguel"
+                      (blur)="formatarValor('vlr_aluguel')"
+                    />
+                  </div>
+
+                  <div class="relative">
+                    <label class="block text-sm font-medium text-gray-700 mb-1"
+                      >Tipo Garantia
+                    </label>
+                    <div class="relative">
+                      <select
+                        id="garantia"
+                        formControlName="garantiaSelecionada"
+                        class="block w-full appearance-none rounded-lg border border-gray-300 bg-white px-4 py-2 pr-8 leading-tight shadow-sm focus:border-blue-500 text-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      >
+                        <option value="" disabled selected>
+                          Selecione uma opção
+                        </option>
+                        @for (opcao of listaGarantias; track opcao) {
+                        <option [value]="opcao">{{ opcao }}</option>
+                        }
+                      </select>
+                      <div
+                        class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400"
+                      >
+                        <svg class="h-5 w-5 fill-current" viewBox="0 0 20 20">
+                          <path d="M7 7l3-3 3 3m0 6l-3 3-3-3" />
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="relative">
+                    <label class="block text-sm font-medium text-gray-700 mb-1"
+                      >IPTU
+                    </label>
+                    <div class="relative">
+                      <select
+                        id="iptu"
+                        formControlName="iptu"
+                        class="block w-full appearance-none rounded-lg border border-gray-300 bg-white px-4 py-2 pr-8 leading-tight shadow-sm focus:border-blue-500 text-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      >
+                        <option value="" disabled selected>
+                          Selecione uma opção
+                        </option>
+                        @for (opcao of responsabilidade; track opcao) {
+                        <option [value]="opcao">{{ opcao }}</option>
+                        }
+                      </select>
+                      <div
+                        class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400"
+                      >
+                        <svg class="h-5 w-5 fill-current" viewBox="0 0 20 20">
+                          <path d="M7 7l3-3 3 3m0 6l-3 3-3-3" />
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="relative">
+                    <label class="block text-sm font-medium text-gray-700 mb-1"
+                      >Taxa condomínio
+                    </label>
+                    <div class="relative">
+                      <select
+                        id="txCondominio"
+                        formControlName="txCondominio"
+                        class="block w-full appearance-none rounded-lg border border-gray-300 bg-white px-4 py-2 pr-8 leading-tight shadow-sm focus:border-blue-500 text-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-600"
+                      >
+                        <option [ngValue]="null" disabled selected>
+                          Selecione uma opção
+                        </option>
+                        @for (opcao of responsabilidade; track opcao) {
+                        <option [value]="opcao">{{ opcao }}</option>
+                        }
+                      </select>
+                      <div
+                        class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400"
+                      >
+                        <svg class="h-5 w-5 fill-current" viewBox="0 0 20 20">
+                          <path d="M7 7l3-3 3 3m0 6l-3 3-3-3" />
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="relative">
+                    <label class="block text-sm font-medium text-gray-700 mb-1"
+                      >Conta de água
+                    </label>
+                    <div class="relative">
+                      <select
+                        id="contaAgua"
+                        formControlName="contaAgua"
+                        class="block w-full appearance-none rounded-lg border border-gray-300 bg-white px-4 py-2 pr-8 leading-tight shadow-sm focus:border-blue-500 text-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-600"
+                      >
+                        <option [ngValue]="null" disabled selected>
+                          Selecione uma opção
+                        </option>
+                        @for (opcao of responsabilidade; track opcao) {
+                        <option [value]="opcao">{{ opcao }}</option>
+                        }
+                      </select>
+                      <div
+                        class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400"
+                      >
+                        <svg class="h-5 w-5 fill-current" viewBox="0 0 20 20">
+                          <path d="M7 7l3-3 3 3m0 6l-3 3-3-3" />
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="relative">
+                    <label class="block text-sm font-medium text-gray-700 mb-1"
+                      >Conta de luz
+                    </label>
+                    <div class="relative">
+                      <select
+                        formControlName="contaEnergia"
+                        class="block w-full appearance-none rounded-lg border border-gray-300 bg-white px-4 py-2 pr-8 leading-tight shadow-sm focus:border-blue-500 text-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      >
+                        <option [ngValue]="null" disabled selected>
+                          Selecione uma opção
+                        </option>
+                        @for (opcao of responsabilidade; track opcao) {
+                        <option [value]="opcao">{{ opcao }}</option>
+                        }
+                      </select>
+                      <div
+                        class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400"
+                      >
+                        <svg class="h-5 w-5 fill-current" viewBox="0 0 20 20">
+                          <path d="M7 7l3-3 3 3m0 6l-3 3-3-3" />
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="relative">
+                    <label class="block text-sm font-medium text-gray-700 mb-1"
+                      >Conta de gás
+                    </label>
+                    <div class="relative">
+                      <select
+                        formControlName="contaGas"
+                        class="block w-full appearance-none rounded-lg border border-gray-300 bg-white px-4 py-2 pr-8 leading-tight shadow-sm focus:border-blue-500 text-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      >
+                        <option [ngValue]="null" disabled selected>
+                          Selecione uma opção
+                        </option>
+                        @for (opcao of responsabilidade; track opcao) {
+                        <option [value]="opcao">{{ opcao }}</option>
+                        }
+                      </select>
+                      <div
+                        class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400"
+                      >
+                        <svg class="h-5 w-5 fill-current" viewBox="0 0 20 20">
+                          <path d="M7 7l3-3 3 3m0 6l-3 3-3-3" />
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="relative">
+                    <label class="block text-sm font-medium text-gray-700 mb-1"
+                      >Conta internet
+                    </label>
+                    <div class="relative">
+                      <select
+                        formControlName="contaInternet"
+                        class="block w-full appearance-none rounded-lg border border-gray-300 bg-white px-4 py-2 pr-8 leading-tight shadow-sm focus:border-blue-500 text-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      >
+                        <option [ngValue]="null" disabled selected>
+                          Selecione uma opção
+                        </option>
+                        @for (opcao of responsabilidade; track opcao) {
+                        <option [value]="opcao">{{ opcao }}</option>
+                        }
+                      </select>
+                      <div
+                        class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400"
+                      >
+                        <svg class="h-5 w-5 fill-current" viewBox="0 0 20 20">
+                          <path d="M7 7l3-3 3 3m0 6l-3 3-3-3" />
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            </div>
+            <div
+              class="flex justify-between items-center mt-8 pt-6 border-t border-gray-200"
+            >
+              <div class="flex-none">
+                <button
+                  *ngIf="abaAnterior"
+                  type="button"
+                  (click)="switchTab(abaAnterior)"
+                  class="px-6 py-2.5 rounded-lg font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 transition-all shadow-sm flex items-center gap-2"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M15 19l-7-7 7-7"
+                    />
+                  </svg>
+                  Voltar
+                </button>
+              </div>
+
+              <div class="flex-none flex gap-3">
+                <button
+                  *ngIf="activeTab !== ultimaAba"
+                  type="button"
+                  (click)="switchTab(proximaAba!)"
+                  class="px-8 py-2.5 rounded-lg font-semibold bg-blue-600 text-white hover:bg-blue-700 shadow-md transition-all flex items-center gap-2"
+                >
+                  Próximo
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                </button>
+
+                <button
+                  *ngIf="activeTab === ultimaAba"
+                  type="button"
+                  (click)="salvar()"
+                  [disabled]="imovelForm.invalid"
+                  class="px-6 py-2 rounded-lg font-semibold transition-all duration-300"
+                  [ngClass]="{
+                  'bg-indigo-600 text-white hover:bg-indigo-700 shadow-md': imovelForm.valid,
+                  'bg-gray-300 text-gray-500 cursor-not-allowed': imovelForm.invalid
+                }"
+                >
+                  Salvar Cadastro
+                </button>
+              </div>
+            </div>
+          </fieldset>
+        </form>
+      </div>
+      }
+    </div>
+  </div>
 </div>
-
-

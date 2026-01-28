@@ -10,7 +10,6 @@ import { InteresseService } from '../../../glocService/interesse.serivice';
 import { IbgeService } from '../../../glocService/Ibge.service';
 import { FormUtilsService } from '../../../glocService/formUtils.service';
 import { OrigemRendaService } from '../../../glocService/origem-renda.service';
-//import { CepBuscaService } from '../../../services/CepBuscaService';
 import { Cep_Service } from '../../../glocService/Cep.service';
 import { TipoCargoService } from '../../../glocService/tipo-cargo.service';
 import { SituacaoImovelService } from '../../../glocService/situacao-imovel.service';
@@ -27,8 +26,6 @@ import { catchError, debounceTime, of, take, throwError } from 'rxjs';
 import { validarCPF } from '../../../validators/cpf-validator';
 import { HttpErrorResponse } from '@angular/common/http';
 import { InteresseFormService } from '../../../glocService/interesse-form.service';
-//import { ViewportScroller } from '@angular/common';
-
 import {
   getInicialPessoa, getInicialEndereco,
   getInicialContato, getInicialInteresse, getInicialEconomico,

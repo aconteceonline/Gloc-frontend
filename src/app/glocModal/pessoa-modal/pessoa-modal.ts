@@ -5,7 +5,7 @@ import { Router } from '@angular/router';
 import { PessoaService } from '../../glocService/pessoa.service';
 import { ContatoService } from '../../glocService/contato.service';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { debounceTime, distinctUntilChanged, of, switchMap } from 'rxjs';
+import { catchError, debounceTime, distinctUntilChanged, of, switchMap } from 'rxjs';
 import { ModalCadastroPessoa } from "./modal-cadastro-pessoa";
 
 @Component({
@@ -82,7 +82,17 @@ implementarBuscaPorNome(): void {
       }
       this.carregando.set(true);
       // Chama o serviço para buscar os dados na API
-      return this.pessoaService.buscarPorTermo(busca);
+    // --- MUDANÇA CRÍTICA AQUI ---
+      return this.pessoaService.buscarPorTermo(busca).pipe(
+        // O catchError aqui "captura" o erro da requisição HTTP
+        // e retorna uma lista vazia, mantendo o valueChanges VIVO.
+        catchError(err => {
+          console.error('Erro DETALHADO na busca:', err);
+          this.carregando.set(false);
+          // Retorna um Observable de array vazio para o fluxo continuar
+          return of([]);
+        })
+      );
     })
   ).subscribe({
     // Recebe o retorno da API
@@ -96,9 +106,9 @@ implementarBuscaPorNome(): void {
 
     // Tratamento de erro
     error: (err) => {
-      console.error('Erro na busca de pessoas:', err);
-      this.pessoasFiltradas.set([]); // Limpa a lista em caso de erro
-      this.carregando.set(false); // Garante que o indicador de carregamento é desativado
+     console.error('Erro fatal no Observable:', err);
+ //     this.pessoasFiltradas.set([]); // Limpa a lista em caso de erro
+  //    this.carregando.set(false); // Garante que o indicador de carregamento é desativado
     },
 
     // Chamado após o 'next' ser executado (ou o 'error')

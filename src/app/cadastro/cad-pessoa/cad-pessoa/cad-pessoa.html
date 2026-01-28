@@ -774,7 +774,7 @@
           <button
                 type="submit"
                 (click)="onSubmit()"
-                [disabled]="isSubmitting"
+                [disabled]="pessoaForm.invalid || isSubmitting"
                 class="px-4 py-2 rounded text-white font-semibold transition-colors duration-200
                       bg-blue-600 hover:bg-blue-700
                       disabled:bg-gray-400 disabled:cursor-not-allowed disabled:hover:bg-gray-400">

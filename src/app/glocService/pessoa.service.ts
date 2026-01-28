@@ -73,8 +73,8 @@ readByCNPJ(cnpj: any): Observable<PessoaModel>{
 }
 /* usado pelo app-pessoa-modal */
   buscarPorTermo(busca: string): Observable<PessoaModel[]> {
- //  console.log(' buscar por cpf cnpj/;  ', (`${this.myApiUrl}termo/${busca}`))
-  return this.http.get<PessoaModel[]>(`${this.apiUrl}termo/${busca}`)
+   console.log(' buscar por cpf cnpj/;  ', busca)
+  return this.http.get<PessoaModel[]>(`${this.apiUrl}/termo/${busca}`)
 
 
 }

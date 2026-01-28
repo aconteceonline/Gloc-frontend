@@ -3,25 +3,21 @@ import { RouterModule, Routes } from '@angular/router';
 import { Login } from './login/login';
 import { authGuard } from './guards/auth-guard';
 
-
-
-
 const routes: Routes = [
+  { path: '', component: Login },
 
-    { path: '', component: Login},
-
-
-
-    { path: 'principal',
-      loadChildren: () => import('./template/template-module').then(m => m.TemplateModule), canActivate: [authGuard]
-
-    },
-      {  path: 'logout', component: Login }
-  ]
+  {
+    path: '',
+    loadChildren: () =>
+      import('./template/template-module').then((m) => m.TemplateModule),
+    canActivate: [authGuard],
+  },
+  { path: 'logout', component: Login },
+];
 
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
-  exports: [RouterModule]
+  exports: [RouterModule],
 })
 export class AppRoutingModule {
   static routes: Routes;

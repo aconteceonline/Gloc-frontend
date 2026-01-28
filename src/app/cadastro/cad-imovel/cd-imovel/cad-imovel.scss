@@ -1,41 +1,40 @@
-
 .alerta-erro {
-    /* Cor de fundo vermelha clara */
+  /* Cor de fundo vermelha clara */
 
-    /* Cor do texto vermelho escuro */
-    color: #cc0000;
-    padding: 1px;
-    margin-bottom: 5px;
-    font-weight: bold;
-    font-size: 12px;
+  /* Cor do texto vermelho escuro */
+  color: #cc0000;
+  padding: 1px;
+  margin-bottom: 5px;
+  font-weight: bold;
+  font-size: 12px;
 }
-
 
 /* Exemplo de CSS básico para a tabela */
 .data-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
 }
 
-.data-table th, .data-table td {
-    border: 1px solid #ccc;
-    padding: 10px;
-    text-align: left;
+.data-table th,
+.data-table td {
+  border: 1px solid #ccc;
+  padding: 10px;
+  text-align: left;
 }
 
 .data-table th {
-    background-color: #f2f2f2;
-    font-weight: bold;
+  background-color: #f2f2f2;
+  font-weight: bold;
 }
 
-select option:checked ,
+select option:checked,
 select option:hover,
 select option:focus {
-    /* Define o fundo como azul claro, por exemplo, 'blue-200' */
-    background-color: #BFDBFE !important; /* Tailwind blue-200 */
-    /* Garante que o texto permaneça escuro para contraste */
-    color: #2e415c !important; /* Tailwind gray-800 */
+  /* Define o fundo como azul claro, por exemplo, 'blue-200' */
+  background-color: #bfdbfe !important; /* Tailwind blue-200 */
+  /* Garante que o texto permaneça escuro para contraste */
+  color: #2e415c !important; /* Tailwind gray-800 */
 }
 
 /* cadastro.component.css */
@@ -105,5 +104,30 @@ input {
   justify-content: space-between;
 }
 
-button.primary { background-color: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; }
-button.secondary { background-color: #8b939b; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; }
+button.secondary {
+  background-color: #8b939b;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* No seu cad-imovel.scss */
+.primary {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+
+  // Estilo quando o botão estiver desativado
+  &:disabled,
+  &.btn-disabled {
+    background-color: #d1d5db; // Cinza claro (Tailwind gray-300)
+    color: #a9b5ca; // Texto cinza (Tailwind gray-400)
+    cursor: not-allowed; // Ícone de "proibido" ao passar o mouse
+    opacity: 0.7;
+  }
+}
